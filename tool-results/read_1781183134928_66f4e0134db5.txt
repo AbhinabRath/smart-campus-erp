@@ -1,0 +1,583 @@
+     1→     1→// =============================================================================
+     2→     2→// Smart Campus ERP - Attendance Manager Component
+     3→     3→// =============================================================================
+     4→     4→// Role-based attendance management:
+     5→     5→// - Teacher: Create sessions, display QR code, end sessions, view reports
+     6→     6→// - Student: Enter QR code to mark attendance, view history & percentage
+     7→     7→// - Admin: View attendance reports and analytics
+     8→     8→// =============================================================================
+     9→     9→
+    10→    10→'use client';
+    11→    11→
+    12→    12→import React, { useEffect, useState, useCallback } from 'react';
+    13→    13→import { motion, AnimatePresence } from 'framer-motion';
+    14→    14→import {
+    15→    15→  ClipboardCheck, QrCode, Play, StopCircle, RefreshCw, CheckCircle, XCircle, Users, Download, BarChart3
+    16→    16→} from 'lucide-react';
+    17→    17→import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+    18→    18→import { Button } from '@/components/ui/button';
+    19→    19→import { Input } from '@/components/ui/input';
+    20→    20→import { Label } from '@/components/ui/label';
+    21→    21→import { Badge } from '@/components/ui/badge';
+    22→    22→import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+    23→    23→import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+    24→    24→import { useAppStore } from '@/lib/store';
+    25→    25→import api from '@/lib/api';
+    26→    26→import { format } from 'date-fns';
+    27→    27→import { useToast } from '@/hooks/use-toast';
+    28→    28→
+    29→    29→interface Subject { id: string; name: string; code: string; }
+    30→    30→interface Department { id: string; name: string; code: string; }
+    31→    31→interface Session {
+    32→    32→  id: string; qrCode: string; isActive: boolean; duration: number; startedAt: string; endedAt: string | null;
+    33→    33→  subject: { name: string; code: string }; teacher: { user: { name: string } };
+    34→    34→  department: { name: string }; semester: number; section: string; _count: { records: number };
+    35→    35→  qrDataUrl?: string;
+    36→    36→}
+    37→    37→interface Record { id: string; markedAt: string; session: { subject: { name: string }; startedAt: string; }; }
+    38→    38→
+    39→    39→export default function AttendanceManager() {
+    40→    40→  const { currentUser } = useAppStore();
+    41→    41→  const role = currentUser?.role || 'student';
+    42→    42→  const { toast } = useToast();
+    43→    43→
+    44→    44→  // Teacher state
+    45→    45→  const [subjects, setSubjects] = useState<Subject[]>([]);
+    46→    46→  const [departments, setDepartments] = useState<Department[]>([]);
+    47→    47→  const [sessions, setSessions] = useState<Session[]>([]);
+    48→    48→  const [activeSession, setActiveSession] = useState<Session | null>(null);
+    49→    49→  const [selectedSubject, setSelectedSubject] = useState('');
+    50→    50→  const [selectedDept, setSelectedDept] = useState('');
+    51→    51→  const [selectedSemester, setSelectedSemester] = useState('3');
+    52→    52→  const [selectedSection, setSelectedSection] = useState('A');
+    53→    53→  const [creating, setCreating] = useState(false);
+    54→    54→
+    55→    55→  // Student state
+    56→    56→  const [qrInput, setQrInput] = useState('');
+    57→    57→  const [marking, setMarking] = useState(false);
+    58→    58→  const [myRecords, setMyRecords] = useState<Record[]>([]);
+    59→    59→  const [attendancePercent, setAttendancePercent] = useState({ percentage: 0, totalSessions: 0, attended: 0 });
+    60→    60→
+    61→    61→  // Admin state
+    62→    62→  const [adminFilterDept, setAdminFilterDept] = useState('all');
+    63→    63→  const [adminFilterSemester, setAdminFilterSemester] = useState('all');
+    64→    64→  const [adminLoading, setAdminLoading] = useState(true);
+    65→    65→
+    66→    66→  // Load dropdown data for teachers
+    67→    67→  const loadTeacherData = useCallback(async () => {
+    68→    68→    try {
+    69→    69→      const [subRes, deptRes, sessRes] = await Promise.all([
+    70→    70→        api.get('/subjects'),
+    71→    71→        api.get('/departments'),
+    72→    72→        api.get('/attendance/sessions'),
+    73→    73→      ]);
+    74→    74→      setSubjects(subRes.data.data || []);
+    75→    75→      setDepartments(deptRes.data.data || []);
+    76→    76→      const allSessions = sessRes.data.data || [];
+    77→    77→      setSessions(allSessions);
+    78→    78→      const active = allSessions.find((s: Session) => s.isActive);
+    79→    79→      if (active) setActiveSession(active);
+    80→    80→    } catch { /* ignore */ }
+    81→    81→  }, []);
+    82→    82→
+    83→    83→  // Load student data
+    84→    84→  const loadStudentData = useCallback(async () => {
+    85→    85→    try {
+    86→    86→      const [histRes, pctRes] = await Promise.all([
+    87→    87→        api.get('/attendance/my-attendance'),
+    88→    88→        api.get('/attendance/percentage'),
+    89→    89→      ]);
+    90→    90→      setMyRecords(histRes.data.data || []);
+    91→    91→      setAttendancePercent(pctRes.data.data || { percentage: 0, totalSessions: 0, attended: 0 });
+    92→    92→    } catch { /* ignore */ }
+    93→    93→  }, []);
+    94→    94→
+    95→    95→  // Admin: load data with loading state
+    96→    96→  const loadAdminData = useCallback(async () => {
+    97→    97→    setAdminLoading(true);
+    98→    98→    try {
+    99→    99→      const [sessRes, deptRes] = await Promise.all([
+   100→   100→        api.get('/attendance/sessions'),
+   101→   101→        api.get('/departments'),
+   102→   102→      ]);
+   103→   103→      const allSessions = sessRes.data.data || [];
+   104→   104→      setSessions(allSessions);
+   105→   105→      setDepartments(deptRes.data.data || []);
+   106→   106→    } catch { /* ignore */ }
+   107→   107→    setAdminLoading(false);
+   108→   108→  }, []);
+   109→   109→
+   110→   110→  useEffect(() => {
+   111→   111→    if (role === 'teacher') loadTeacherData();
+   112→   112→    if (role === 'admin') loadAdminData();
+   113→   113→    if (role === 'student') loadStudentData();
+   114→   114→  }, [role, loadTeacherData, loadStudentData, loadAdminData]);
+   115→   115→
+   116→   116→  // Teacher: Create attendance session
+   117→   117→  const createSession = async () => {
+   118→   118→    if (!selectedSubject || !selectedDept) {
+   119→   119→      toast({ title: 'Error', description: 'Please select subject and department', variant: 'destructive' });
+   120→   120→      return;
+   121→   121→    }
+   122→   122→    setCreating(true);
+   123→   123→    try {
+   124→   124→      const res = await api.post('/attendance/sessions', {
+   125→   125→        subjectId: selectedSubject,
+   126→   126→        departmentId: selectedDept,
+   127→   127→        semester: parseInt(selectedSemester),
+   128→   128→        section: selectedSection,
+   129→   129→      });
+   130→   130→      const newSession = res.data.data;
+   131→   131→      setActiveSession(newSession);
+   132→   132→      setSessions((prev) => [newSession, ...prev]);
+   133→   133→      toast({ title: 'Session Created', description: 'Attendance session is now active' });
+   134→   134→    } catch (err: unknown) {
+   135→   135→      const axiosErr = err as { response?: { data?: { message?: string } } };
+   136→   136→      toast({ title: 'Error', description: axiosErr.response?.data?.message || 'Failed to create session', variant: 'destructive' });
+   137→   137→    } finally {
+   138→   138→      setCreating(false);
+   139→   139→    }
+   140→   140→  };
+   141→   141→
+   142→   142→  // Teacher: End attendance session
+   143→   143→  const endSession = async (sessionId: string) => {
+   144→   144→    try {
+   145→   145→      await api.post(`/attendance/sessions/${sessionId}/end`);
+   146→   146→      setActiveSession(null);
+   147→   147→      setSessions((prev) => prev.map((s) => s.id === sessionId ? { ...s, isActive: false } : s));
+   148→   148→      toast({ title: 'Session Ended', description: 'Attendance session has been closed' });
+   149→   149→    } catch {
+   150→   150→      toast({ title: 'Error', description: 'Failed to end session', variant: 'destructive' });
+   151→   151→    }
+   152→   152→  };
+   153→   153→
+   154→   154→  // Export CSV helper
+   155→   155→  const exportSessionsCSV = (sessionsData: Session[], filename: string) => {
+   156→   156→    if (sessionsData.length === 0) {
+   157→   157→      toast({ title: 'No Data', description: 'No sessions to export', variant: 'destructive' });
+   158→   158→      return;
+   159→   159→    }
+   160→   160→    const headers = ['Subject', 'Teacher', 'Department', 'Semester', 'Section', 'Started', 'Present Count', 'Status'];
+   161→   161→    const rows = sessionsData.map((s) => [
+   162→   162→      s.subject?.name || 'N/A',
+   163→   163→      s.teacher?.user?.name || 'N/A',
+   164→   164→      s.department?.name || 'N/A',
+   165→   165→      s.semester?.toString() || '',
+   166→   166→      s.section || '',
+   167→   167→      s.startedAt ? format(new Date(s.startedAt), 'MMM d, yyyy h:mm a') : '',
+   168→   168→      (s._count?.records || 0).toString(),
+   169→   169→      s.isActive ? 'Live' : 'Ended',
+   170→   170→    ]);
+   171→   171→    const csvContent = [headers, ...rows].map((row) => row.map((cell) => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
+   172→   172→    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+   173→   173→    const url = URL.createObjectURL(blob);
+   174→   174→    const link = document.createElement('a');
+   175→   175→    link.href = url;
+   176→   176→    link.download = filename;
+   177→   177→    link.click();
+   178→   178→    URL.revokeObjectURL(url);
+   179→   179→    toast({ title: 'Exported', description: 'CSV file downloaded successfully' });
+   180→   180→  };
+   181→   181→
+   182→   182→  // Student: Mark attendance via QR code
+   183→   183→  const markAttendance = async () => {
+   184→   184→    if (!qrInput.trim()) return;
+   185→   185→    setMarking(true);
+   186→   186→    try {
+   187→   187→      await api.post('/attendance/mark', { qrCode: qrInput.trim() });
+   188→   188→      toast({ title: 'Success', description: 'Attendance marked successfully!' });
+   189→   189→      setQrInput('');
+   190→   190→      loadStudentData();
+   191→   191→    } catch (err: unknown) {
+   192→   192→      const axiosErr = err as { response?: { data?: { message?: string } } };
+   193→   193→      toast({ title: 'Error', description: axiosErr.response?.data?.message || 'Failed to mark attendance', variant: 'destructive' });
+   194→   194→    } finally {
+   195→   195→      setMarking(false);
+   196→   196→    }
+   197→   197→  };
+   198→   198→
+   199→   199→  // =========================================================================
+   200→   200→  // Teacher View
+   201→   201→  // =========================================================================
+   202→   202→  if (role === 'teacher') {
+   203→   203→    return (
+   204→   204→      <div className="space-y-6">
+   205→   205→        <h2 className="text-2xl font-bold tracking-tight">Attendance Management</h2>
+   206→   206→
+   207→   207→        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+   208→   208→          {/* Create Session */}
+   209→   209→          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+   210→   210→            <Card>
+   211→   211→              <CardHeader><CardTitle className="text-lg">Create Session</CardTitle></CardHeader>
+   212→   212→              <CardContent className="space-y-4">
+   213→   213→                <div className="space-y-2">
+   214→   214→                  <Label>Subject</Label>
+   215→   215→                  <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+   216→   216→                    <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+   217→   217→                    <SelectContent>
+   218→   218→                      {subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.name} ({s.code})</SelectItem>)}
+   219→   219→                    </SelectContent>
+   220→   220→                  </Select>
+   221→   221→                </div>
+   222→   222→                <div className="space-y-2">
+   223→   223→                  <Label>Department</Label>
+   224→   224→                  <Select value={selectedDept} onValueChange={setSelectedDept}>
+   225→   225→                    <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
+   226→   226→                    <SelectContent>
+   227→   227→                      {departments.map((d) => <SelectItem key={d.id} value={d.id}>{d.name} ({d.code})</SelectItem>)}
+   228→   228→                    </SelectContent>
+   229→   229→                  </Select>
+   230→   230→                </div>
+   231→   231→                <div className="grid grid-cols-2 gap-4">
+   232→   232→                  <div className="space-y-2">
+   233→   233→                    <Label>Semester</Label>
+   234→   234→                    <Select value={selectedSemester} onValueChange={setSelectedSemester}>
+   235→   235→                      <SelectTrigger><SelectValue /></SelectTrigger>
+   236→   236→                      <SelectContent>
+   237→   237→                        {[1,2,3,4,5,6,7,8].map((s) => <SelectItem key={s} value={s.toString()}>{s}</SelectItem>)}
+   238→   238→                      </SelectContent>
+   239→   239→                    </Select>
+   240→   240→                  </div>
+   241→   241→                  <div className="space-y-2">
+   242→   242→                    <Label>Section</Label>
+   243→   243→                    <Select value={selectedSection} onValueChange={setSelectedSection}>
+   244→   244→                      <SelectTrigger><SelectValue /></SelectTrigger>
+   245→   245→                      <SelectContent>
+   246→   246→                        {['A','B','C'].map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+   247→   247→                      </SelectContent>
+   248→   248→                    </Select>
+   249→   249→                  </div>
+   250→   250→                </div>
+   251→   251→                <Button onClick={createSession} disabled={creating || !!activeSession} className="w-full bg-emerald-700 hover:bg-emerald-800">
+   252→   252→                  {creating ? 'Creating...' : activeSession ? 'Session Active' : 'Create Session'}
+   253→   253→                </Button>
+   254→   254→              </CardContent>
+   255→   255→            </Card>
+   256→   256→          </motion.div>
+   257→   257→
+   258→   258→          {/* Active Session / QR Code */}
+   259→   259→          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   260→   260→            <Card>
+   261→   261→              <CardHeader><CardTitle className="text-lg">Active Session</CardTitle></CardHeader>
+   262→   262→              <CardContent>
+   263→   263→                {activeSession ? (
+   264→   264→                  <div className="space-y-4 text-center">
+   265→   265→                    <Badge className="bg-emerald-600 mb-2">Live</Badge>
+   266→   266→                    <p className="font-medium">{activeSession.subject?.name || 'Session'}</p>
+   267→   267→                    <p className="text-sm text-muted-foreground">
+   268→   268→                      Started {format(new Date(activeSession.startedAt), 'h:mm a')}
+   269→   269→                    </p>
+   270→   270→                    {activeSession.qrDataUrl && (
+   271→   271→                      <div className="flex justify-center">
+   272→   272→                        <img src={activeSession.qrDataUrl} alt="QR Code" className="w-48 h-48 rounded-lg border" />
+   273→   273→                      </div>
+   274→   274→                    )}
+   275→   275→                    <p className="text-xs text-muted-foreground">QR Token: {activeSession.qrCode}</p>
+   276→   276→                    <Button variant="destructive" onClick={() => endSession(activeSession.id)} className="w-full">
+   277→   277→                      <StopCircle className="w-4 h-4 mr-2" /> End Session
+   278→   278→                    </Button>
+   279→   279→                  </div>
+   280→   280→                ) : (
+   281→   281→                  <div className="text-center py-8 text-muted-foreground">
+   282→   282→                    <QrCode className="w-12 h-12 mx-auto mb-3 opacity-30" />
+   283→   283→                    <p>No active session</p>
+   284→   284→                    <p className="text-sm">Create a session to generate a QR code</p>
+   285→   285→                  </div>
+   286→   286→                )}
+   287→   287→              </CardContent>
+   288→   288→            </Card>
+   289→   289→          </motion.div>
+   290→   290→        </div>
+   291→   291→
+   292→   292→        {/* Session History */}
+   293→   293→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+   294→   294→          <Card>
+   295→   295→            <CardHeader className="flex flex-row items-center justify-between">
+   296→   296→              <CardTitle className="text-lg">Session History</CardTitle>
+   297→   297→              <div className="flex items-center gap-1">
+   298→   298→                <Button variant="ghost" size="icon" onClick={() => exportSessionsCSV(sessions, 'attendance-sessions.csv')} title="Export CSV">
+   299→   299→                  <Download className="w-4 h-4" />
+   300→   300→                </Button>
+   301→   301→                <Button variant="ghost" size="icon" onClick={loadTeacherData}><RefreshCw className="w-4 h-4" /></Button>
+   302→   302→              </div>
+   303→   303→            </CardHeader>
+   304→   304→            <CardContent className="max-h-96 overflow-y-auto custom-scrollbar">
+   305→   305→              {sessions.length === 0 ? (
+   306→   306→                <p className="text-center text-muted-foreground py-4">No sessions yet</p>
+   307→   307→              ) : (
+   308→   308→                <Table>
+   309→   309→                  <TableHeader>
+   310→   310→                    <TableRow>
+   311→   311→                      <TableHead>Subject</TableHead>
+   312→   312→                      <TableHead>Sem/Sec</TableHead>
+   313→   313→                      <TableHead>Started</TableHead>
+   314→   314→                      <TableHead>Present</TableHead>
+   315→   315→                      <TableHead>Status</TableHead>
+   316→   316→                      <TableHead>Actions</TableHead>
+   317→   317→                    </TableRow>
+   318→   318→                  </TableHeader>
+   319→   319→                  <TableBody>
+   320→   320→                    {sessions.map((s) => (
+   321→   321→                      <TableRow key={s.id}>
+   322→   322→                        <TableCell className="font-medium">{s.subject?.name || 'N/A'}</TableCell>
+   323→   323→                        <TableCell>{s.semester}/{s.section}</TableCell>
+   324→   324→                        <TableCell>{format(new Date(s.startedAt), 'MMM d, h:mm a')}</TableCell>
+   325→   325→                        <TableCell>{s._count?.records || 0}</TableCell>
+   326→   326→                        <TableCell>
+   327→   327→                          <Badge variant={s.isActive ? 'default' : 'secondary'}>{s.isActive ? 'Live' : 'Ended'}</Badge>
+   328→   328→                        </TableCell>
+   329→   329→                        <TableCell>
+   330→   330→                          {s.isActive && (
+   331→   331→                            <Button size="sm" variant="outline" onClick={() => endSession(s.id)}>End</Button>
+   332→   332→                          )}
+   333→   333→                        </TableCell>
+   334→   334→                      </TableRow>
+   335→   335→                    ))}
+   336→   336→                  </TableBody>
+   337→   337→                </Table>
+   338→   338→              )}
+   339→   339→            </CardContent>
+   340→   340→          </Card>
+   341→   341→        </motion.div>
+   342→   342→      </div>
+   343→   343→    );
+   344→   344→  }
+   345→   345→
+   346→   346→  // =========================================================================
+   347→   347→  // Student View
+   348→   348→  // =========================================================================
+   349→   349→  if (role === 'student') {
+   350→   350→    return (
+   351→   351→      <div className="space-y-6">
+   352→   352→        <h2 className="text-2xl font-bold tracking-tight">My Attendance</h2>
+   353→   353→
+   354→   354→        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+   355→   355→          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+   356→   356→            <Card>
+   357→   357→              <CardContent className="p-5 text-center">
+   358→   358→                <p className="text-sm text-muted-foreground">Attendance %</p>
+   359→   359→                <p className={`text-3xl font-bold ${attendancePercent.percentage >= 75 ? 'text-emerald-600' : 'text-amber-600'}`}>
+   360→   360→                  {attendancePercent.percentage}%
+   361→   361→                </p>
+   362→   362→              </CardContent>
+   363→   363→            </Card>
+   364→   364→          </motion.div>
+   365→   365→          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   366→   366→            <Card>
+   367→   367→              <CardContent className="p-5 text-center">
+   368→   368→                <p className="text-sm text-muted-foreground">Total Sessions</p>
+   369→   369→                <p className="text-3xl font-bold">{attendancePercent.totalSessions}</p>
+   370→   370→              </CardContent>
+   371→   371→            </Card>
+   372→   372→          </motion.div>
+   373→   373→          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+   374→   374→            <Card>
+   375→   375→              <CardContent className="p-5 text-center">
+   376→   376→                <p className="text-sm text-muted-foreground">Attended</p>
+   377→   377→                <p className="text-3xl font-bold text-emerald-600">{attendancePercent.attended}</p>
+   378→   378→              </CardContent>
+   379→   379→            </Card>
+   380→   380→          </motion.div>
+   381→   381→        </div>
+   382→   382→
+   383→   383→        {/* QR Code Input */}
+   384→   384→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+   385→   385→          <Card>
+   386→   386→            <CardHeader><CardTitle className="text-lg">Mark Attendance</CardTitle></CardHeader>
+   387→   387→            <CardContent>
+   388→   388→              <div className="flex gap-3">
+   389→   389→                <Input
+   390→   390→                  placeholder="Enter QR code token..."
+   391→   391→                  value={qrInput}
+   392→   392→                  onChange={(e) => setQrInput(e.target.value)}
+   393→   393→                  onKeyDown={(e) => e.key === 'Enter' && markAttendance()}
+   394→   394→                  className="flex-1"
+   395→   395→                />
+   396→   396→                <Button onClick={markAttendance} disabled={marking || !qrInput.trim()} className="bg-emerald-700 hover:bg-emerald-800">
+   397→   397→                  {marking ? 'Marking...' : <><CheckCircle className="w-4 h-4 mr-2" /> Mark</>}
+   398→   398→                </Button>
+   399→   399→              </div>
+   400→   400→              <p className="text-xs text-muted-foreground mt-2">Enter the QR code token provided by your teacher to mark attendance</p>
+   401→   401→            </CardContent>
+   402→   402→          </Card>
+   403→   403→        </motion.div>
+   404→   404→
+   405→   405→        {/* Attendance History */}
+   406→   406→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+   407→   407→          <Card>
+   408→   408→            <CardHeader className="flex flex-row items-center justify-between">
+   409→   409→              <CardTitle className="text-lg">Attendance History</CardTitle>
+   410→   410→              <Button variant="ghost" size="icon" onClick={loadStudentData}><RefreshCw className="w-4 h-4" /></Button>
+   411→   411→            </CardHeader>
+   412→   412→            <CardContent className="max-h-96 overflow-y-auto custom-scrollbar">
+   413→   413→              {myRecords.length === 0 ? (
+   414→   414→                <div className="text-center py-8 text-muted-foreground">
+   415→   415→                  <ClipboardCheck className="w-12 h-12 mx-auto mb-3 opacity-30" />
+   416→   416→                  <p>No attendance records yet</p>
+   417→   417→                </div>
+   418→   418→              ) : (
+   419→   419→                <Table>
+   420→   420→                  <TableHeader>
+   421→   421→                    <TableRow>
+   422→   422→                      <TableHead>Subject</TableHead>
+   423→   423→                      <TableHead>Date</TableHead>
+   424→   424→                      <TableHead>Status</TableHead>
+   425→   425→                    </TableRow>
+   426→   426→                  </TableHeader>
+   427→   427→                  <TableBody>
+   428→   428→                    {myRecords.map((r) => (
+   429→   429→                      <TableRow key={r.id}>
+   430→   430→                        <TableCell className="font-medium">{r.session?.subject?.name || 'N/A'}</TableCell>
+   431→   431→                        <TableCell>{format(new Date(r.markedAt), 'MMM d, h:mm a')}</TableCell>
+   432→   432→                        <TableCell><Badge className="bg-emerald-600">Present</Badge></TableCell>
+   433→   433→                      </TableRow>
+   434→   434→                    ))}
+   435→   435→                  </TableBody>
+   436→   436→                </Table>
+   437→   437→              )}
+   438→   438→            </CardContent>
+   439→   439→          </Card>
+   440→   440→        </motion.div>
+   441→   441→      </div>
+   442→   442→    );
+   443→   443→  }
+   444→   444→
+   445→   445→  // =========================================================================
+   446→   446→  // Admin View
+   447→   447→  // =========================================================================
+   448→   448→
+   449→   449→  // Admin filter logic
+   450→   450→  const adminFilteredSessions = sessions.filter((s) => {
+   451→   451→    if (adminFilterDept !== 'all' && s.department?.id !== adminFilterDept) return false;
+   452→   452→    if (adminFilterSemester !== 'all' && s.semester?.toString() !== adminFilterSemester) return false;
+   453→   453→    return true;
+   454→   454→  });
+   455→   455→
+   456→   456→  // Admin stats
+   457→   457→  const totalSessions = adminFilteredSessions.length;
+   458→   458→  const activeSessions = adminFilteredSessions.filter((s) => s.isActive).length;
+   459→   459→  const totalPresent = adminFilteredSessions.reduce((sum, s) => sum + (s._count?.records || 0), 0);
+   460→   460→  const avgAttendance = totalSessions > 0 ? Math.round((totalPresent / totalSessions) * 10) / 10 : 0;
+   461→   461→
+   462→   462→  return (
+   463→   463→    <div className="space-y-6">
+   464→   464→      <h2 className="text-2xl font-bold tracking-tight">Attendance Overview</h2>
+   465→   465→
+   466→   466→      {/* Stat Cards */}
+   467→   467→      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+   468→   468→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+   469→   469→          <Card>
+   470→   470→            <CardContent className="p-5 text-center">
+   471→   471→              <p className="text-sm text-muted-foreground">Total Sessions</p>
+   472→   472→              <p className="text-3xl font-bold">{totalSessions}</p>
+   473→   473→            </CardContent>
+   474→   474→          </Card>
+   475→   475→        </motion.div>
+   476→   476→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+   477→   477→          <Card>
+   478→   478→            <CardContent className="p-5 text-center">
+   479→   479→              <p className="text-sm text-muted-foreground">Active Sessions</p>
+   480→   480→              <p className="text-3xl font-bold text-emerald-600">{activeSessions}</p>
+   481→   481→            </CardContent>
+   482→   482→          </Card>
+   483→   483→        </motion.div>
+   484→   484→        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+   485→   485→          <Card>
+   486→   486→            <CardContent className="p-5 text-center">
+   487→   487→              <p className="text-sm text-muted-foreground">Avg Attendance</p>
+   488→   488→              <p className="text-3xl font-bold text-amber-600">{avgAttendance}</p>
+   489→   489→            </CardContent>
+   490→   490→          </Card>
+   491→   491→        </motion.div>
+   492→   492→      </div>
+   493→   493→
+   494→   494→      {/* Filters */}
+   495→   495→      <div className="flex flex-col sm:flex-row gap-3">
+   496→   496→        <Select value={adminFilterDept} onValueChange={setAdminFilterDept}>
+   497→   497→          <SelectTrigger className="w-[220px]"><SelectValue placeholder="Department" /></SelectTrigger>
+   498→   498→          <SelectContent>
+   499→   499→            <SelectItem value="all">All Departments</SelectItem>
+   500→   500→            {departments.map((d) => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+   501→   501→          </SelectContent>
+   502→   502→        </Select>
+   503→   503→        <Select value={adminFilterSemester} onValueChange={setAdminFilterSemester}>
+   504→   504→          <SelectTrigger className="w-[160px]"><SelectValue placeholder="Semester" /></SelectTrigger>
+   505→   505→          <SelectContent>
+   506→   506→            <SelectItem value="all">All Semesters</SelectItem>
+   507→   507→            {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => <SelectItem key={s} value={s.toString()}>Semester {s}</SelectItem>)}
+   508→   508→          </SelectContent>
+   509→   509→        </Select>
+   510→   510→      </div>
+   511→   511→
+   512→   512→      {/* Sessions Table */}
+   513→   513→      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+   514→   514→        <Card>
+   515→   515→          <CardHeader className="flex flex-row items-center justify-between">
+   516→   516→            <CardTitle className="text-lg flex items-center gap-2"><BarChart3 className="w-5 h-5" /> Attendance Sessions</CardTitle>
+   517→   517→            <div className="flex items-center gap-1">
+   518→   518→              <Button variant="ghost" size="icon" onClick={() => exportSessionsCSV(adminFilteredSessions, 'admin-attendance-sessions.csv')} title="Export CSV">
+   519→   519→                <Download className="w-4 h-4" />
+   520→   520→              </Button>
+   521→   521→              <Button variant="ghost" size="icon" onClick={loadAdminData}><RefreshCw className="w-4 h-4" /></Button>
+   522→   522→            </div>
+   523→   523→          </CardHeader>
+   524→   524→          <CardContent className="max-h-[500px] overflow-y-auto custom-scrollbar">
+   525→   525→            {adminLoading ? (
+   526→   526→              <div className="space-y-3">
+   527→   527→                {[...Array(5)].map((_, i) => (
+   528→   528→                  <div key={i} className="flex items-center gap-4">
+   529→   529→                    <div className="h-4 bg-muted rounded animate-pulse w-32" />
+   530→   530→                    <div className="h-4 bg-muted rounded animate-pulse w-24" />
+   531→   531→                    <div className="h-4 bg-muted rounded animate-pulse w-20" />
+   532→   532→                    <div className="h-4 bg-muted rounded animate-pulse w-16" />
+   533→   533→                    <div className="h-4 bg-muted rounded animate-pulse w-28" />
+   534→   534→                    <div className="h-4 bg-muted rounded animate-pulse w-12" />
+   535→   535→                    <div className="h-4 bg-muted rounded animate-pulse w-16" />
+   536→   536→                  </div>
+   537→   537→                ))}
+   538→   538→              </div>
+   539→   539→            ) : adminFilteredSessions.length === 0 ? (
+   540→   540→              <div className="text-center py-8 text-muted-foreground">
+   541→   541→                <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
+   542→   542→                <p>No attendance sessions found</p>
+   543→   543→                <p className="text-sm mt-1">Try adjusting the filters or wait for sessions to be created</p>
+   544→   544→              </div>
+   545→   545→            ) : (
+   546→   546→              <Table>
+   547→   547→                <TableHeader>
+   548→   548→                  <TableRow>
+   549→   549→                    <TableHead>Subject</TableHead>
+   550→   550→                    <TableHead>Teacher</TableHead>
+   551→   551→                    <TableHead>Department</TableHead>
+   552→   552→                    <TableHead>Semester</TableHead>
+   553→   553→                    <TableHead>Started</TableHead>
+   554→   554→                    <TableHead>Present</TableHead>
+   555→   555→                    <TableHead>Status</TableHead>
+   556→   556→                  </TableRow>
+   557→   557→                </TableHeader>
+   558→   558→                <TableBody>
+   559→   559→                  {adminFilteredSessions.map((s) => (
+   560→   560→                    <TableRow key={s.id}>
+   561→   561→                      <TableCell className="font-medium">{s.subject?.name || 'N/A'}</TableCell>
+   562→   562→                      <TableCell>{s.teacher?.user?.name || 'N/A'}</TableCell>
+   563→   563→                      <TableCell>{s.department?.name || 'N/A'}</TableCell>
+   564→   564→                      <TableCell>{s.semester} / {s.section}</TableCell>
+   565→   565→                      <TableCell>{format(new Date(s.startedAt), 'MMM d, h:mm a')}</TableCell>
+   566→   566→                      <TableCell>{s._count?.records || 0}</TableCell>
+   567→   567→                      <TableCell>
+   568→   568→                        <Badge variant={s.isActive ? 'default' : 'secondary'}>
+   569→   569→                          {s.isActive ? 'Live' : 'Ended'}
+   570→   570→                        </Badge>
+   571→   571→                      </TableCell>
+   572→   572→                    </TableRow>
+   573→   573→                  ))}
+   574→   574→                </TableBody>
+   575→   575→              </Table>
+   576→   576→            )}
+   577→   577→          </CardContent>
+   578→   578→        </Card>
+   579→   579→      </motion.div>
+   580→   580→    </div>
+   581→   581→  );
+   582→   582→}
+   583→   583→

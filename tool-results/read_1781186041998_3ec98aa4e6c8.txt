@@ -1,0 +1,643 @@
+     1→// =============================================================================
+     2→// Smart Campus ERP - Settings Page Component
+     3→// =============================================================================
+     4→// Comprehensive settings page organized into tabs: General (appearance/theme),
+     5→// Notifications (toggle preferences), and Security (password change, danger zone).
+     6→// All visual preferences stored in localStorage with campus-erp- prefix.
+     7→// =============================================================================
+     8→
+     9→'use client';
+    10→
+    11→import React, { useState, useEffect, useCallback } from 'react';
+    12→import { motion } from 'framer-motion';
+    13→import { useTheme } from 'next-themes';
+    14→import {
+    15→  Settings, Sun, Moon, Monitor, Bell, BellOff, Mail, ClipboardCheck,
+    16→  FileText, AlertCircle, Lightbulb, User, Shield, KeyRound, Eye, EyeOff,
+    17→  Trash2, AlertTriangle, ChevronRight, Type, PanelLeftClose, Check,
+    18→} from 'lucide-react';
+    19→import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+    20→import { Button } from '@/components/ui/button';
+    21→import { Input } from '@/components/ui/input';
+    22→import { Label } from '@/components/ui/label';
+    23→import { Switch } from '@/components/ui/switch';
+    24→import { Separator } from '@/components/ui/separator';
+    25→import { Badge } from '@/components/ui/badge';
+    26→import {
+    27→  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+    28→} from '@/components/ui/select';
+    29→import {
+    30→  Tabs, TabsContent, TabsList, TabsTrigger,
+    31→} from '@/components/ui/tabs';
+    32→import {
+    33→  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+    34→} from '@/components/ui/tooltip';
+    35→import { useAppStore } from '@/lib/store';
+    36→import api from '@/lib/api';
+    37→import { useToast } from '@/hooks/use-toast';
+    38→
+    39→// ---------------------------------------------------------------------------
+    40→// localStorage helpers with campus-erp- prefix
+    41→// ---------------------------------------------------------------------------
+    42→
+    43→const LS_NOTIFICATIONS = 'campus-erp-notifications';
+    44→const LS_SIDEBAR_COMPACT = 'campus-erp-sidebar-compact';
+    45→const LS_FONT_SIZE = 'campus-erp-font-size';
+    46→
+    47→interface NotificationPrefs {
+    48→  email: boolean;
+    49→  attendance: boolean;
+    50→  assignments: boolean;
+    51→  notices: boolean;
+    52→  recommendations: boolean;
+    53→}
+    54→
+    55→const defaultNotificationPrefs: NotificationPrefs = {
+    56→  email: true,
+    57→  attendance: true,
+    58→  assignments: true,
+    59→  notices: true,
+    60→  recommendations: true,
+    61→};
+    62→
+    63→function loadNotificationPrefs(): NotificationPrefs {
+    64→  if (typeof window === 'undefined') return defaultNotificationPrefs;
+    65→  try {
+    66→    const raw = localStorage.getItem(LS_NOTIFICATIONS);
+    67→    if (raw) return { ...defaultNotificationPrefs, ...JSON.parse(raw) };
+    68→  } catch { /* ignore */ }
+    69→  return defaultNotificationPrefs;
+    70→}
+    71→
+    72→function saveNotificationPrefs(prefs: NotificationPrefs) {
+    73→  try { localStorage.setItem(LS_NOTIFICATIONS, JSON.stringify(prefs)); } catch { /* ignore */ }
+    74→}
+    75→
+    76→function loadSidebarCompact(): boolean {
+    77→  if (typeof window === 'undefined') return false;
+    78→  return localStorage.getItem(LS_SIDEBAR_COMPACT) === 'true';
+    79→}
+    80→
+    81→function saveSidebarCompact(val: boolean) {
+    82→  try { localStorage.setItem(LS_SIDEBAR_COMPACT, String(val)); } catch { /* ignore */ }
+    83→}
+    84→
+    85→function loadFontSize(): string {
+    86→  if (typeof window === 'undefined') return 'medium';
+    87→  return localStorage.getItem(LS_FONT_SIZE) || 'medium';
+    88→}
+    89→
+    90→function saveFontSize(val: string) {
+    91→  try { localStorage.setItem(LS_FONT_SIZE, val); } catch { /* ignore */ }
+    92→}
+    93→
+    94→// ---------------------------------------------------------------------------
+    95→// Animation variants
+    96→// ---------------------------------------------------------------------------
+    97→
+    98→const containerVariants = {
+    99→  hidden: { opacity: 0 },
+   100→  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
+   101→};
+   102→
+   103→const itemVariants = {
+   104→  hidden: { opacity: 0, y: 12 },
+   105→  show: { opacity: 1, y: 0, transition: { duration: 0.3 } },
+   106→};
+   107→
+   108→// ---------------------------------------------------------------------------
+   109→// SettingsPage Component
+   110→// ---------------------------------------------------------------------------
+   111→
+   112→export default function SettingsPage() {
+   113→  const { currentUser } = useAppStore();
+   114→  const { theme, setTheme } = useTheme();
+   115→  const { toast } = useToast();
+   116→
+   117→  // ---- General Tab State ----
+   118→  const [sidebarCompact, setSidebarCompact] = useState(false);
+   119→  const [fontSize, setFontSize] = useState('medium');
+   120→
+   121→  // ---- Notifications Tab State ----
+   122→  const [notifPrefs, setNotifPrefs] = useState<NotificationPrefs>(defaultNotificationPrefs);
+   123→
+   124→  // ---- Security Tab State ----
+   125→  const [currentPassword, setCurrentPassword] = useState('');
+   126→  const [newPassword, setNewPassword] = useState('');
+   127→  const [confirmPassword, setConfirmPassword] = useState('');
+   128→  const [showCurrent, setShowCurrent] = useState(false);
+   129→  const [showNew, setShowNew] = useState(false);
+   130→  const [changingPassword, setChangingPassword] = useState(false);
+   131→
+   132→  // ---- Load localStorage on mount ----
+   133→  useEffect(() => {
+   134→    setSidebarCompact(loadSidebarCompact());
+   135→    setFontSize(loadFontSize());
+   136→    setNotifPrefs(loadNotificationPrefs());
+   137→  }, []);
+   138→
+   139→  // ---- Handlers ----
+   140→
+   141→  const handleSidebarCompact = useCallback((val: boolean) => {
+   142→    setSidebarCompact(val);
+   143→    saveSidebarCompact(val);
+   144→    toast({
+   145→      title: val ? 'Compact sidebar enabled' : 'Compact sidebar disabled',
+   146→      description: 'This preference is saved locally.',
+   147→    });
+   148→  }, [toast]);
+   149→
+   150→  const handleFontSize = useCallback((val: string) => {
+   151→    setFontSize(val);
+   152→    saveFontSize(val);
+   153→    toast({
+   154→      title: 'Font size updated',
+   155→      description: `Font size set to ${val}.`,
+   156→    });
+   157→  }, [toast]);
+   158→
+   159→  const handleNotifToggle = useCallback((key: keyof NotificationPrefs, val: boolean) => {
+   160→    setNotifPrefs((prev) => {
+   161→      const updated = { ...prev, [key]: val };
+   162→      saveNotificationPrefs(updated);
+   163→      return updated;
+   164→    });
+   165→  }, []);
+   166→
+   167→  const handleChangePassword = async (e: React.FormEvent) => {
+   168→    e.preventDefault();
+   169→    if (!currentUser) return;
+   170→
+   171→    if (!currentPassword || !newPassword || !confirmPassword) {
+   172→      toast({ title: 'Error', description: 'Please fill all password fields', variant: 'destructive' });
+   173→      return;
+   174→    }
+   175→    if (newPassword.length < 6) {
+   176→      toast({ title: 'Error', description: 'New password must be at least 6 characters', variant: 'destructive' });
+   177→      return;
+   178→    }
+   179→    if (newPassword !== confirmPassword) {
+   180→      toast({ title: 'Error', description: 'New passwords do not match', variant: 'destructive' });
+   181→      return;
+   182→    }
+   183→
+   184→    setChangingPassword(true);
+   185→    try {
+   186→      await api.put(`/users/${currentUser.id}/password`, {
+   187→        currentPassword,
+   188→        newPassword,
+   189→      });
+   190→      toast({ title: 'Success', description: 'Password changed successfully' });
+   191→      setCurrentPassword('');
+   192→      setNewPassword('');
+   193→      setConfirmPassword('');
+   194→    } catch (err: unknown) {
+   195→      const axiosErr = err as { response?: { data?: { message?: string } } };
+   196→      toast({
+   197→        title: 'Error',
+   198→        description: axiosErr.response?.data?.message || 'Failed to change password',
+   199→        variant: 'destructive',
+   200→      });
+   201→    } finally {
+   202→      setChangingPassword(false);
+   203→    }
+   204→  };
+   205→
+   206→  const navigateToProfile = () => {
+   207→    useAppStore.getState().setView('profile');
+   208→  };
+   209→
+   210→  // ---- Theme button helper ----
+   211→  const themeOptions = [
+   212→    { value: 'light', label: 'Light', icon: Sun },
+   213→    { value: 'dark', label: 'Dark', icon: Moon },
+   214→    { value: 'system', label: 'System', icon: Monitor },
+   215→  ] as const;
+   216→
+   217→  if (!currentUser) {
+   218→    return null;
+   219→  }
+   220→
+   221→  return (
+   222→    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
+   223→      {/* Page Title */}
+   224→      <motion.div variants={itemVariants} className="flex items-center gap-3">
+   225→        <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+   226→          <Settings className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+   227→        </div>
+   228→        <div>
+   229→          <h2 className="text-2xl font-bold tracking-tight">Settings</h2>
+   230→          <p className="text-sm text-muted-foreground">Manage your preferences and account security</p>
+   231→        </div>
+   232→      </motion.div>
+   233→
+   234→      {/* Tabs */}
+   235→      <Tabs defaultValue="general" className="space-y-6">
+   236→        <motion.div variants={itemVariants}>
+   237→          <TabsList className="grid w-full max-w-md grid-cols-3">
+   238→            <TabsTrigger value="general" className="gap-2">
+   239→              <Settings className="w-4 h-4 hidden sm:block" />
+   240→              General
+   241→            </TabsTrigger>
+   242→            <TabsTrigger value="notifications" className="gap-2">
+   243→              <Bell className="w-4 h-4 hidden sm:block" />
+   244→              Notifications
+   245→            </TabsTrigger>
+   246→            <TabsTrigger value="security" className="gap-2">
+   247→              <Shield className="w-4 h-4 hidden sm:block" />
+   248→              Security
+   249→            </TabsTrigger>
+   250→          </TabsList>
+   251→        </motion.div>
+   252→
+   253→        {/* ================================================================= */}
+   254→        {/* GENERAL TAB                                                       */}
+   255→        {/* ================================================================= */}
+   256→        <TabsContent value="general" className="space-y-6">
+   257→          {/* Appearance Card */}
+   258→          <motion.div variants={itemVariants}>
+   259→            <Card className="overflow-hidden">
+   260→              <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+   261→              <CardHeader>
+   262→                <CardTitle className="text-lg flex items-center gap-2">
+   263→                  <Sun className="w-5 h-5 text-amber-500" />
+   264→                  Appearance
+   265→                </CardTitle>
+   266→                <CardDescription>Customize how the application looks and feels</CardDescription>
+   267→              </CardHeader>
+   268→              <CardContent className="space-y-6">
+   269→                {/* Theme toggle */}
+   270→                <div className="space-y-3">
+   271→                  <Label className="text-sm font-medium">Theme</Label>
+   272→                  <div className="grid grid-cols-3 gap-3 max-w-sm">
+   273→                    {themeOptions.map((opt) => {
+   274→                      const Icon = opt.icon;
+   275→                      const isActive = theme === opt.value;
+   276→                      return (
+   277→                        <button
+   278→                          key={opt.value}
+   279→                          type="button"
+   280→                          onClick={() => setTheme(opt.value)}
+   281→                          className={`relative flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all duration-200 hover:border-emerald-300 dark:hover:border-emerald-700 ${
+   282→                            isActive
+   283→                              ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 shadow-sm'
+   284→                              : 'border-border bg-card'
+   285→                          }`}
+   286→                        >
+   287→                          <Icon className={`w-6 h-6 ${isActive ? 'text-emerald-600 dark:text-emerald-400' : 'text-muted-foreground'}`} />
+   288→                          <span className={`text-xs font-medium ${isActive ? 'text-emerald-700 dark:text-emerald-300' : 'text-muted-foreground'}`}>
+   289→                            {opt.label}
+   290→                          </span>
+   291→                          {isActive && (
+   292→                            <motion.div
+   293→                              layoutId="theme-check"
+   294→                              className="absolute top-2 right-2 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center"
+   295→                              transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+   296→                            >
+   297→                              <Check className="w-3 h-3 text-white" />
+   298→                            </motion.div>
+   299→                          )}
+   300→                        </button>
+   301→                      );
+   302→                    })}
+   303→                  </div>
+   304→                </div>
+   305→
+   306→                <Separator />
+   307→
+   308→                {/* Compact sidebar */}
+   309→                <div className="flex items-center justify-between">
+   310→                  <div className="flex items-center gap-3">
+   311→                    <div className="w-9 h-9 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center">
+   312→                      <PanelLeftClose className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+   313→                    </div>
+   314→                    <div>
+   315→                      <Label className="text-sm font-medium">Compact Sidebar</Label>
+   316→                      <p className="text-xs text-muted-foreground">Use a narrower sidebar with icons only</p>
+   317→                    </div>
+   318→                  </div>
+   319→                  <Switch
+   320→                    checked={sidebarCompact}
+   321→                    onCheckedChange={handleSidebarCompact}
+   322→                  />
+   323→                </div>
+   324→
+   325→                <Separator />
+   326→
+   327→                {/* Font size */}
+   328→                <div className="flex items-center justify-between">
+   329→                  <div className="flex items-center gap-3">
+   330→                    <div className="w-9 h-9 rounded-lg bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center">
+   331→                      <Type className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+   332→                    </div>
+   333→                    <div>
+   334→                      <Label className="text-sm font-medium">Font Size</Label>
+   335→                      <p className="text-xs text-muted-foreground">Adjust the base text size</p>
+   336→                    </div>
+   337→                  </div>
+   338→                  <Select value={fontSize} onValueChange={handleFontSize}>
+   339→                    <SelectTrigger className="w-32">
+   340→                      <SelectValue />
+   341→                    </SelectTrigger>
+   342→                    <SelectContent>
+   343→                      <SelectItem value="small">Small</SelectItem>
+   344→                      <SelectItem value="medium">Medium</SelectItem>
+   345→                      <SelectItem value="large">Large</SelectItem>
+   346→                    </SelectContent>
+   347→                  </Select>
+   348→                </div>
+   349→              </CardContent>
+   350→            </Card>
+   351→          </motion.div>
+   352→        </TabsContent>
+   353→
+   354→        {/* ================================================================= */}
+   355→        {/* NOTIFICATIONS TAB                                                 */}
+   356→        {/* ================================================================= */}
+   357→        <TabsContent value="notifications" className="space-y-6">
+   358→          <motion.div variants={itemVariants}>
+   359→            <Card className="overflow-hidden">
+   360→              <div className="h-1 bg-gradient-to-r from-amber-500 to-yellow-500" />
+   361→              <CardHeader>
+   362→                <CardTitle className="text-lg flex items-center gap-2">
+   363→                  <Bell className="w-5 h-5 text-amber-500" />
+   364→                  Notification Preferences
+   365→                </CardTitle>
+   366→                <CardDescription>Choose which notifications you want to receive</CardDescription>
+   367→              </CardHeader>
+   368→              <CardContent className="space-y-1">
+   369→                {/* Email notifications */}
+   370→                <NotificationRow
+   371→                  icon={<Mail className="w-4 h-4 text-blue-500" />}
+   372→                  bgColor="bg-blue-100 dark:bg-blue-900/30"
+   373→                  title="Email Notifications"
+   374→                  description="Receive important updates via email"
+   375→                  checked={notifPrefs.email}
+   376→                  onCheckedChange={(val) => handleNotifToggle('email', val)}
+   377→                />
+   378→
+   379→                <Separator />
+   380→
+   381→                {/* Attendance alerts */}
+   382→                <NotificationRow
+   383→                  icon={<ClipboardCheck className="w-4 h-4 text-emerald-500" />}
+   384→                  bgColor="bg-emerald-100 dark:bg-emerald-900/30"
+   385→                  title="Attendance Alerts"
+   386→                  description="Get notified about attendance status changes"
+   387→                  checked={notifPrefs.attendance}
+   388→                  onCheckedChange={(val) => handleNotifToggle('attendance', val)}
+   389→                />
+   390→
+   391→                <Separator />
+   392→
+   393→                {/* Assignment reminders */}
+   394→                <NotificationRow
+   395→                  icon={<FileText className="w-4 h-4 text-orange-500" />}
+   396→                  bgColor="bg-orange-100 dark:bg-orange-900/30"
+   397→                  title="Assignment Reminders"
+   398→                  description="Reminders for upcoming assignment deadlines"
+   399→                  checked={notifPrefs.assignments}
+   400→                  onCheckedChange={(val) => handleNotifToggle('assignments', val)}
+   401→                />
+   402→
+   403→                <Separator />
+   404→
+   405→                {/* Notice alerts */}
+   406→                <NotificationRow
+   407→                  icon={<AlertCircle className="w-4 h-4 text-red-500" />}
+   408→                  bgColor="bg-red-100 dark:bg-red-900/30"
+   409→                  title="Notice Alerts"
+   410→                  description="Alerts for new and urgent notices"
+   411→                  checked={notifPrefs.notices}
+   412→                  onCheckedChange={(val) => handleNotifToggle('notices', val)}
+   413→                />
+   414→
+   415→                <Separator />
+   416→
+   417→                {/* Recommendation alerts */}
+   418→                <NotificationRow
+   419→                  icon={<Lightbulb className="w-4 h-4 text-yellow-500" />}
+   420→                  bgColor="bg-yellow-100 dark:bg-yellow-900/30"
+   421→                  title="Recommendation Alerts"
+   422→                  description="Get personalized academic recommendations"
+   423→                  checked={notifPrefs.recommendations}
+   424→                  onCheckedChange={(val) => handleNotifToggle('recommendations', val)}
+   425→                />
+   426→              </CardContent>
+   427→            </Card>
+   428→          </motion.div>
+   429→        </TabsContent>
+   430→
+   431→        {/* ================================================================= */}
+   432→        {/* SECURITY TAB                                                      */}
+   433→        {/* ================================================================= */}
+   434→        <TabsContent value="security" className="space-y-6">
+   435→          {/* Account Info Card */}
+   436→          <motion.div variants={itemVariants}>
+   437→            <Card className="overflow-hidden">
+   438→              <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+   439→              <CardHeader>
+   440→                <CardTitle className="text-lg flex items-center gap-2">
+   441→                  <User className="w-5 h-5 text-emerald-500" />
+   442→                  Account Information
+   443→                </CardTitle>
+   444→                <CardDescription>Your account details (read-only)</CardDescription>
+   445→              </CardHeader>
+   446→              <CardContent className="space-y-4">
+   447→                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+   448→                  <div className="space-y-1">
+   449→                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Name</Label>
+   450→                    <p className="text-sm font-medium">{currentUser.name}</p>
+   451→                  </div>
+   452→                  <div className="space-y-1">
+   453→                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Email</Label>
+   454→                    <p className="text-sm font-medium">{currentUser.email}</p>
+   455→                  </div>
+   456→                  <div className="space-y-1">
+   457→                    <Label className="text-xs text-muted-foreground uppercase tracking-wider">Role</Label>
+   458→                    <Badge
+   459→                      variant="outline"
+   460→                      className="capitalize mt-0.5 bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800"
+   461→                    >
+   462→                      {currentUser.role}
+   463→                    </Badge>
+   464→                  </div>
+   465→                </div>
+   466→
+   467→                <Separator />
+   468→
+   469→                <Button
+   470→                  variant="outline"
+   471→                  className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-50 dark:border-emerald-700 dark:text-emerald-400 dark:hover:bg-emerald-950/30"
+   472→                  onClick={navigateToProfile}
+   473→                >
+   474→                  <User className="w-4 h-4" />
+   475→                  Go to Profile
+   476→                  <ChevronRight className="w-4 h-4 ml-auto" />
+   477→                </Button>
+   478→              </CardContent>
+   479→            </Card>
+   480→          </motion.div>
+   481→
+   482→          {/* Change Password Card */}
+   483→          <motion.div variants={itemVariants}>
+   484→            <Card className="overflow-hidden">
+   485→              <div className="h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+   486→              <CardHeader>
+   487→                <CardTitle className="text-lg flex items-center gap-2">
+   488→                  <KeyRound className="w-5 h-5 text-amber-500" />
+   489→                  Change Password
+   490→                </CardTitle>
+   491→                <CardDescription>Update your password to keep your account secure</CardDescription>
+   492→              </CardHeader>
+   493→              <CardContent>
+   494→                <form onSubmit={handleChangePassword} className="space-y-4">
+   495→                  <div className="space-y-2">
+   496→                    <Label htmlFor="settings-current-password">Current Password</Label>
+   497→                    <div className="relative">
+   498→                      <Input
+   499→                        id="settings-current-password"
+   500→                        type={showCurrent ? 'text' : 'password'}
+   501→                        value={currentPassword}
+   502→                        onChange={(e) => setCurrentPassword(e.target.value)}
+   503→                        placeholder="Enter current password"
+   504→                        required
+   505→                      />
+   506→                      <Button
+   507→                        type="button"
+   508→                        variant="ghost"
+   509→                        size="icon"
+   510→                        className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+   511→                        onClick={() => setShowCurrent(!showCurrent)}
+   512→                      >
+   513→                        {showCurrent ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+   514→                      </Button>
+   515→                    </div>
+   516→                  </div>
+   517→                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+   518→                    <div className="space-y-2">
+   519→                      <Label htmlFor="settings-new-password">New Password</Label>
+   520→                      <div className="relative">
+   521→                        <Input
+   522→                          id="settings-new-password"
+   523→                          type={showNew ? 'text' : 'password'}
+   524→                          value={newPassword}
+   525→                          onChange={(e) => setNewPassword(e.target.value)}
+   526→                          placeholder="Enter new password"
+   527→                          required
+   528→                          minLength={6}
+   529→                        />
+   530→                        <Button
+   531→                          type="button"
+   532→                          variant="ghost"
+   533→                          size="icon"
+   534→                          className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+   535→                          onClick={() => setShowNew(!showNew)}
+   536→                        >
+   537→                          {showNew ? <EyeOff className="w-4 h-4 text-muted-foreground" /> : <Eye className="w-4 h-4 text-muted-foreground" />}
+   538→                        </Button>
+   539→                      </div>
+   540→                    </div>
+   541→                    <div className="space-y-2">
+   542→                      <Label htmlFor="settings-confirm-password">Confirm New Password</Label>
+   543→                      <Input
+   544→                        id="settings-confirm-password"
+   545→                        type="password"
+   546→                        value={confirmPassword}
+   547→                        onChange={(e) => setConfirmPassword(e.target.value)}
+   548→                        placeholder="Confirm new password"
+   549→                        required
+   550→                        minLength={6}
+   551→                      />
+   552→                    </div>
+   553→                  </div>
+   554→                  {newPassword && confirmPassword && newPassword !== confirmPassword && (
+   555→                    <p className="text-xs text-destructive flex items-center gap-1">
+   556→                      <AlertTriangle className="w-3 h-3" /> Passwords do not match
+   557→                    </p>
+   558→                  )}
+   559→                  <Button type="submit" disabled={changingPassword} className="bg-emerald-700 hover:bg-emerald-800">
+   560→                    <KeyRound className="w-4 h-4 mr-2" />
+   561→                    {changingPassword ? 'Changing Password...' : 'Change Password'}
+   562→                  </Button>
+   563→                </form>
+   564→              </CardContent>
+   565→            </Card>
+   566→          </motion.div>
+   567→
+   568→          {/* Danger Zone Card */}
+   569→          <motion.div variants={itemVariants}>
+   570→            <Card className="border-red-300 dark:border-red-800 overflow-hidden">
+   571→              <div className="h-1 bg-gradient-to-r from-red-500 to-rose-500" />
+   572→              <CardHeader>
+   573→                <CardTitle className="text-lg flex items-center gap-2 text-red-600 dark:text-red-400">
+   574→                  <AlertTriangle className="w-5 h-5" />
+   575→                  Danger Zone
+   576→                </CardTitle>
+   577→                <CardDescription className="text-red-500/80 dark:text-red-400/80">
+   578→                  Irreversible and destructive actions
+   579→                </CardDescription>
+   580→              </CardHeader>
+   581→              <CardContent>
+   582→                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
+   583→                  <div>
+   584→                    <p className="text-sm font-medium text-red-700 dark:text-red-300">Delete Account</p>
+   585→                    <p className="text-xs text-red-600/70 dark:text-red-400/70 mt-0.5">
+   586→                      Permanently delete your account and all associated data. This action cannot be undone.
+   587→                    </p>
+   588→                  </div>
+   589→                  <TooltipProvider>
+   590→                    <Tooltip>
+   591→                      <TooltipTrigger asChild>
+   592→                        <span tabIndex={0}>
+   593→                          <Button variant="destructive" disabled className="gap-2 shrink-0">
+   594→                            <Trash2 className="w-4 h-4" />
+   595→                            Delete Account
+   596→                          </Button>
+   597→                        </span>
+   598→                      </TooltipTrigger>
+   599→                      <TooltipContent>
+   600→                        <p>Contact administrator to delete your account</p>
+   601→                      </TooltipContent>
+   602→                    </Tooltip>
+   603→                  </TooltipProvider>
+   604→                </div>
+   605→              </CardContent>
+   606→            </Card>
+   607→          </motion.div>
+   608→        </TabsContent>
+   609→      </Tabs>
+   610→    </motion.div>
+   611→  );
+   612→}
+   613→
+   614→// ---------------------------------------------------------------------------
+   615→// NotificationRow sub-component
+   616→// ---------------------------------------------------------------------------
+   617→
+   618→interface NotificationRowProps {
+   619→  icon: React.ReactNode;
+   620→  bgColor: string;
+   621→  title: string;
+   622→  description: string;
+   623→  checked: boolean;
+   624→  onCheckedChange: (val: boolean) => void;
+   625→}
+   626→
+   627→function NotificationRow({ icon, bgColor, title, description, checked, onCheckedChange }: NotificationRowProps) {
+   628→  return (
+   629→    <div className="flex items-center justify-between py-3">
+   630→      <div className="flex items-center gap-3">
+   631→        <div className={`w-9 h-9 rounded-lg ${bgColor} flex items-center justify-center shrink-0`}>
+   632→          {icon}
+   633→        </div>
+   634→        <div>
+   635→          <p className="text-sm font-medium">{title}</p>
+   636→          <p className="text-xs text-muted-foreground">{description}</p>
+   637→        </div>
+   638→      </div>
+   639→      <Switch checked={checked} onCheckedChange={onCheckedChange} />
+   640→    </div>
+   641→  );
+   642→}
+   643→
