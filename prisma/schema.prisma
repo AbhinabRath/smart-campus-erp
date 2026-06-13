@@ -58,7 +58,6 @@ model Student {
   guardianName          String?
   guardianPhone         String?
   admissionYear         Int?
-  graduationYear        Int?
   bio                   String?
 
   createdAt             DateTime               @default(now())
