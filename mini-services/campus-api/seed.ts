@@ -5,13 +5,7 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: 'file:/home/z/my-project/db/custom.db',
-    },
-  },
-});
+const prisma = new PrismaClient();
 
 async function seed() {
   console.log('Seeding database...');
@@ -381,7 +375,7 @@ async function seed() {
   }
 
   // ── Create Additional Notices ──
-  const existingNotices = await prisma.notice.count();
+  const existingNotices2 = await prisma.notice.count();
   if (existingNotices <= 3) {
     await prisma.notice.createMany({
       data: [

@@ -53,6 +53,14 @@ model Student {
   departmentId          String
   section               String                 @default("A")
   academicYear          String
+
+  phoneNumber           String?
+  guardianName          String?
+  guardianPhone         String?
+  admissionYear         Int?
+  graduationYear        Int?
+  bio                   String?
+
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   assignmentSubmissions AssignmentSubmission[]
@@ -74,6 +82,13 @@ model Teacher {
   departmentId       String
   specialization     String?
   designation        String              @default("Assistant Professor")
+
+  phoneNumber        String?
+  qualification      String?
+  officeRoom         String?
+  bio                String?
+  researchArea       String?
+
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   assignments        Assignment[]
@@ -122,6 +137,10 @@ model AttendanceSession {
   qrCode       String             @unique
   isActive     Boolean            @default(true)
   duration     Int                @default(15)
+
+  classroomIp  String?
+  expiresAt    DateTime?
+
   startedAt    DateTime           @default(now())
   endedAt      DateTime?
   createdAt    DateTime           @default(now())
@@ -338,3 +357,7 @@ model Session {
   @@index([userId])
   @@map("sessions")
 }
+
+
+
+

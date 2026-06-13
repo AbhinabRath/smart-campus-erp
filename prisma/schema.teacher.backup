@@ -53,6 +53,13 @@ model Student {
   departmentId          String
   section               String                 @default("A")
   academicYear          String
+
+  phoneNumber           String?
+  guardianName          String?
+  guardianPhone         String?
+  graduationYear        Int?
+  bio                   String?
+
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   assignmentSubmissions AssignmentSubmission[]
@@ -338,3 +345,4 @@ model Session {
   @@index([userId])
   @@map("sessions")
 }
+
