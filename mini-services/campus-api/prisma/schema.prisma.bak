@@ -53,12 +53,6 @@ model Student {
   departmentId          String
   section               String                 @default("A")
   academicYear          String
-  phoneNumber           String?
-  guardianName          String?
-  guardianPhone         String?
-  admissionYear         Int?
-  collegeEmail          String?
-  bio                   String?
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   assignmentSubmissions AssignmentSubmission[]
@@ -80,11 +74,6 @@ model Teacher {
   departmentId       String
   specialization     String?
   designation        String              @default("Assistant Professor")
-  phoneNumber        String?
-  qualification      String?
-  officeRoom         String?
-  bio                String?
-  researchArea       String?
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   assignments        Assignment[]
