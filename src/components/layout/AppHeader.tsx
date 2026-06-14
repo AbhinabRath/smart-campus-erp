@@ -104,7 +104,20 @@ export default function AppHeader() {
     student: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800',
   };
 
-  const hasUnread = notices.length > 0;
+  const readNotices =
+  typeof window !== 'undefined'
+    ? new Set(
+        JSON.parse(
+          localStorage.getItem('campus-erp-read-notices') || '[]'
+        )
+      )
+    : new Set();
+
+const unreadCount = notices.filter(
+  (n) => !readNotices.has(n.id)
+).length;
+
+const hasUnread = unreadCount > 0;
 
   return (
     <header className="h-16 bg-card/80 backdrop-blur-md border-b border-border flex items-center justify-between px-4 sticky top-0 z-30 shadow-sm">
@@ -215,7 +228,7 @@ export default function AppHeader() {
                   animate={{ scale: 1 }}
                   className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] bg-destructive text-destructive-foreground rounded-full text-[10px] font-bold flex items-center justify-center px-1 shadow-sm"
                 >
-                  {notices.length > 9 ? '9+' : notices.length}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </motion.span>
               )}
             </Button>
@@ -223,7 +236,7 @@ export default function AppHeader() {
           <PopoverContent className="w-80 p-0 shadow-lg" align="end">
             <div className="p-3 border-b bg-muted/20">
               <h4 className="font-semibold text-sm">Notifications</h4>
-              <p className="text-xs text-muted-foreground">{notices.length} recent notices</p>
+              <p className="text-xs text-muted-foreground">{unreadCount} unread notices</p>
             </div>
             <div className="max-h-72 overflow-y-auto custom-scrollbar">
               {notices.length === 0 ? (

@@ -93,11 +93,22 @@ export default function AppSidebar() {
   // Fetch unread counts
   useEffect(() => {
     if (currentUser) {
-      api.get('/notices?limit=1')
-        .then((res) => {
-          const total = res.data.pagination?.total || res.data.data?.length || 0;
-          setNoticeCount(total);
-        })
+      api.get('/notices')
+  .then((res) => {
+    const notices = res.data.data || [];
+
+    const readNotices = new Set(
+      JSON.parse(
+        localStorage.getItem('campus-erp-read-notices') || '[]'
+      )
+    );
+
+    const unread = notices.filter(
+      (n: any) => !readNotices.has(n.id)
+    ).length;
+
+    setNoticeCount(unread);
+  })
         .catch(() => {});
 
       if (role === 'student') {
