@@ -97,17 +97,11 @@ export default function AppSidebar() {
   .then((res) => {
     const notices = res.data.data || [];
 
-    const readNotices = new Set(
-      JSON.parse(
-        localStorage.getItem('campus-erp-read-notices') || '[]'
-      )
-    );
-
     const unread = notices.filter(
-      (n: any) => !readNotices.has(n.id)
-    ).length;
+  (n: any) => !n.isRead
+).length;
 
-    setNoticeCount(unread);
+setNoticeCount(unread);
   })
         .catch(() => {});
 

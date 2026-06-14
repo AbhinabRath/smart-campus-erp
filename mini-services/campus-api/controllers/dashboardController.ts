@@ -35,17 +35,17 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
     }
 
     // Run all queries in parallel for performance
-    const [
-      totalSessions,
-      attendedCount,
-      recentAttendance,
-      marks,
-      assignments,
-      notices,
-      todayTimetable,
-      recentMaterials,
-      recommendations,
-    ] = await Promise.all([
+   const [
+  totalSessions,
+  attendedCount,
+  recentAttendance,
+  marks,
+  assignments,
+  notices,
+  todayTimetable,
+  recentMaterials,
+  recommendations,
+] = await Promise.all([
       // Total attendance sessions for this student's class
       prisma.attendanceSession.count({
         where: {
@@ -280,16 +280,18 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
  */
 export async function getAdminDashboard(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const [
-      totalStudents,
-      totalTeachers,
-      totalAdmins,
-      departments,
-      recentSessions,
-      recentNotices,
-      pendingLeaves,
-      totalSubjects,
-    ] = await Promise.all([
+   const [
+  totalStudents,
+  totalTeachers,
+  totalAdmins,
+  departments,
+  recentSessions,
+  recentNotices,
+  pendingLeaves,
+  totalSubjects,
+  attendanceSessions,
+  attendanceRecords,
+] = await Promise.all([
       prisma.student.count(),
       prisma.teacher.count(),
       prisma.user.count({ where: { role: 'admin' } }),
@@ -308,6 +310,15 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
+      prisma.attendanceRecord.findMany({
+        include: {
+          session: {
+            select: {
+              startedAt: true,
+            },
+          },
+        },
+      }),
       // Recent notices
       prisma.notice.findMany({
         include: { author: { select: { name: true, role: true } } },
@@ -317,6 +328,18 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
       // Pending leave requests
       prisma.leaveRequest.count({ where: { status: 'pending' } }),
       prisma.subject.count(),
+      prisma.attendanceSession.findMany({
+  include: {
+    _count: {
+      select: {
+        records: true,
+      },
+    },
+  },
+  orderBy: {
+    startedAt: 'asc',
+  },
+}),
     ]);
 
     successResponse(res, 'Admin dashboard data loaded.', {
@@ -328,6 +351,7 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
       },
       departments,
       totalSubjects,
+      attendanceSessions,
       recentActivity: {
         attendanceSessions: recentSessions,
         notices: recentNotices,

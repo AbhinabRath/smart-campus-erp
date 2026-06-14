@@ -320,7 +320,7 @@ export default function AssignmentManager() {
 
   // Admin: Export assignments CSV
   const exportAdminCSV = () => {
-    const dataToExport = filteredAdminAssignments;
+    const dataToExport = assignments;
     if (dataToExport.length === 0) {
       toast({ title: 'No Data', description: 'No assignments to export', variant: 'destructive' });
       return;

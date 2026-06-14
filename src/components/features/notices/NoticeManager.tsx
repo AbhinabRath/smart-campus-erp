@@ -30,8 +30,16 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 interface Notice {
-  id: string; title: string; content: string; targetRole: string; priority: string; isPinned: boolean;
-  author: { name: string }; createdAt: string; updatedAt: string;
+  id: string;
+  title: string;
+  content: string;
+  targetRole: string;
+  priority: string;
+  isPinned: boolean;
+  isRead: boolean;
+  author: { name: string };
+  createdAt: string;
+  updatedAt: string;
 }
 
 // Color-coded priority config with dark mode
@@ -71,13 +79,7 @@ export default function NoticeManager() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPriority, setFilterPriority] = useState('all');
-  const [readNotices, setReadNotices] = useState<Set<string>>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('campus-erp-read-notices');
-      return saved ? new Set(JSON.parse(saved)) : new Set();
-    }
-    return new Set();
-  });
+  
 
   // Create form state
   const [title, setTitle] = useState('');
@@ -102,28 +104,58 @@ export default function NoticeManager() {
   useEffect(() => { loadNotices(); }, [loadNotices]);
 
   // Persist read state
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('campus-erp-read-notices', JSON.stringify([...readNotices]));
-    }
-  }, [readNotices]);
+  
 
   // Toggle read state
-  const toggleRead = (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setReadNotices((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
+  const toggleRead = async (
+  id: string,
+  e: React.MouseEvent
+) => {
+  e.stopPropagation();
+
+  try {
+    const res = await api.post(`/notices/${id}/read`);
+
+    setNotices((prev) =>
+      prev.map((n) =>
+        n.id === id
+          ? { ...n, isRead: res.data.data.isRead }
+          : n
+      )
+    );
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Failed to update notice',
+      variant: 'destructive',
     });
-  };
+  }
+};
 
   // Mark all as read
-  const markAllRead = () => {
-    setReadNotices(new Set(notices.map((n) => n.id)));
-    toast({ title: 'Done', description: 'All notices marked as read' });
-  };
+  const markAllRead = async () => {
+  try {
+    await api.post('/notices/read-all');
+
+    setNotices((prev) =>
+      prev.map((n) => ({
+        ...n,
+        isRead: true,
+      }))
+    );
+
+    toast({
+      title: 'Done',
+      description: 'All notices marked as read',
+    });
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Failed to mark all as read',
+      variant: 'destructive',
+    });
+  }
+};
 
   // Create notice
   const handleCreate = async (e: React.FormEvent) => {
@@ -158,12 +190,24 @@ export default function NoticeManager() {
   };
 
   // Open detail dialog
-  const openDetail = (notice: Notice) => {
-    setSelectedNotice(notice);
-    setDetailOpen(true);
-    // Mark as read when opened
-    setReadNotices((prev) => new Set(prev).add(notice.id));
-  };
+const openDetail = async (notice: Notice) => {
+  setSelectedNotice(notice);
+  setDetailOpen(true);
+
+  if (!notice.isRead) {
+    try {
+      await api.post(`/notices/${notice.id}/read`);
+
+      setNotices((prev) =>
+        prev.map((n) =>
+          n.id === notice.id
+            ? { ...n, isRead: true }
+            : n
+        )
+      );
+    } catch {}
+  }
+};
 
   const canCreate = role === 'admin' || role === 'teacher';
   const canDelete = role === 'admin';
@@ -181,7 +225,8 @@ export default function NoticeManager() {
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
-  const unreadCount = notices.filter((n) => !readNotices.has(n.id)).length;
+  const unreadCount =
+  notices.filter((n) => !n.isRead).length;
 
   return (
     <div className="space-y-6">
@@ -290,7 +335,7 @@ export default function NoticeManager() {
               const pConfig = PRIORITY_CONFIG[n.priority] || PRIORITY_CONFIG.normal;
               const PriorityIcon = pConfig.icon;
               const relativeTime = formatDistanceToNow(new Date(n.createdAt), { addSuffix: true });
-              const isRead = readNotices.has(n.id);
+              const isRead = n.isRead;
 
               return (
                 <motion.div

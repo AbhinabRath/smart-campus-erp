@@ -69,18 +69,38 @@ export async function getNotices(req: Request, res: Response, next: NextFunction
       ];
     }
 
-    const notices = await prisma.notice.findMany({
-      where,
-      include: {
-        author: { select: { name: true, role: true } },
+   const notices = await prisma.notice.findMany({
+  where,
+  include: {
+    author: {
+      select: {
+        name: true,
+        role: true,
       },
-      orderBy: [
-        { isPinned: 'desc' },    // Pinned notices first
-        { createdAt: 'desc' },    // Then by date
-      ],
-    });
+    },
+    reads: {
+      where: {
+        userId: req.user!.id,
+      },
+      select: {
+        id: true,
+      },
+    },
+  },
+  orderBy: [
+    { isPinned: 'desc' },
+    { createdAt: 'desc' },
+  ],
+});
 
-    successResponse(res, 'Notices retrieved.', notices);
+const result = notices.map(({ reads, ...notice }) => ({
+  ...notice,
+  isRead: reads.length > 0,
+}));
+
+successResponse(res, 'Notices retrieved.', result);
+return;
+
   } catch (err) {
     next(err);
   }
@@ -174,6 +194,76 @@ export async function deleteNotice(req: Request, res: Response, next: NextFuncti
 
     await prisma.notice.delete({ where: { id } });
     successResponse(res, 'Notice deleted.');
+  } catch (err) {
+    next(err);
+  }
+}
+/**
+ * POST /api/notices/:id/read
+ * Toggle read/unread status for current user.
+ */
+export async function toggleNoticeRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { id: noticeId } = req.params;
+    const userId = req.user!.id;
+
+    const existing = await prisma.noticeRead.findUnique({
+      where: {
+        userId_noticeId: {
+          userId,
+          noticeId,
+        },
+      },
+    });
+
+    if (existing) {
+      await prisma.noticeRead.delete({
+        where: {
+          userId_noticeId: {
+            userId,
+            noticeId,
+          },
+        },
+      });
+
+      successResponse(res, 'Notice marked as unread.', { isRead: false });
+      return;
+    }
+
+    await prisma.noticeRead.create({
+      data: {
+        userId,
+        noticeId,
+      },
+    });
+
+    successResponse(res, 'Notice marked as read.', { isRead: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/**
+ * POST /api/notices/read-all
+ * Mark all visible notices as read.
+ */
+export async function markAllNoticesRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userId = req.user!.id;
+
+    const notices = await prisma.notice.findMany({
+      select: { id: true },
+    });
+
+    await prisma.noticeRead.createMany({
+      data: notices.map((n) => ({
+        userId,
+        noticeId: n.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    successResponse(res, 'All notices marked as read.');
   } catch (err) {
     next(err);
   }

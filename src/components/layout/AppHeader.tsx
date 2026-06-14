@@ -55,6 +55,7 @@ interface NoticeItem {
   title: string;
   priority: string;
   createdAt: string;
+  isRead: boolean;
 }
 
 export default function AppHeader() {
@@ -104,17 +105,8 @@ export default function AppHeader() {
     student: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800',
   };
 
-  const readNotices =
-  typeof window !== 'undefined'
-    ? new Set(
-        JSON.parse(
-          localStorage.getItem('campus-erp-read-notices') || '[]'
-        )
-      )
-    : new Set();
-
-const unreadCount = notices.filter(
-  (n) => !readNotices.has(n.id)
+  const unreadCount = notices.filter(
+  (n) => !n.isRead
 ).length;
 
 const hasUnread = unreadCount > 0;

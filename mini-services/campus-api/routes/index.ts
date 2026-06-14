@@ -151,7 +151,19 @@ router.post('/notices', requireAuth, requireRole('admin', 'teacher'), validate([
 ]), noticeCtrl.createNotice);
 
 router.get('/notices', requireAuth, noticeCtrl.getNotices);
+router.post(
+  '/notices/read-all',
+  requireAuth,
+  noticeCtrl.markAllNoticesRead
+);
+
+router.post(
+  '/notices/:id/read',
+  requireAuth,
+  noticeCtrl.toggleNoticeRead
+);
 router.get('/notices/:id', requireAuth, noticeCtrl.getNoticeById);
+
 router.put('/notices/:id', requireAuth, noticeCtrl.updateNotice);
 router.delete('/notices/:id', requireAuth, noticeCtrl.deleteNotice);
 

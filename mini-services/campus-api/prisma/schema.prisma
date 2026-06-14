@@ -35,6 +35,7 @@ model User {
   approvedLeaves   LeaveRequest[]   @relation("LeaveApprover")
   leaveRequests    LeaveRequest[]
   publishedNotices Notice[]
+  noticeReads NoticeRead[]
   recommendations  Recommendation[]
   sessions         Session[]
   student          Student?
@@ -289,11 +290,28 @@ model Notice {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   author     User     @relation(fields: [authorId], references: [id])
+  reads      NoticeRead[]
 
   @@index([targetRole])
   @@index([priority])
   @@index([createdAt])
   @@map("notices")
+}
+
+model NoticeRead {
+  id        String   @id @default(cuid())
+  userId    String
+  noticeId  String
+  readAt    DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notice Notice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, noticeId])
+  @@index([userId])
+  @@index([noticeId])
+
+  @@map("notice_reads")
 }
 
 model LeaveRequest {

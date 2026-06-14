@@ -326,8 +326,6 @@ export default function AdminDashboard() {
       color: 'text-emerald-600',
       bg: 'bg-emerald-50 dark:bg-emerald-950/30',
       sparkKey: 'users',
-      sparkColor: 'oklch(0.47 0.16 155)',
-      trend: 8,
     },
     {
       label: 'Students',
@@ -336,8 +334,6 @@ export default function AdminDashboard() {
       color: 'text-sky-600',
       bg: 'bg-sky-50 dark:bg-sky-950/30',
       sparkKey: 'students',
-      sparkColor: 'oklch(0.6 0.18 220)',
-      trend: 5,
     },
     {
       label: 'Departments',
@@ -346,8 +342,6 @@ export default function AdminDashboard() {
       color: 'text-amber-600',
       bg: 'bg-amber-50 dark:bg-amber-950/30',
       sparkKey: 'departments',
-      sparkColor: 'oklch(0.65 0.18 80)',
-      trend: 12,
     },
     {
       label: 'Subjects',
@@ -356,8 +350,6 @@ export default function AdminDashboard() {
       color: 'text-violet-600',
       bg: 'bg-violet-50 dark:bg-violet-950/30',
       sparkKey: 'subjects',
-      sparkColor: 'oklch(0.55 0.2 300)',
-      trend: -3,
     },
   ];
 
@@ -373,7 +365,6 @@ export default function AdminDashboard() {
                   <div>
                     <div className="flex items-center gap-2">
                       <p className="text-sm text-muted-foreground">{stat.label}</p>
-                      <TrendIndicator value={stat.trend} />
                     </div>
                     <p className="text-3xl font-bold mt-1">{stat.value}</p>
                   </div>
@@ -381,11 +372,7 @@ export default function AdminDashboard() {
                     <div className={`w-10 h-10 rounded-xl ${stat.bg} flex items-center justify-center`}>
                       <stat.icon className={`w-5 h-5 ${stat.color}`} />
                     </div>
-                    <MiniSparkline
-                      data={sparklineData}
-                      dataKey={stat.sparkKey}
-                      color={stat.sparkColor}
-                    />
+                    
                   </div>
                 </div>
               </CardContent>
