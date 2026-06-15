@@ -204,13 +204,14 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
     }
 
     const [
-      activeSessions,
-      recentAssignments,
-      recentMaterials,
-      marksCount,
-      recentNotices,
-      totalStudents,
-    ] = await Promise.all([
+  activeSessions,
+  recentAssignments,
+  recentMaterials,
+  marksCount,
+  recentNotices,
+  totalStudents,
+  todaySchedule,
+] = await Promise.all([
       // Active attendance sessions
       prisma.attendanceSession.findMany({
         where: { teacherId: teacher.id, isActive: true },
@@ -253,6 +254,29 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
       prisma.student.count({
         where: { departmentId: teacher.departmentId },
       }),
+      prisma.timetable.findMany({
+  where: {
+    teacherId: teacher.id,
+    dayOfWeek: new Date().getDay(),
+  },
+  include: {
+  subject: {
+    select: {
+      name: true,
+      code: true,
+    },
+  },
+  department: {
+    select: {
+      code: true,
+      name: true,
+    },
+  },
+},
+  orderBy: {
+    periodNumber: 'asc',
+  },
+}),
     ]);
 
     successResponse(res, 'Teacher dashboard data loaded.', {
@@ -268,6 +292,7 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
       marksCount,
       notices: recentNotices,
       totalStudents,
+      todaySchedule,
     });
   } catch (err) {
     next(err);

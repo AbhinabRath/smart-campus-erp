@@ -64,6 +64,24 @@ interface TeacherData {
     createdAt: string;
   }>;
   totalStudents: number;
+  todaySchedule: Array<{
+  id: string;
+  periodNumber: number;
+  roomNumber: string;
+  startTime: string;
+  endTime: string;
+  subject: {
+    name: string;
+    code: string;
+  };
+  department: {
+  code: string;
+  name: string;
+};
+
+semester: number;
+section: string;
+}>;
 }
 
 const fadeUp = {
@@ -85,12 +103,7 @@ const weeklyAttendanceData = [
   { day: 'Fri', present: 27, absent: 5 },
 ];
 
-// Simulated today's schedule
-const todaySchedule = [
-  { time: '9:00 AM', subject: 'Data Structures', room: 'Room 301', duration: '1h' },
-  { time: '11:00 AM', subject: 'Algorithms', room: 'Room 205', duration: '1h' },
-  { time: '2:00 PM', subject: 'Database Systems', room: 'Lab 102', duration: '2h' },
-];
+
 
 export default function TeacherDashboard() {
   const { setView } = useAppStore();
@@ -117,6 +130,8 @@ export default function TeacherDashboard() {
 
   // Error state when data fails to load
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
+  
+  const todaySchedule = data.todaySchedule ?? [];
 
   // Stat cards data derived from the backend response
   const statCards = [
@@ -198,22 +213,36 @@ export default function TeacherDashboard() {
               {todaySchedule.length === 0 ? (
                 <p className="text-muted-foreground text-sm text-center py-6">No classes scheduled today</p>
               ) : (
-                todaySchedule.map((slot, idx) => (
-                  <div key={idx} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                    <div className="w-14 text-center shrink-0">
-                      <p className="text-xs font-semibold text-primary">{slot.time}</p>
-                      <p className="text-[10px] text-muted-foreground">{slot.duration}</p>
-                    </div>
-                    <div className="w-px h-10 bg-border shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{slot.subject}</p>
-                      <p className="text-xs text-muted-foreground">{slot.room}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      {idx === 0 ? 'Next' : `#${idx + 1}`}
-                    </Badge>
-                  </div>
-                ))
+                todaySchedule.map((slot) => (
+  <div
+    key={slot.id}
+    className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg"
+  >
+    <div className="w-20 text-center shrink-0">
+      <p className="text-xs font-semibold text-primary">
+        {slot.startTime}
+      </p>
+      <p className="text-[10px] text-muted-foreground">
+        {slot.endTime}
+      </p>
+    </div>
+
+    <div className="w-px h-10 bg-border shrink-0" />
+
+    <div className="flex-1 min-w-0">
+      <p className="text-sm font-medium truncate">
+         {slot.department.code} • Sem {slot.semester} • Sec {slot.section}
+      </p>
+      <p className="text-xs text-muted-foreground">
+        {slot.roomNumber}
+      </p>
+    </div>
+
+    <Badge variant="outline" className="text-xs shrink-0">
+      P{slot.periodNumber}
+    </Badge>
+  </div>
+))
               )}
             </CardContent>
           </Card>

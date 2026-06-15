@@ -91,19 +91,6 @@ const deptMarksConfig: ChartConfig = {
   avgMarks: { label: 'Avg Marks %', color: 'oklch(0.6 0.15 160)' },
 };
 
-
-
-// Simulated sparkline data for stat cards (weekly trend)
-const sparklineData = [
-  { week: 'W1', users: 42, students: 35, departments: 4, subjects: 8 },
-  { week: 'W2', users: 48, students: 40, departments: 4, subjects: 9 },
-  { week: 'W3', users: 55, students: 46, departments: 5, subjects: 10 },
-  { week: 'W4', users: 60, students: 50, departments: 5, subjects: 11 },
-  { week: 'W5', users: 68, students: 57, departments: 5, subjects: 12 },
-  { week: 'W6', users: 75, students: 63, departments: 6, subjects: 13 },
-  { week: 'W7', users: 82, students: 69, departments: 6, subjects: 14 },
-];
-
 // Mini Sparkline component
 function MiniSparkline({
   data,

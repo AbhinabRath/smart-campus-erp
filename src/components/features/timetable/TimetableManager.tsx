@@ -31,6 +31,7 @@ interface TimetableEntry {
   subject: { name: string; code: string };
   teacher: { user: { name: string }; employeeId: string };
   department: { id?: string; name: string; code: string };
+  departmentId: string;
   semester: number; section: string;
 }
 
@@ -136,7 +137,10 @@ export default function TimetableManager() {
       ]);
       const ttData = ttRes.data.data;
       setEntries(Array.isArray(ttData) ? ttData : (ttData?.timetables || []));
+      console.log("first timetable entry:", ttData?.timetables?.[0] || ttData?.[0]);
       setDepartments(deptRes.data.data || []);
+      console.log("departments response:", deptRes.data);
+console.log("departments data:", deptRes.data.data);
       setSubjects(subRes.data.data || []);
 
       // Load teachers for admin
@@ -153,9 +157,9 @@ export default function TimetableManager() {
         setFilterDept(currentUser.student.departmentId);
         setFilterSemester(currentUser.student.semester.toString());
         setFilterSection(currentUser.student.section);
-      } else if (departments.length > 0 && !filterDept) {
-        setFilterDept(departments[0].id);
-      }
+      } else if ((deptRes.data.data || []).length > 0 && !filterDept) {
+          setFilterDept(deptRes.data.data[0].id);
+          }
     } catch { /* ignore */ }
     setLoading(false);
   }, [role, currentUser]);
@@ -193,18 +197,47 @@ export default function TimetableManager() {
       setCreating(false);
     }
   };
-
+console.log('filterDept:', filterDept);
+console.log('filterSemester:', filterSemester);
+console.log('filterSection:', filterSection);
+console.log('entries count:', entries.length);
   // Filter timetable entries
-  const filtered = entries.filter((e) => {
-    return e.department?.id === filterDept && e.semester === parseInt(filterSemester) && e.section === filterSection;
-  });
+ const filtered = entries.filter((e) => {
+  return e.departmentId === filterDept &&
+         e.semester === parseInt(filterSemester) &&
+         e.section === filterSection;
+});
+console.log("filterDept:", filterDept);
+console.log("first entry department:", entries[0]?.departmentId);
+console.log("departments loaded:", departments.length);
+console.log("filtered count:", filtered.length);
+  // Dynamic periods from DB
+const periods = [...new Set(
+  filtered.map((e) => e.periodNumber)
+)].sort((a, b) => a - b);
 
-  // Build grid: days x periods
-  const grid: (TimetableEntry | null)[][] = DAYS.map((_, dayIdx) =>
-    PERIODS.map((_, periodIdx) =>
-      filtered.find((e) => e.dayOfWeek === dayIdx + 1 && e.periodNumber === periodIdx + 1) || null
-    )
+// Build grid dynamically
+const grid: (TimetableEntry | null)[][] = DAYS.map((_, dayIdx) =>
+  periods.map((period) =>
+    filtered.find(
+      (e) =>
+        e.dayOfWeek === dayIdx + 1 &&
+        e.periodNumber === period
+    ) || null
+  )
+);
+
+const periodInfo = periods.map((period) => {
+  const entry = filtered.find(
+    (e) => e.periodNumber === period
   );
+
+  return {
+    period,
+    startTime: entry?.startTime ?? '--:--',
+    endTime: entry?.endTime ?? '--:--',
+  };
+});
 
   return (
     <div className="space-y-6">
@@ -313,14 +346,14 @@ export default function TimetableManager() {
                   <thead>
                     <tr>
                       <th className="p-2 text-left text-sm font-medium text-muted-foreground border-b w-20">Day</th>
-                      {PERIODS.map((p, i) => (
-                        <th key={p} className="p-2 text-center border-b">
-                          <div className="text-xs font-medium text-foreground">P{p}</div>
+                     {periodInfo.map((p) => (
+                        <th key={p.period} className="p-2 text-center border-b">
+                         <div className="text-xs font-medium text-foreground">P{p.period}</div>
                           <div className="text-[10px] text-muted-foreground flex items-center justify-center gap-0.5">
                             <Clock className="w-2.5 h-2.5" />
-                            {PERIOD_TIMES[i]}
+                            {p.startTime}
                           </div>
-                          {currentPeriod === p && (
+                          {currentPeriod === p.period && (
                             <div className="flex justify-center mt-0.5">
                               <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-0.5">
                                 <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" /> NOW
@@ -413,7 +446,7 @@ export default function TimetableManager() {
                               >
                                 <div className="w-16 text-xs text-muted-foreground shrink-0 flex items-center gap-1">
                                   <Clock className="w-3 h-3" />
-                                  {PERIOD_TIMES[entry.periodNumber - 1]}
+                                  {entry.startTime}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <span className={`text-sm font-medium ${color.text}`}>{entry.subject?.name}</span>
