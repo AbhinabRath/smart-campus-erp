@@ -586,7 +586,90 @@ await prisma.mark.create({
 }
 
 console.log('Marks created.');
+// ========================================
+// Attendance Sessions & Records
+// Last 4 Mondays (dynamic)
+// ========================================
 
+const today = new Date();
+
+const currentMonday = new Date(today);
+currentMonday.setDate(
+  today.getDate() - ((today.getDay() + 6) % 7)
+);
+currentMonday.setHours(9, 0, 0, 0);
+
+const attendanceDates = Array.from(
+  { length: 4 },
+  (_, i) => {
+    const d = new Date(currentMonday);
+    d.setDate(currentMonday.getDate() - (21 - i * 7));
+    return d;
+  }
+);
+
+for (const attendanceDate of attendanceDates) {
+  for (const dept of DEPARTMENTS) {
+    const departmentStudents = students.filter(
+      (s) => s.departmentId === deptMap[dept.code].id
+    );
+
+    if (departmentStudents.length === 0) continue;
+
+    const sampleStudent = departmentStudents[0];
+
+    const subject = allSubjects.find(
+      (sub) =>
+        sub.departmentId === deptMap[dept.code].id &&
+        sub.semester === sampleStudent.semester
+    );
+
+    const teacher = allTeachers.find(
+      (t) => t.departmentId === deptMap[dept.code].id
+    );
+
+    if (!subject || !teacher) continue;
+
+    const session = await prisma.attendanceSession.create({
+      data: {
+        teacherId: teacher.id,
+        subjectId: subject.id,
+        departmentId: deptMap[dept.code].id,
+        semester: sampleStudent.semester,
+        section: sampleStudent.section,
+        qrCode: `ATT-${dept.code}-${attendanceDate.getTime()}`,
+        startedAt: attendanceDate,
+        endedAt: new Date(
+          attendanceDate.getTime() + 60 * 60 * 1000
+        ),
+        isActive: false,
+        duration: 60,
+      },
+    });
+
+    const attendanceRate =
+      0.82 + Math.random() * 0.13; // 82% - 95%
+
+    const presentCount = Math.floor(
+      departmentStudents.length * attendanceRate
+    );
+
+    const presentStudents =
+      departmentStudents.slice(0, presentCount);
+
+    for (const student of presentStudents) {
+      await prisma.attendanceRecord.create({
+        data: {
+          studentId: student.id,
+          attendanceSessionId: session.id,
+          markedAt: attendanceDate,
+        },
+      });
+    }
+  }
+}
+
+console.log('Attendance sessions created.');
 // ─────────────────────────────────────
 // Assignment Submissions
 // ─────────────────────────────────────

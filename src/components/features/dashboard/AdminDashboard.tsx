@@ -33,6 +33,11 @@ interface AdminData {
   userStats: { totalStudents: number; totalTeachers: number; totalAdmins: number; totalUsers: number };
   departments: Array<{ id: string; name: string; code: string; _count: { students: number; teachers: number; subjects: number } }>;
   totalSubjects: number;
+  attendanceTrendData: Array<{
+  week: string;
+  attendance: number;
+  absence: number;
+}>;
   recentActivity: {
     attendanceSessions: Array<{
       id: string; startedAt: string; isActive: boolean; createdAt: string;
@@ -81,17 +86,7 @@ const deptMarksConfig: ChartConfig = {
   avgMarks: { label: 'Avg Marks %', color: 'oklch(0.6 0.15 160)' },
 };
 
-// Simulated attendance trend data
-const attendanceTrendData = [
-  { week: 'Week 1', attendance: 92, absence: 8 },
-  { week: 'Week 2', attendance: 88, absence: 12 },
-  { week: 'Week 3', attendance: 91, absence: 9 },
-  { week: 'Week 4', attendance: 85, absence: 15 },
-  { week: 'Week 5', attendance: 89, absence: 11 },
-  { week: 'Week 6', attendance: 93, absence: 7 },
-  { week: 'Week 7', attendance: 87, absence: 13 },
-  { week: 'Week 8', attendance: 90, absence: 10 },
-];
+
 
 // Simulated sparkline data for stat cards (weekly trend)
 const sparklineData = [
@@ -317,6 +312,7 @@ export default function AdminDashboard() {
   }
 
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
+  const attendanceTrendData = data.attendanceTrendData ?? [];
 
   const statCards = [
     {

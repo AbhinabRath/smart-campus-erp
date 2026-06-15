@@ -280,7 +280,7 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
  */
 export async function getAdminDashboard(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-   const [
+  const [
   totalStudents,
   totalTeachers,
   totalAdmins,
@@ -291,6 +291,7 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
   totalSubjects,
   attendanceSessions,
   attendanceRecords,
+  students,
 ] = await Promise.all([
       prisma.student.count(),
       prisma.teacher.count(),
@@ -310,15 +311,7 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
-      prisma.attendanceRecord.findMany({
-        include: {
-          session: {
-            select: {
-              startedAt: true,
-            },
-          },
-        },
-      }),
+      
       // Recent notices
       prisma.notice.findMany({
         include: { author: { select: { name: true, role: true } } },
@@ -340,7 +333,87 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
     startedAt: 'asc',
   },
 }),
-    ]);
+prisma.attendanceRecord.findMany({
+  include: {
+    session: {
+      select: {
+        startedAt: true,
+      },
+    },
+  },
+}),
+
+prisma.student.findMany({
+  select: {
+    departmentId: true,
+    semester: true,
+    section: true,
+  },
+}),
+]);
+
+const attendanceTrendData = (() => {
+  const today = new Date();
+
+  const currentMonday = new Date(today);
+  currentMonday.setDate(
+    today.getDate() - ((today.getDay() + 6) % 7)
+  );
+  currentMonday.setHours(0, 0, 0, 0);
+
+  const weekStarts = Array.from({ length: 4 }, (_, i) => {
+    const d = new Date(currentMonday);
+    d.setDate(currentMonday.getDate() - (21 - i * 7));
+    return d;
+  });
+
+  return weekStarts.map((weekStart) => {
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+
+    const sessionsInWeek = attendanceSessions.filter(
+      (session) =>
+        session.startedAt >= weekStart &&
+        session.startedAt < weekEnd
+    );
+
+    const present = attendanceRecords.filter(
+      (record) =>
+        record.session.startedAt >= weekStart &&
+        record.session.startedAt < weekEnd
+    ).length;
+
+    let possibleAttendances = 0;
+
+    sessionsInWeek.forEach((session) => {
+      const matchingStudents = students.filter(
+        (student) =>
+          student.departmentId === session.departmentId &&
+          student.semester === session.semester &&
+          student.section === session.section
+      ).length;
+
+      possibleAttendances += matchingStudents;
+    });
+
+    const attendance =
+      possibleAttendances > 0
+        ? Math.round((present / possibleAttendances) * 100)
+        : 0;
+
+    const absence = 100 - attendance;
+
+    return {
+      week: weekStart.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+      }),
+      attendance,
+      absence,
+    };
+  });
+})();
+
 
     successResponse(res, 'Admin dashboard data loaded.', {
       userStats: {
@@ -352,6 +425,7 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
       departments,
       totalSubjects,
       attendanceSessions,
+      attendanceTrendData,
       recentActivity: {
         attendanceSessions: recentSessions,
         notices: recentNotices,
