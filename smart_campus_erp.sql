@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 14, 2026 at 05:20 PM
+-- Generation Time: Jun 15, 2026 at 09:24 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -6519,6 +6519,38 @@ CREATE TABLE `attendance_records` (
   `updatedAt` datetime(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `attendance_records`
+--
+
+INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `markedAt`, `ipAddress`, `createdAt`, `updatedAt`) VALUES
+('att1_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att1_cmqcgp4qg00r9eod4vcdgd29e', 'cmqcgp4qg00r9eod4vcdgd29e', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
+('att2_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att2_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att2_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att2_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att2_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att2_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4qg00r9eod4vcdgd29e', 'cmqcgp4qg00r9eod4vcdgd29e', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att3_cmqcgp4qk00rceod41qnjeh7g', 'cmqcgp4qk00rceod41qnjeh7g', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att4_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att4_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att4_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att4_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
+('att4_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000');
+
 -- --------------------------------------------------------
 
 --
@@ -6540,6 +6572,16 @@ CREATE TABLE `attendance_sessions` (
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
   `updatedAt` datetime(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `attendance_sessions`
+--
+
+INSERT INTO `attendance_sessions` (`id`, `teacherId`, `subjectId`, `departmentId`, `semester`, `section`, `qrCode`, `isActive`, `duration`, `startedAt`, `endedAt`, `createdAt`, `updatedAt`) VALUES
+('manual_session_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
+('manual_session_2', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_2', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
+('manual_session_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
+('manual_session_4', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_4', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000');
 
 -- --------------------------------------------------------
 
@@ -8282,7 +8324,7 @@ CREATE TABLE `sessions` (
 --
 
 INSERT INTO `sessions` (`id`, `userId`, `token`, `role`, `expiresAt`, `createdAt`, `updatedAt`) VALUES
-('cmqdvgir20005eoxsu0k9qvjb', 'cmqcgp4kd00mieod4sbmhglm2', '97c0550e-16e4-4908-81bb-3b5ee7024ad0', 'admin', '2026-06-15 14:20:50.029', '2026-06-14 14:20:50.030', '2026-06-14 14:20:50.030');
+('cmqeuqyuw0005eoeotc1kixwh', 'cmqcgp4kd00mieod4sbmhglm2', '14369b55-3851-489a-8d4d-2075c14fd6a0', 'admin', '2026-06-16 06:48:44.025', '2026-06-15 06:48:44.024', '2026-06-15 06:48:44.024');
 
 -- --------------------------------------------------------
 

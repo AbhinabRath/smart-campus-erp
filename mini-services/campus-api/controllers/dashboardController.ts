@@ -292,6 +292,7 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
   attendanceSessions,
   attendanceRecords,
   students,
+  marks,
 ] = await Promise.all([
       prisma.student.count(),
       prisma.teacher.count(),
@@ -334,7 +335,8 @@ export async function getAdminDashboard(req: Request, res: Response, next: NextF
   },
 }),
 prisma.attendanceRecord.findMany({
-  include: {
+  select: {
+    attendanceSessionId: true,
     session: {
       select: {
         startedAt: true,
@@ -348,6 +350,16 @@ prisma.student.findMany({
     departmentId: true,
     semester: true,
     section: true,
+  },
+}),
+
+prisma.mark.findMany({
+  include: {
+    student: {
+      select: {
+        departmentId: true,
+      },
+    },
   },
 }),
 ]);
@@ -389,8 +401,7 @@ const attendanceTrendData = (() => {
       const matchingStudents = students.filter(
         (student) =>
           student.departmentId === session.departmentId &&
-          student.semester === session.semester &&
-          student.section === session.section
+          student.semester === session.semester
       ).length;
 
       possibleAttendances += matchingStudents;
@@ -413,6 +424,64 @@ const attendanceTrendData = (() => {
     };
   });
 })();
+const departmentPerformance = departments.map((dept) => {
+  const deptStudents = students.filter(
+    (s) => s.departmentId === dept.id
+  );
+
+  const deptAttendanceSessions = attendanceSessions.filter(
+    (s) => s.departmentId === dept.id
+  );
+
+  const deptAttendanceRecords = attendanceRecords.filter((record) => {
+    const session = attendanceSessions.find(
+      (s) => s.id === record.attendanceSessionId
+    );
+
+    return session?.departmentId === dept.id;
+  });
+
+  let possibleAttendances = 0;
+
+  deptAttendanceSessions.forEach((session) => {
+    possibleAttendances += deptStudents.filter(
+      (student) => student.semester === session.semester
+    ).length;
+  });
+
+  const avgAttendance =
+    possibleAttendances > 0
+      ? Math.round(
+          (deptAttendanceRecords.length /
+            possibleAttendances) *
+            100
+        )
+      : 0;
+
+  const deptMarks = marks.filter(
+    (m) => m.student.departmentId === dept.id
+  );
+
+  const avgMarks =
+    deptMarks.length > 0
+      ? Math.round(
+          deptMarks.reduce(
+            (sum, mark) =>
+              sum +
+              (mark.marksObtained /
+                mark.totalMarks) *
+                100,
+            0
+          ) / deptMarks.length
+        )
+      : 0;
+
+  return {
+    department: dept.code,
+    avgAttendance,
+    avgMarks,
+  };
+});
 
 
     successResponse(res, 'Admin dashboard data loaded.', {
@@ -426,6 +495,7 @@ const attendanceTrendData = (() => {
       totalSubjects,
       attendanceSessions,
       attendanceTrendData,
+      departmentPerformance,
       recentActivity: {
         attendanceSessions: recentSessions,
         notices: recentNotices,

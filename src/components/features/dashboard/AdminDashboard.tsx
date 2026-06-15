@@ -38,6 +38,11 @@ interface AdminData {
   attendance: number;
   absence: number;
 }>;
+departmentPerformance: Array<{
+  department: string;
+  avgAttendance: number;
+  avgMarks: number;
+}>;
   recentActivity: {
     attendanceSessions: Array<{
       id: string; startedAt: string; isActive: boolean; createdAt: string;
@@ -223,13 +228,9 @@ export default function AdminDashboard() {
 
   // Simulated department performance data for comparison charts
   const deptPerformanceData = useMemo(() => {
-    if (!data) return [];
-    return data.departments.map((dept) => ({
-      department: dept.code,
-      avgAttendance: Math.round(70 + Math.random() * 25),
-      avgMarks: Math.round(55 + Math.random() * 35),
-    }));
-  }, [data]);
+  if (!data) return [];
+  return data.departmentPerformance ?? [];
+   }, [data]);
 
   // Build combined activity timeline
   const activityTimeline = useMemo(() => {
