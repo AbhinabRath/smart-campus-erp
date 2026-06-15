@@ -77,19 +77,22 @@ function useSubjectColorMap(entries: TimetableEntry[]) {
 }
 
 // Get current period number based on time
-function getCurrentPeriod(): number | null {
+function getCurrentPeriod(entries: TimetableEntry[]): number | null {
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const timeInMinutes = hours * 60 + minutes;
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-  for (let i = 0; i < PERIOD_TIMES.length; i++) {
-    const [sh, sm] = PERIOD_TIMES[i].split(':').map(Number);
-    const [eh, em] = PERIOD_END_TIMES[i].split(':').map(Number);
+  for (const entry of entries) {
+    const [sh, sm] = entry.startTime.split(':').map(Number);
+    const [eh, em] = entry.endTime.split(':').map(Number);
+
     const start = sh * 60 + sm;
     const end = eh * 60 + em;
-    if (timeInMinutes >= start && timeInMinutes < end) return i + 1;
+
+    if (currentMinutes >= start && currentMinutes < end) {
+      return entry.periodNumber;
+    }
   }
+
   return null;
 }
 
@@ -122,7 +125,7 @@ export default function TimetableManager() {
   });
   const [creating, setCreating] = useState(false);
 
-  const currentPeriod = getCurrentPeriod();
+  const currentPeriod = getCurrentPeriod(entries);
   const currentDay = getCurrentDayOfWeek();
 
   const subjectColorMap = useSubjectColorMap(entries);
