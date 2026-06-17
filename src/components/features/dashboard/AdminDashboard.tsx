@@ -433,8 +433,8 @@ console.log("ATTENDANCE TREND DATA", attendanceTrendData);
                   <YAxis tickLine={false} axisLine={false} fontSize={12} domain={[0, 100]} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <ChartLegend content={<ChartLegendContent />} />
-                  <Line type="monotone" dataKey="present" stroke="var(--color-attendance)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="absent" stroke="var(--color-absence)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="present" stroke="var(--color-present)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="absent" stroke="var(--color-absent)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} strokeDasharray="5 5" />
                 </LineChart>
               </ChartContainer>
             </CardContent>
