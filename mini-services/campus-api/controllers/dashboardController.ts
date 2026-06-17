@@ -211,6 +211,9 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
   recentNotices,
   totalStudents,
   todaySchedule,
+  teacherAttendanceSessions,
+  teacherAttendanceRecords,
+  allStudents,
 ] = await Promise.all([
       // Active attendance sessions
       prisma.attendanceSession.findMany({
@@ -277,8 +280,112 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
     periodNumber: 'asc',
   },
 }),
-    ]);
+prisma.attendanceSession.findMany({
+  where: {
+    teacherId: teacher.id,
+  },
+  include: {
+    _count: {
+      select: {
+        records: true,
+      },
+    },
+  },
+  orderBy: {
+    startedAt: 'asc',
+  },
+}),
 
+prisma.attendanceRecord.findMany({
+  where: {
+    session: {
+      teacherId: teacher.id,
+    },
+  },
+  include: {
+    session: {
+      select: {
+        startedAt: true,
+        departmentId: true,
+        semester: true,
+        section: true,
+      },
+    },
+  },
+}),
+prisma.student.findMany({
+  select: {
+    departmentId: true,
+    semester: true,
+    section: true,
+  },
+}),
+    ]);
+    console.log(
+  'SEMESTER DISTRIBUTION',
+  allStudents.reduce((acc, s) => {
+    const key = `${s.semester}-${s.section}`;
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>)
+);
+const attendanceTrendData = (() => {
+  const today = new Date();
+
+  const currentMonday = new Date(today);
+  currentMonday.setDate(
+    today.getDate() - ((today.getDay() + 6) % 7)
+  );
+  currentMonday.setHours(0, 0, 0, 0);
+
+  const weekDays = Array.from({ length: 5 }, (_, i) => {
+    const day = new Date(currentMonday);
+    day.setDate(currentMonday.getDate() + i);
+    return day;
+  });
+
+  return weekDays.map((day) => {
+    const nextDay = new Date(day);
+    nextDay.setDate(day.getDate() + 1);
+
+    const sessions = teacherAttendanceSessions.filter(
+      (s) =>
+        s.startedAt >= day &&
+        s.startedAt < nextDay
+    );
+
+    const presentCount = teacherAttendanceRecords.filter(
+  (r) =>
+    r.session.startedAt >= day &&
+    r.session.startedAt < nextDay
+).length;
+
+const possibleAttendances = sessions.reduce(
+  (sum, session) => sum + session._count.records,
+  0
+);
+const attendance =
+  possibleAttendances > 0
+    ? Math.min(
+        100,
+        Math.round((presentCount / possibleAttendances) * 100)
+      )
+    : 0;
+
+const absence =
+  possibleAttendances > 0
+    ? 100 - attendance
+    : 0;
+
+return {
+  day: day.toLocaleDateString('en-US', {
+    weekday: 'short',
+  }),
+  present: attendance,
+  absent: absence,
+};
+  });
+})();
     successResponse(res, 'Teacher dashboard data loaded.', {
       teacher: {
         name: req.user!.name,
@@ -292,6 +399,7 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
       marksCount,
       notices: recentNotices,
       totalStudents,
+      attendanceTrendData,
       todaySchedule,
     });
   } catch (err) {
@@ -388,7 +496,17 @@ prisma.mark.findMany({
   },
 }),
 ]);
+const sectionStudentCount = new Map<string, number>();
 
+students.forEach((student) => {
+  const key =
+    `${student.departmentId}-${student.semester}-${student.section}`;
+
+  sectionStudentCount.set(
+    key,
+    (sectionStudentCount.get(key) || 0) + 1
+  );
+});
 const attendanceTrendData = (() => {
   const today = new Date();
 
@@ -398,39 +516,37 @@ const attendanceTrendData = (() => {
   );
   currentMonday.setHours(0, 0, 0, 0);
 
-  const weekStarts = Array.from({ length: 4 }, (_, i) => {
-    const d = new Date(currentMonday);
-    d.setDate(currentMonday.getDate() - (21 - i * 7));
-    return d;
+  const weekDays = Array.from({ length: 5 }, (_, i) => {
+    const day = new Date(currentMonday);
+    day.setDate(currentMonday.getDate() + i);
+    return day;
   });
 
-  return weekStarts.map((weekStart) => {
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 7);
+  return weekDays.map((day) => {
+    const nextDay = new Date(day);
+    nextDay.setDate(day.getDate() + 1);
 
-    const sessionsInWeek = attendanceSessions.filter(
-      (session) =>
-        session.startedAt >= weekStart &&
-        session.startedAt < weekEnd
+    const sessions = attendanceSessions.filter(
+      (s) =>
+        s.startedAt >= day &&
+        s.startedAt < nextDay
     );
 
+   let possibleAttendances = 0;
+
+sessions.forEach((session) => {
+  const key =
+    `${session.departmentId}-${session.semester}-${session.section}`;
+
+  possibleAttendances +=
+    sectionStudentCount.get(key) || 0;
+});
+
     const present = attendanceRecords.filter(
-      (record) =>
-        record.session.startedAt >= weekStart &&
-        record.session.startedAt < weekEnd
+      (r) =>
+        r.session.startedAt >= day &&
+        r.session.startedAt < nextDay
     ).length;
-
-    let possibleAttendances = 0;
-
-    sessionsInWeek.forEach((session) => {
-      const matchingStudents = students.filter(
-        (student) =>
-          student.departmentId === session.departmentId &&
-          student.semester === session.semester
-      ).length;
-
-      possibleAttendances += matchingStudents;
-    });
 
     const attendance =
       possibleAttendances > 0
@@ -440,15 +556,17 @@ const attendanceTrendData = (() => {
     const absence = 100 - attendance;
 
     return {
-      week: weekStart.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
+      day: day.toLocaleDateString('en-US', {
+        weekday: 'short',
       }),
-      attendance,
-      absence,
+      present: attendance,
+      absent: absence,
     };
   });
 })();
+const sessionDepartmentMap = new Map(
+  attendanceSessions.map((s) => [s.id, s.departmentId])
+);
 const departmentPerformance = departments.map((dept) => {
   const deptStudents = students.filter(
     (s) => s.departmentId === dept.id
@@ -458,13 +576,10 @@ const departmentPerformance = departments.map((dept) => {
     (s) => s.departmentId === dept.id
   );
 
-  const deptAttendanceRecords = attendanceRecords.filter((record) => {
-    const session = attendanceSessions.find(
-      (s) => s.id === record.attendanceSessionId
-    );
-
-    return session?.departmentId === dept.id;
-  });
+ const deptAttendanceRecords = attendanceRecords.filter(
+  (record) =>
+    sessionDepartmentMap.get(record.attendanceSessionId) === dept.id
+);
 
   let possibleAttendances = 0;
 

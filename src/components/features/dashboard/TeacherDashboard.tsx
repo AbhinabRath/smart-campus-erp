@@ -64,6 +64,11 @@ interface TeacherData {
     createdAt: string;
   }>;
   totalStudents: number;
+  attendanceTrendData: Array<{
+  day: string;
+  present: number;
+  absent: number;
+}>;
   todaySchedule: Array<{
   id: string;
   periodNumber: number;
@@ -94,14 +99,7 @@ const attendanceChartConfig: ChartConfig = {
   absent: { label: 'Absent', color: 'oklch(0.5 0.2 30)' },
 };
 
-// Simulated weekly attendance data
-const weeklyAttendanceData = [
-  { day: 'Mon', present: 28, absent: 4 },
-  { day: 'Tue', present: 30, absent: 2 },
-  { day: 'Wed', present: 25, absent: 7 },
-  { day: 'Thu', present: 32, absent: 0 },
-  { day: 'Fri', present: 27, absent: 5 },
-];
+
 
 
 
@@ -112,7 +110,10 @@ export default function TeacherDashboard() {
 
   useEffect(() => {
     api.get('/dashboard/teacher')
-      .then((res) => setData(res.data.data))
+     .then((res) => {
+  console.log('ATTENDANCE DATA:', res.data.data.attendanceTrendData);
+  setData(res.data.data);
+})
       .catch((err) => console.error('Teacher dashboard error:', err))
       .finally(() => setLoading(false));
   }, []);
@@ -183,7 +184,7 @@ export default function TeacherDashboard() {
             </CardHeader>
             <CardContent>
               <ChartContainer config={attendanceChartConfig} className="h-[250px] w-full">
-                <LineChart data={weeklyAttendanceData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
+                <LineChart data={data?.attendanceTrendData ?? []} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
                   <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={12} />
                   <YAxis tickLine={false} axisLine={false} fontSize={12} />

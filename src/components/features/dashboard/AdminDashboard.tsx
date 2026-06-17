@@ -33,10 +33,10 @@ interface AdminData {
   userStats: { totalStudents: number; totalTeachers: number; totalAdmins: number; totalUsers: number };
   departments: Array<{ id: string; name: string; code: string; _count: { students: number; teachers: number; subjects: number } }>;
   totalSubjects: number;
-  attendanceTrendData: Array<{
-  week: string;
-  attendance: number;
-  absence: number;
+ attendanceTrendData: Array<{
+  day: string;
+  present: number;
+  absent: number;
 }>;
 departmentPerformance: Array<{
   department: string;
@@ -79,10 +79,9 @@ const pieChartConfig: ChartConfig = {
 };
 
 const lineChartConfig: ChartConfig = {
-  attendance: { label: 'Attendance %', color: 'oklch(0.47 0.16 155)' },
-  absence: { label: 'Absence %', color: 'oklch(0.5 0.2 30)' },
+  present: { label: 'Attendance %', color: 'oklch(0.47 0.16 155)' },
+  absent: { label: 'Absence %', color: 'oklch(0.5 0.2 30)' },
 };
-
 const deptAttendanceConfig: ChartConfig = {
   avgAttendance: { label: 'Avg Attendance %', color: 'oklch(0.47 0.16 155)' },
 };
@@ -301,7 +300,7 @@ export default function AdminDashboard() {
 
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
   const attendanceTrendData = data.attendanceTrendData ?? [];
-
+console.log("ATTENDANCE TREND DATA", attendanceTrendData);
   const statCards = [
     {
       label: 'Total Users',
@@ -430,12 +429,12 @@ export default function AdminDashboard() {
               <ChartContainer config={lineChartConfig} className="h-[250px] w-full">
                 <LineChart data={attendanceTrendData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="week" tickLine={false} axisLine={false} fontSize={11} />
+                 <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} />
                   <YAxis tickLine={false} axisLine={false} fontSize={12} domain={[0, 100]} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                   <ChartLegend content={<ChartLegendContent />} />
-                  <Line type="monotone" dataKey="attendance" stroke="var(--color-attendance)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
-                  <Line type="monotone" dataKey="absence" stroke="var(--color-absence)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} strokeDasharray="5 5" />
+                  <Line type="monotone" dataKey="present" stroke="var(--color-attendance)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} />
+                  <Line type="monotone" dataKey="absent" stroke="var(--color-absence)" strokeWidth={2} dot={{ r: 3 }} activeDot={{ r: 5 }} strokeDasharray="5 5" />
                 </LineChart>
               </ChartContainer>
             </CardContent>

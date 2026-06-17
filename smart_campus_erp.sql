@@ -3,10 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 15, 2026 at 09:24 AM
+-- Generation Time: Jun 16, 2026 at 03:45 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -20,6 +21,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `smart_campus_erp`
 --
+CREATE DATABASE IF NOT EXISTS `smart_campus_erp` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `smart_campus_erp`;
 
 -- --------------------------------------------------------
 
@@ -27,7 +30,8 @@ SET time_zone = "+00:00";
 -- Table structure for table `assignments`
 --
 
-CREATE TABLE `assignments` (
+DROP TABLE IF EXISTS `assignments`;
+CREATE TABLE IF NOT EXISTS `assignments` (
   `id` varchar(191) NOT NULL,
   `teacherId` varchar(191) NOT NULL,
   `subjectId` varchar(191) NOT NULL,
@@ -38,8 +42,20 @@ CREATE TABLE `assignments` (
   `fileName` varchar(191) DEFAULT NULL,
   `maxMarks` double NOT NULL DEFAULT 100,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assignments_teacherId_idx` (`teacherId`),
+  KEY `assignments_subjectId_idx` (`subjectId`),
+  KEY `assignments_deadline_idx` (`deadline`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `assignments`:
+--   `subjectId`
+--       `subjects` -> `id`
+--   `teacherId`
+--       `teachers` -> `id`
+--
 
 --
 -- Dumping data for table `assignments`
@@ -443,7 +459,6 @@ INSERT INTO `assignments` (`id`, `teacherId`, `subjectId`, `title`, `description
 ('cmqcgp70b02iqeod4uynzyrke', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4i900m3eod499lizi1t', 'Operating Systems 7 Assignment', 'Assignment for Operating Systems 7', '2026-06-27 14:39:54.299', NULL, NULL, 25, '2026-06-13 14:39:54.299', '2026-06-13 14:39:54.299'),
 ('cmqcgp70c02iseod4ev1bf8co', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4ib00m5eod48qw6be37', 'Computer Networks 7 Assignment', 'Assignment for Computer Networks 7', '2026-06-27 14:39:54.300', NULL, NULL, 25, '2026-06-13 14:39:54.300', '2026-06-13 14:39:54.300'),
 ('cmqcgp70e02iueod4s80d9q0k', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4id00m7eod4ibnxksx6', 'Object Oriented Programming 7 Assignment', 'Assignment for Object Oriented Programming 7', '2026-06-27 14:39:54.302', NULL, NULL, 25, '2026-06-13 14:39:54.302', '2026-06-13 14:39:54.302'),
-('cmqcgp70f02iweod4467j33ap', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4if00m9eod49b0czecd', 'Data Structures & Algorithms 8 Assignment', 'Assignment for Data Structures & Algorithms 8', '2026-06-27 14:39:54.303', NULL, NULL, 25, '2026-06-13 14:39:54.303', '2026-06-13 14:39:54.303'),
 ('cmqcgp70g02iyeod4b71o4cv7', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4ih00mbeod4tjy7udpu', 'Database Management Systems 8 Assignment', 'Assignment for Database Management Systems 8', '2026-06-27 14:39:54.304', NULL, NULL, 25, '2026-06-13 14:39:54.304', '2026-06-13 14:39:54.304'),
 ('cmqcgp70h02j0eod4fcg3z4h3', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4ik00mdeod4249dyqrg', 'Operating Systems 8 Assignment', 'Assignment for Operating Systems 8', '2026-06-27 14:39:54.305', NULL, NULL, 25, '2026-06-13 14:39:54.305', '2026-06-13 14:39:54.305'),
 ('cmqcgp70i02j2eod4rk0dkim2', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4im00mfeod43f9f2cxh', 'Computer Networks 8 Assignment', 'Assignment for Computer Networks 8', '2026-06-27 14:39:54.306', NULL, NULL, 25, '2026-06-13 14:39:54.306', '2026-06-13 14:39:54.306'),
@@ -455,7 +470,8 @@ INSERT INTO `assignments` (`id`, `teacherId`, `subjectId`, `title`, `description
 -- Table structure for table `assignment_submissions`
 --
 
-CREATE TABLE `assignment_submissions` (
+DROP TABLE IF EXISTS `assignment_submissions`;
+CREATE TABLE IF NOT EXISTS `assignment_submissions` (
   `id` varchar(191) NOT NULL,
   `assignmentId` varchar(191) NOT NULL,
   `studentId` varchar(191) NOT NULL,
@@ -467,8 +483,20 @@ CREATE TABLE `assignment_submissions` (
   `marksObtained` double DEFAULT NULL,
   `feedback` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `assignment_submissions_assignmentId_studentId_key` (`assignmentId`,`studentId`),
+  KEY `assignment_submissions_assignmentId_idx` (`assignmentId`),
+  KEY `assignment_submissions_studentId_idx` (`studentId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `assignment_submissions`:
+--   `assignmentId`
+--       `assignments` -> `id`
+--   `studentId`
+--       `students` -> `id`
+--
 
 --
 -- Dumping data for table `assignment_submissions`
@@ -6427,21 +6455,6 @@ INSERT INTO `assignment_submissions` (`id`, `assignmentId`, `studentId`, `filePa
 ('cmqcgpj9n0elqeod4wur4lo0a', 'cmqcgp70e02iueod4s80d9q0k', 'cmqcgp5qk01e9eod4tuipd0ec', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.187', 'submitted', NULL, NULL, '2026-06-13 14:40:10.187', '2026-06-13 14:40:10.187'),
 ('cmqcgpj9p0elseod4fp8a40pb', 'cmqcgp70e02iueod4s80d9q0k', 'cmqcgp5qp01eceod4nqn840k2', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.190', 'submitted', NULL, NULL, '2026-06-13 14:40:10.190', '2026-06-13 14:40:10.190'),
 ('cmqcgpj9r0elueod4mn966p1q', 'cmqcgp70e02iueod4s80d9q0k', 'cmqcgp5qs01efeod4ei9x7um5', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.192', 'submitted', NULL, NULL, '2026-06-13 14:40:10.192', '2026-06-13 14:40:10.192'),
-('cmqcgpj9u0elweod4zuudxjgp', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5p401d9eod4mc8yfjvm', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.194', 'submitted', NULL, NULL, '2026-06-13 14:40:10.194', '2026-06-13 14:40:10.194'),
-('cmqcgpj9x0elyeod41gvre1pr', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5p701dceod46nsbuomh', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.198', 'submitted', NULL, NULL, '2026-06-13 14:40:10.198', '2026-06-13 14:40:10.198'),
-('cmqcgpja00em0eod4hj0inf69', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5pa01dfeod4tejnn9pv', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.200', 'submitted', NULL, NULL, '2026-06-13 14:40:10.200', '2026-06-13 14:40:10.200'),
-('cmqcgpja30em2eod4bhsic2ey', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5pd01dieod4g6mvu7ue', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.203', 'submitted', NULL, NULL, '2026-06-13 14:40:10.203', '2026-06-13 14:40:10.203'),
-('cmqcgpja50em4eod4onklb7i7', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5pu01dleod4xziw7x5x', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.205', 'submitted', NULL, NULL, '2026-06-13 14:40:10.205', '2026-06-13 14:40:10.205'),
-('cmqcgpjaa0em6eod4l6i1o0tx', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5px01doeod4izzrcf6b', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.210', 'submitted', NULL, NULL, '2026-06-13 14:40:10.210', '2026-06-13 14:40:10.210'),
-('cmqcgpjae0em8eod47lty4s51', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5q101dreod473hwf5yq', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.215', 'submitted', NULL, NULL, '2026-06-13 14:40:10.215', '2026-06-13 14:40:10.215'),
-('cmqcgpjag0emaeod4dm8xhw3k', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5q401dueod4rbcjemsc', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.217', 'submitted', NULL, NULL, '2026-06-13 14:40:10.217', '2026-06-13 14:40:10.217'),
-('cmqcgpjai0emceod480j6v5xk', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5q801dxeod48pzsa9tk', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.219', 'submitted', NULL, NULL, '2026-06-13 14:40:10.219', '2026-06-13 14:40:10.219'),
-('cmqcgpjam0emeeod45ecmau5l', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qc01e0eod42us89wrm', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.222', 'submitted', NULL, NULL, '2026-06-13 14:40:10.222', '2026-06-13 14:40:10.222'),
-('cmqcgpjan0emgeod41i44c7tx', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qf01e3eod44vows1nf', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.224', 'submitted', NULL, NULL, '2026-06-13 14:40:10.224', '2026-06-13 14:40:10.224'),
-('cmqcgpjap0emieod4fjbjk0ei', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qi01e6eod4njzctt8p', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.225', 'submitted', NULL, NULL, '2026-06-13 14:40:10.225', '2026-06-13 14:40:10.225'),
-('cmqcgpjat0emkeod4ap62sd6s', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qk01e9eod4tuipd0ec', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.229', 'submitted', NULL, NULL, '2026-06-13 14:40:10.229', '2026-06-13 14:40:10.229'),
-('cmqcgpjau0emmeod4upp2cq9s', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qp01eceod4nqn840k2', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.231', 'submitted', NULL, NULL, '2026-06-13 14:40:10.231', '2026-06-13 14:40:10.231'),
-('cmqcgpjaw0emoeod4r6l2con4', 'cmqcgp70f02iweod4467j33ap', 'cmqcgp5qs01efeod4ei9x7um5', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.232', 'submitted', NULL, NULL, '2026-06-13 14:40:10.232', '2026-06-13 14:40:10.232'),
 ('cmqcgpjay0emqeod4wr7iubxm', 'cmqcgp70g02iyeod4b71o4cv7', 'cmqcgp5p401d9eod4mc8yfjvm', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.235', 'submitted', NULL, NULL, '2026-06-13 14:40:10.235', '2026-06-13 14:40:10.235'),
 ('cmqcgpjb00emseod41637xehs', 'cmqcgp70g02iyeod4b71o4cv7', 'cmqcgp5p701dceod46nsbuomh', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.236', 'submitted', NULL, NULL, '2026-06-13 14:40:10.236', '2026-06-13 14:40:10.236'),
 ('cmqcgpjb10emueod4wuo8us5i', 'cmqcgp70g02iyeod4b71o4cv7', 'cmqcgp5pa01dfeod4tejnn9pv', NULL, NULL, 'Assignment submitted.', '2026-06-13 14:40:10.238', 'submitted', NULL, NULL, '2026-06-13 14:40:10.238', '2026-06-13 14:40:10.238'),
@@ -6509,47 +6522,1083 @@ INSERT INTO `assignment_submissions` (`id`, `assignmentId`, `studentId`, `filePa
 -- Table structure for table `attendance_records`
 --
 
-CREATE TABLE `attendance_records` (
+DROP TABLE IF EXISTS `attendance_records`;
+CREATE TABLE IF NOT EXISTS `attendance_records` (
   `id` varchar(191) NOT NULL,
   `studentId` varchar(191) NOT NULL,
   `attendanceSessionId` varchar(191) NOT NULL,
   `markedAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
   `ipAddress` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `attendance_records_studentId_attendanceSessionId_key` (`studentId`,`attendanceSessionId`),
+  KEY `attendance_records_studentId_idx` (`studentId`),
+  KEY `attendance_records_attendanceSessionId_idx` (`attendanceSessionId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `attendance_records`:
+--   `attendanceSessionId`
+--       `attendance_sessions` -> `id`
+--   `studentId`
+--       `students` -> `id`
+--
 
 --
 -- Dumping data for table `attendance_records`
 --
 
 INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `markedAt`, `ipAddress`, `createdAt`, `updatedAt`) VALUES
-('att1_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att1_cmqcgp4qg00r9eod4vcdgd29e', 'cmqcgp4qg00r9eod4vcdgd29e', 'manual_session_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 12:07:47.000', '2026-06-15 12:07:47.000'),
-('att2_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att2_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att2_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att2_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att2_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att2_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_2', '2026-06-01 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4qc00r6eod4mhrie5ph', 'cmqcgp4qc00r6eod4mhrie5ph', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4qg00r9eod4vcdgd29e', 'cmqcgp4qg00r9eod4vcdgd29e', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att3_cmqcgp4qk00rceod41qnjeh7g', 'cmqcgp4qk00rceod41qnjeh7g', 'manual_session_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att4_cmqcgp4pq00qreod4532aezdd', 'cmqcgp4pq00qreod4532aezdd', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att4_cmqcgp4px00queod4sqdov0qo', 'cmqcgp4px00queod4sqdov0qo', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att4_cmqcgp4q000qxeod4ouh797ut', 'cmqcgp4q000qxeod4ouh797ut', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att4_cmqcgp4q400r0eod4z5sjnrxp', 'cmqcgp4q400r0eod4z5sjnrxp', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000'),
-('att4_cmqcgp4q800r3eod42hfya9f5', 'cmqcgp4q800r3eod42hfya9f5', 'manual_session_4', '2026-06-15 09:05:00.000', NULL, '2026-06-15 12:07:48.000', '2026-06-15 12:07:48.000');
+('AR_0034abd9c798067425f72be2', 'cmqcgp5fb0163eod44fleydev', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_004b14316004c6941a854a2a', 'cmqcgp5i7018ieod41ybeb6gw', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_005415474ddc2041e2ff0077', 'cmqcgp54d010oeod4x9qzjsbm', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_007c8ec2bb9fc40a5c0180ed', 'cmqcgp50h00yieod4rv61gbzz', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_00c3fb4537c74f8ec4e3b32e', 'cmqcgp5g3016ueod4cby3spx3', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_00d3453e85d05c6f10d9b39e', 'cmqcgp5jn019reod4lqqz2w5h', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_00d43dc7667cdc4865d16027', 'cmqcgp5gj017ceod4e4odcv0b', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_018eb09c3471275fc6128b26', 'cmqcgp5mt01bleod48cwaosu4', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_01a095d67d6de81349c95a1f', 'cmqcgp5qs01efeod4ei9x7um5', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_02230c189f00d53637b10d11', 'cmqcgp5fw016oeod4dzzves1i', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_022ac59fd4c6eac9c656b9ca', 'cmqcgp4x400wfeod4ben8nh48', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_022da9feca83be4a244b4547', 'cmqcgp5ge0176eod4zh2054fd', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_022eaaf8bcc26621f6bd324a', 'cmqcgp53300zreod4knm5lhbh', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_026c4f1063c08f99977a5535', 'cmqcgp5oy01d3eod4iv00zrau', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_02fa88a7bd3a0993889954e3', 'cmqcgp5j2019ceod4xgrab0ih', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_030c73bebe2b8df1a02ec958', 'cmqcgp4sg00soeod45auktp41', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_038fb832d3a891b61c4116de', 'cmqcgp5jb019leod46flj7pav', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_03b6c9ebe575c1f95098c1c6', 'cmqcgp5sl01fieod4blt1ptl5', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_03f6842e4e66da9d9b9b8503', 'cmqcgp580012xeod4m9oke6xe', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_048c774b217f3b05afc56bbc', 'cmqcgp5lu01b3eod4nioi4k0e', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_04a66afefa3b2bbd2cb70d30', 'cmqcgp4yx00xreod4cldn0pt6', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_054b5f8ab5382d3aabc370aa', 'cmqcgp53o0103eod4b6ka08nj', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_05548a2fbdf76ce8c7620124', 'cmqcgp52k00zieod4o9exvts5', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_05d754a465629c9ecbc37f4e', 'cmqcgp5be013xeod4koiyyk0j', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_060a19ce11a877d76ce6347d', 'cmqcgp4xj00wueod41j9x0k00', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_071d50c70ba9db4d28c64848', 'cmqcgp5aa013ieod4evgpq6zv', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_07226b6caf1d6fa44e13b70c', 'cmqcgp4xd00woeod4g122gfli', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_07c39ec5b1bf95e2b0839bb0', 'cmqcgp5gz017ueod4p0y0scc6', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_07ce642d3e3b744a339a30f6', 'cmqcgp59n0139eod4a0pnpeo2', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_07d2ccbf8130ccd52d59b99a', 'cmqcgp56d0123eod4s1nd4g5w', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_080ce0685e7587e1aa8632ec', 'cmqcgp4qu00rleod48kswlny1', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_082e6544444c478c9a18eb45', 'cmqcgp5aa013ieod4evgpq6zv', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_083e2cdc575fd71b3e6c3608', 'cmqcgp5qc01e0eod42us89wrm', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_08a882059db0ee4eae1c35b5', 'cmqcgp5qp01eceod4nqn840k2', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0931cd788a3486b236038889', 'cmqcgp5fw016oeod4dzzves1i', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_096ef788db89266d242b327f', 'cmqcgp5qp01eceod4nqn840k2', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0989ebb9b9ddd613fd3391e5', 'cmqcgp4uo00uleod4eqr02wwf', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_09ae50bfbc9914d41f4d81b9', 'cmqcgp5lu01b3eod4nioi4k0e', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_09f56019e2e369c122218f4e', 'cmqcgp5qi01e6eod4njzctt8p', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0a4442d98c06189a5e2c2e5e', 'cmqcgp5lj01aueod433l6az18', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0b9e4c7774ba65a7576e9dab', 'cmqcgp5ie018oeod4wsdk60ci', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0ba6a72ace461c97b1402e36', 'cmqcgp4t500t6eod4ut2vo9rm', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0bdff099f244daaaa074647c', 'cmqcgp5su01foeod40upxzkj2', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0c138710684b5b2226a9d8f0', 'cmqcgp5j5019feod45i78yr67', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0c2b12626fe0ee5216c75c4b', 'cmqcgp5fb0163eod44fleydev', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0c59f083d7dbb5032802651e', 'cmqcgp4rk00sceod4by355yoj', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0d3314225d8ca5c12f1f3e03', 'cmqcgp4r000rreod4282176bg', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0d4a30b84077babed82b20df', 'cmqcgp53k0100eod47ectu3x4', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0d4e9fc3b044c0857c5a74a1', 'cmqcgp52600zfeod4fy0l6wud', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0e16fe0b999780919bb5c7b1', 'cmqcgp57f012oeod4rw05fgdf', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0e831e8800d72284e6d792e0', 'cmqcgp4y500x3eod4v52ggv0v', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0e884aad90dec4e4054a41d0', 'cmqcgp5ku01aceod4d91ju8sw', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0f54ecaf12710c0241d60098', 'cmqcgp4q400r0eod4z5sjnrxp', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0fb5193a2c2516c9f4f189e7', 'cmqcgp4ra00s0eod4ayibe744', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0fc809e01222b7ad1c66d334', 'cmqcgp5qk01e9eod4tuipd0ec', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0fcd9dd48d766fe85203e755', 'cmqcgp5d5014reod4p6gspx7i', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_0ffeb67267a26d305399b667', 'cmqcgp5iq0190eod4eob26c1o', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_10283352d738e7df7c4a1d1c', 'cmqcgp5oh01coeod42uzejbg5', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_105c3fc0b35cab98106e5e1a', 'cmqcgp5sf01ffeod4y6v08hv5', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1060d93e56fd32de5560233b', 'cmqcgp5fd0166eod4lxh71x4p', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_108ef1ed9807c229ccf2f074', 'cmqcgp4wm00w0eod4geg88ykx', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_10bfe8080042ce61f89d1807', 'cmqcgp4uu00ureod4s18a0jw7', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_10ef4538a4b5985b365f3250', 'cmqcgp5it0193eod4v9we04bn', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_119f7d3cbe8aff42b93681cd', 'cmqcgp50r00yreod4p0m0nfrj', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_11a921cc3dd5430c4ec4d2f0', 'cmqcgp4wm00w0eod4geg88ykx', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_11cf37b33a15b51819baae9f', 'cmqcgp4xd00woeod4g122gfli', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_11f7b60e8677532203cf396f', 'cmqcgp5q801dxeod48pzsa9tk', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_123e72703e2020288c730bff', 'cmqcgp5gw017reod47l4woz22', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_128811190efd4efae8bf30cf', 'cmqcgp5fi016ceod4241c3ksp', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_12fb4b7905a4d2afb1b2f6f7', 'cmqcgp5la01aleod4f0ib3vig', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_132686c392dd69d56d4c2132', 'cmqcgp5kz01afeod4cn61vzxg', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_133001ba6443b46190235edf', 'cmqcgp5cl014ceod4wkpw2ygi', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_13540301ace5a93f7dfd9762', 'cmqcgp4rk00sceod4by355yoj', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_13eb3f429c5386d0fa4f23f4', 'cmqcgp5r201ereod4x0ow11cp', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1416f3905dad6595f89cf14f', 'cmqcgp5i3018feod4h5te1fci', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1419c5192150349c0f6b102d', 'cmqcgp4yu00xoeod46g98vxs0', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_141fbde2ce0ffd77023f5298', 'cmqcgp4t500t6eod4ut2vo9rm', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_14945bee66bf7b3a8c5fd07f', 'cmqcgp4x600wieod4a70ejsjx', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_14cf20dad72f4098fdc65732', 'cmqcgp5f70160eod4ptu2c77i', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_14d51e271e535ceb40e2fbf2', 'cmqcgp5la01aleod4f0ib3vig', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1520222e400d2d49130f65f4', 'cmqcgp547010ieod4w6mttpb7', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_153654bb274b50a79c73c32a', 'cmqcgp5kz01afeod4cn61vzxg', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_15669843424481d0d887437f', 'cmqcgp4v500v3eod404gdcqdk', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_157852d9a536b1d3d2c8caf3', 'cmqcgp5h70180eod4qxa0e1zs', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_15a5d67ba5fb5be929ae32bf', 'cmqcgp4wu00w6eod4rl07htee', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_15c837e909f84846ea468db3', 'cmqcgp5mc01bceod49a0janor', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1609002573003884a80b26f6', 'cmqcgp50400y6eod4op1477cy', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_165702ca31516ca19584d065', 'cmqcgp5gj017ceod4e4odcv0b', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_16745ee78de32f20820e9620', 'cmqcgp5fk016feod480b7ainn', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_16ba17906b7487fe10be5797', 'cmqcgp54l010ueod4upym4h9c', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1729ef7fae7f7e02400100a7', 'cmqcgp5mo01bieod41qft9ih0', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_17c62d80847cec99274efa14', 'cmqcgp5op01cueod4p10q7fs7', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_17d996cbdb659b5b1852c5c7', 'cmqcgp4v300v0eod4hb5ft239', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_17f120209aea0c152a4c610d', 'cmqcgp4yk00xfeod4d4849ptm', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1813aaca891cc8f32f039b37', 'cmqcgp4rk00sceod4by355yoj', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_18459bda8493e3a745d9a292', 'cmqcgp5jh019oeod4gkanbwkm', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_18803b97599820a02b40e238', 'cmqcgp5g6016xeod4mfbssdgt', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_191f43139537e8157d9c937e', 'cmqcgp50c00yceod4jn0za7gp', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_198457f83ebb6a9959e4cb0a', 'cmqcgp4zv00y0eod4k2av0rrd', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1a1895cb9e1dc27775c01ced', 'cmqcgp4xg00wreod4phy040z8', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1b0e7dfc1f8035fb9cf09b35', 'cmqcgp5fw016oeod4dzzves1i', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1b1a663f6e61a0ba510c4191', 'cmqcgp4y800x6eod4teecjons', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1b5f43d8d26968b0396ba1a4', 'cmqcgp5nx01cceod4gl2ibxvq', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1be40934b2ac9dcaeb1d932a', 'cmqcgp4qg00r9eod4vcdgd29e', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1bfeeffcb5a91f24006db814', 'cmqcgp57i012reod4acrejsqr', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1c3e58e4f25c73035de54848', 'cmqcgp4wy00w9eod42d7v9aho', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1c686e4c7852786e0b8d57b7', 'cmqcgp5oc01cleod45aysn9k1', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1c827f8034bce508ff31e635', 'cmqcgp5nt01c9eod4yqe7nhu8', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1d1560c96c6b0034fe9a79a9', 'cmqcgp579012ieod43pu3utiq', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1d1f4365890f117798224291', 'cmqcgp5940133eod41au6bv7r', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1df78644e39f89bda2e45154', 'cmqcgp562011ueod4y04fyf70', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1df8ae8cbbb61040f45bb55e', 'cmqcgp4q800r3eod42hfya9f5', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1e3759a947a39955937383cd', 'cmqcgp5do0153eod4fxadtggk', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1ea6a9fe5832296590c7b5cd', 'cmqcgp5bu0140eod41p668lkc', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1f5001b1f34315fcba5b6b59', 'cmqcgp5i3018feod4h5te1fci', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_1f5fe94eaeab3d7ba20ce1dd', 'cmqcgp5pa01dfeod4tejnn9pv', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2079e532ca85ed7ebdf5050d', 'cmqcgp576012feod42gajwam9', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_207be710569f961163e6d973', 'cmqcgp5op01cueod4p10q7fs7', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2096c306fcb703cf5bb57246', 'cmqcgp5px01doeod4izzrcf6b', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_20cc265a8d085a2e140f4a6d', 'cmqcgp53k0100eod47ectu3x4', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_213e7246f7f2921dbae09da3', 'cmqcgp4wy00w9eod42d7v9aho', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_21a05d8633d67485248bf5d3', 'cmqcgp5ii018reod41huno7mu', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_21f335890a9abde1c16e231b', 'cmqcgp576012feod42gajwam9', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_21ffca95e65765682d014739', 'cmqcgp5fi016ceod4241c3ksp', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_223b9c34caa4541b7d96462d', 'cmqcgp5as013oeod413zo6qfe', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_22463b4698cb086def8f2e3a', 'cmqcgp5ku01aceod4d91ju8sw', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2271f44699f74e42201a32c4', 'cmqcgp5ng01c0eod4njl3ht7e', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_22ecc3b28fd683feb338119d', 'cmqcgp5iz0199eod4t01y78ya', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_23755a12e96204e41a91163f', 'cmqcgp5c90146eod4zlu2fum4', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_239e272cf20235e58d06bed9', 'cmqcgp5sf01ffeod4y6v08hv5', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_23e2473510dc823ce512f9fb', 'cmqcgp5cx014leod4ccdrxr0x', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_23f6000e8f08c5182ae00b9e', 'cmqcgp5c90146eod4zlu2fum4', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_240627d2570d6a58a616fc6f', 'cmqcgp543010feod4er9rrfis', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_244c41fd9fd141daef6b91a5', 'cmqcgp5rx01f9eod4pez1p7jj', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2452a0c6cbfe60ebc43c3bfe', 'cmqcgp5r801eueod40n7zpq08', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2490dc3cf95782a030086bed', 'cmqcgp4x900wleod4fu7b80zj', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_24a6561268475a38db0848e4', 'cmqcgp5m501b9eod4a1uev4ua', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_24b90a67ec59e1dbd59a418f', 'cmqcgp50000y3eod4350bxxdh', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_24de40534724fe2ef723794b', 'cmqcgp5n801bueod4b04kw2j4', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_252372b15000bf9d323997df', 'cmqcgp4tm00tleod4sczn0ms7', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_25647574e2ce32d3bdd0ba9b', 'cmqcgp5kc01a3eod46uampe0s', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_258775c8c8dd5b971189cc87', 'cmqcgp4u000txeod4cr60lpne', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_25928bf55b9c0978d825716a', 'cmqcgp5nx01cceod4gl2ibxvq', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_25ad460a2414614568b0fff8', 'cmqcgp5rf01f0eod41sdkeowf', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_25cf34a75a375eb8d8963487', 'cmqcgp5p401d9eod4mc8yfjvm', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_260274713c188351c4efe142', 'cmqcgp50j00yleod4miapxt3m', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_260ea1b1c1ce0a49bcb81168', 'cmqcgp50h00yieod4rv61gbzz', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_26858f0c77399415ff8ed5d1', 'cmqcgp5p701dceod46nsbuomh', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2694d0b9d90a7dec165e4b47', 'cmqcgp5ib018leod4fh1d33bc', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_26f178192ab47eb96a32fcbc', 'cmqcgp5le01aoeod4j0temrq4', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2723c10dc0a967bab46dd50c', 'cmqcgp4wc00vueod4e4kzqtai', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_27332936a450a35d851a9342', 'cmqcgp5h70180eod4qxa0e1zs', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_274fe41e3d3144c7cda8aec3', 'cmqcgp5nl01c3eod4suw5wyu5', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_27d3886add4681f22c0d340e', 'cmqcgp5o701cieod4bpv4qhn1', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2861192918ec018236901173', 'cmqcgp4t200t3eod4xv8hgdmn', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_287990ff51f369d867f3674a', 'cmqcgp562011ueod4y04fyf70', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2884fc22afa5fbda9d8504f1', 'cmqcgp4yk00xfeod4d4849ptm', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_28ff922c55cde4314f2c17d6', 'cmqcgp59t013ceod4xydrecca', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2911bf20babbae036df44189', 'cmqcgp5my01boeod4qq8rvxpp', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_292b0f70d2cd43cdc6963734', 'cmqcgp51w00zceod44wvzvi0y', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_294003bf59bbc6439ad69b9a', 'cmqcgp4wi00vxeod4yl8l3yih', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_29802305fce89a4084384657', 'cmqcgp5rj01f3eod4xqbbaf01', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_29811881eabf348324dbb417', 'cmqcgp5sl01fieod4blt1ptl5', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2a078559f4b6a4cd8cd9d027', 'cmqcgp5gg0179eod4sq57v1ge', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2a45920116228d62f6a0e6f8', 'cmqcgp54a010leod4m4lr8wwz', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2a4df84aced5ba483c536962', 'cmqcgp4xy00wxeod491j0b1g1', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2a786bd4b026dcc93dc418b4', 'cmqcgp5fn016ieod4lqq6btoa', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2a79d12d8b5ac05db656c554', 'cmqcgp4q400r0eod4z5sjnrxp', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2abe85be860568d848838c79', 'cmqcgp5e5015ceod4axtz50xi', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2ad32bc545f62a39f23096b6', 'cmqcgp5c40143eod4803moqvb', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2adbdeaafd0f03ca44c468c4', 'cmqcgp5be013xeod4koiyyk0j', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2afe5b4df0f298a3ce5bb761', 'cmqcgp5ii018reod41huno7mu', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b066a1443cfe1bbada171dc', 'cmqcgp4y800x6eod4teecjons', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b1c1b90191c85f09a2e4b81', 'cmqcgp5ly01b6eod4e2syjgkp', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b4f8192c9ea9f4de650eaa0', 'cmqcgp4qk00rceod41qnjeh7g', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b7ed8ce5561c4479189d394', 'cmqcgp5op01cueod4p10q7fs7', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b86f44363efea4e6e6f7514', 'cmqcgp5sl01fieod4blt1ptl5', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2b9697ede18ac1b1e27b7dc2', 'cmqcgp55w011oeod45umi0wcc', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2c0cbe9338f814798347c93b', 'cmqcgp5ak013leod4rczzzayd', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2c349a863e0b49bc56a0d1e9', 'cmqcgp51r00z9eod4or7pfscv', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2cf87ed6912625faa9e0cabe', 'cmqcgp5fb0163eod44fleydev', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2d35faeeda6990103f669357', 'cmqcgp4v300v0eod4hb5ft239', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2d4c0b838267af65af716f6a', 'cmqcgp5q401dueod4rbcjemsc', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2e11e767362f3cba24056380', 'cmqcgp4ui00ufeod47zzosj75', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2e1ff08d3b1d096e064197ef', 'cmqcgp50000y3eod4350bxxdh', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2e2623e2ed3c7f0f58a7c964', 'cmqcgp55w011oeod45umi0wcc', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2e41626cd62ae1fd40a08c6c', 'cmqcgp4v500v3eod404gdcqdk', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2ee1ed1dd33b4f7e18ce0375', 'cmqcgp5o301cfeod4ozjnlmz6', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2ef7c5caa1aac03a35c19483', 'cmqcgp5pd01dieod4g6mvu7ue', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2f654e714f138a7162d528c6', 'cmqcgp56d0123eod4s1nd4g5w', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2fa78671fa064988b9933938', 'cmqcgp50n00yoeod4t8obatli', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_2fd8ceaa3a3b399dfd7213fe', 'cmqcgp54r0110eod48ph12abe', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_30b266428affecced8f78c23', 'cmqcgp5e00159eod4aenbn94v', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3106c3a44ccfb63562d7967b', 'cmqcgp580012xeod4m9oke6xe', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_311c5142f478d58d16f950c2', 'cmqcgp4px00queod4sqdov0qo', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_312b64a7fb417f57381840ba', 'cmqcgp5f70160eod4ptu2c77i', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_314a0fc053c1fc940a5d7b9f', 'cmqcgp5k701a0eod4qynbglya', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3171af288080c41dc23e162d', 'cmqcgp5lu01b3eod4nioi4k0e', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_31a0c57739e9cb5ad12bfbcf', 'cmqcgp5su01foeod40upxzkj2', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_31bb5cc53b412859240708d2', 'cmqcgp4tj00tieod4toczzyy4', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3272d564a850203f6e8c597a', 'cmqcgp5lj01aueod433l6az18', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_329bf2cf4109eb1ff3ef64ea', 'cmqcgp5ng01c0eod4njl3ht7e', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_32b69480180f510b1a827e54', 'cmqcgp5rf01f0eod41sdkeowf', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_32e05c9a7ac0d4c736f51540', 'cmqcgp51e00z3eod4cpmn1tap', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3309325888d93949f0152566', 'cmqcgp4t200t3eod4xv8hgdmn', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_33145133f461341f25be5f84', 'cmqcgp5mh01bfeod4i9cnva1n', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3355068c22991be7674f1378', 'cmqcgp4vh00vfeod4dpv9usjn', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_33825950f4f6ae69f0b0a15d', 'cmqcgp4wc00vueod4e4kzqtai', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3382dfe9160222af5db10de6', 'cmqcgp5fq016leod49oijrekx', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_33a6a2a55500c0ce2aeb2610', 'cmqcgp5jv019ueod41gqmyx2g', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_342180668e33106d60ad2fe9', 'cmqcgp57o012ueod48ib0rbmc', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_346a18f42965643c476b2eeb', 'cmqcgp4r000rreod4282176bg', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3472ea8bb4ccc84b8bc8ea55', 'cmqcgp4xg00wreod4phy040z8', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_34b52b340cf035e4a590c2d0', 'cmqcgp52k00zieod4o9exvts5', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_352d5830382a28fa21983eaf', 'cmqcgp54o010xeod4dccnj0jv', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_358f41ffd8a563aeaf671069', 'cmqcgp5jb019leod46flj7pav', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3673b006bb572c2c81354932', 'cmqcgp5np01c6eod4fclbxrgb', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3708d4467013141e43f62031', 'cmqcgp5rj01f3eod4xqbbaf01', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_374d5e09d66750190897694d', 'cmqcgp58h0130eod4v13il0in', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_375d200b67c00a9c8fe8f7fb', 'cmqcgp4yq00xleod4wvwq9541', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_376c458bba353435cb3391f4', 'cmqcgp4ux00uueod4lav7688o', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3789116ad702c945232d760c', 'cmqcgp58h0130eod4v13il0in', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_38062fa699615744c8288cb3', 'cmqcgp5b9013ueod42fqjc4k7', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_384966705915f5eef0e73660', 'cmqcgp52o00zleod4abuysb1c', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3864e909f85a7f7a0381d36d', 'cmqcgp5q801dxeod48pzsa9tk', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_387dde90b2883e3f7d8b8e96', 'cmqcgp4q800r3eod42hfya9f5', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_38dab6bc2d71dfb6c903ca1a', 'cmqcgp5nl01c3eod4suw5wyu5', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_38dd21cc19054b314626bc3b', 'cmqcgp5jn019reod4lqqz2w5h', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_39286e5e5908c25777f27f40', 'cmqcgp55j011ceod4vgrps5kz', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_393ff5c3ab51875645c48e49', 'cmqcgp51r00z9eod4or7pfscv', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_399d9fbe5edadce334e6d931', 'cmqcgp4v800v6eod41pazzesf', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3a14c9833bba22baca10fa8c', 'cmqcgp5lu01b3eod4nioi4k0e', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3a2cbfd918169610fde27f97', 'cmqcgp54o010xeod4dccnj0jv', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3a45f697bd783341b6d5d300', 'cmqcgp4zv00y0eod4k2av0rrd', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3abfce3f2b21e0bc39c60b79', 'cmqcgp4sm00sreod4h7fmtwnf', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3ac35f8b284b59675af625a9', 'cmqcgp5dk0150eod4j1roea56', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3b04a476893939eb6d1a29b3', 'cmqcgp5690120eod4wwb44vkx', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3b17e41b3537a4ec8a392d30', 'cmqcgp5kg01a6eod4fd41ky83', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3b4924ee680dfefb78416048', 'cmqcgp4w700vreod443l6ks1m', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3b564590bfc4b5c5a17f7d37', 'cmqcgp5el015leod4wrz0wla3', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3b73bfba7a3119012bbdc845', 'cmqcgp5r201ereod4x0ow11cp', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3ba4db88619a7e22746f7ee1', 'cmqcgp50j00yleod4miapxt3m', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3c6b2bea5a0942612bfa1269', 'cmqcgp5ng01c0eod4njl3ht7e', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3c858413fdbc4b596b8637b8', 'cmqcgp5d2014oeod4nii9gn5a', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3c8c3ea6256f07cfa4687159', 'cmqcgp5cu014ieod48pmmncuz', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3cab07694d231122673673da', 'cmqcgp5f4015xeod4uf9rrpsw', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3db1f1c2a231542d02d66892', 'cmqcgp4sv00sxeod4wlb2lzlw', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3e13c524e35ea1858668b309', 'cmqcgp5su01foeod40upxzkj2', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3e57871b86ed5f6b8f16b8f4', 'cmqcgp4v800v6eod41pazzesf', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3e671bd9254a414837b3beef', 'cmqcgp4sm00sreod4h7fmtwnf', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3ea998137d99aebb6f45d3a3', 'cmqcgp55w011oeod45umi0wcc', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3edd00d446997b5423d3c6af', 'cmqcgp53d00zxeod4b53kyq3d', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3ef018e479dcbf67a5ee43cc', 'cmqcgp5lq01b0eod4rub5tcq5', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3f9ab99ba129f4e9e4b1791d', 'cmqcgp5jv019ueod41gqmyx2g', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3fc948d4b8616962770b3eb4', 'cmqcgp4u700u3eod4325h573o', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3fcce1658209f894280c9657', 'cmqcgp5n401breod4ly8zy2xh', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3fe732e0bfeb131c7b8dfd86', 'cmqcgp4u700u3eod4325h573o', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_3fea6ee02550f7adb9ca8a11', 'cmqcgp4yg00xceod4vdoxorvv', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_40abaa4e082bb288814f114d', 'cmqcgp5nl01c3eod4suw5wyu5', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41030398973d24f98c3dcfef', 'cmqcgp4r600rxeod4wi45lk3w', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41058b4bbc33b441d62eefee', 'cmqcgp4yx00xreod4cldn0pt6', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_412d5039787d6c6cce686c85', 'cmqcgp5la01aleod4f0ib3vig', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41be7948758117a2b6c79bb3', 'cmqcgp5gu017oeod4q2ze9w17', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41bfbeb645c92f494d60cc72', 'cmqcgp5hv018ceod42kndlyoa', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41e5544151f6305288892c29', 'cmqcgp5k1019xeod46av9s6ez', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000');
+INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `markedAt`, `ipAddress`, `createdAt`, `updatedAt`) VALUES
+('AR_41eb50b2871d039bc1240c1a', 'cmqcgp5gz017ueod4p0y0scc6', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41f7097408d482db2678506e', 'cmqcgp5lq01b0eod4rub5tcq5', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_41fd8a00fb12343ae1c7d43e', 'cmqcgp5ge0176eod4zh2054fd', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_423b6d571e6289c67d896f6f', 'cmqcgp5ge0176eod4zh2054fd', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_427e7b7113151cc9c60dd104', 'cmqcgp54l010ueod4upym4h9c', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_429065ad7490b7beddefaafc', 'cmqcgp5p401d9eod4mc8yfjvm', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_42e9b20217ac42b3cf332c18', 'cmqcgp5k701a0eod4qynbglya', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4348fad71ed963b7b30d2f3d', 'cmqcgp4t900t9eod4k7mkpm68', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_43588ac5255cd73ee4572e5e', 'cmqcgp5gc0173eod41p2vcv8y', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4389b456284bda001cd15646', 'cmqcgp5oy01d3eod4iv00zrau', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_43a58ad0f8f1830d80e44a93', 'cmqcgp4pq00qreod4532aezdd', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_44046d15b7332beb9de666fb', 'cmqcgp5p701dceod46nsbuomh', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4494782d38f1bc22e81e97a1', 'cmqcgp4qc00r6eod4mhrie5ph', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_44b6fa8e086a109c06aca4b1', 'cmqcgp5gp017ieod47sx3smuu', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_44bd28d4c869c3b708a31cbe', 'cmqcgp4ux00uueod4lav7688o', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4554c485af46e403f8c5b1a3', 'cmqcgp5do0153eod4fxadtggk', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4558359d75f32eece16d6a43', 'cmqcgp5pd01dieod4g6mvu7ue', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4575d5c6f2c4ca5e567504e4', 'cmqcgp5gc0173eod41p2vcv8y', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4580565636e01fb928e7f0bb', 'cmqcgp5mc01bceod49a0janor', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_45ce8fb5aff523a8d85f8add', 'cmqcgp53o0103eod4b6ka08nj', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_45d9e971f7235c973affaf57', 'cmqcgp59k0136eod4b7f2hmyw', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_469c5c2e92d8778c63257094', 'cmqcgp4sg00soeod45auktp41', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_46bf876ad3f328c73c33bd00', 'cmqcgp4u400u0eod452kfpfqj', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_46d0811ad8464a27ef074b5d', 'cmqcgp4y200x0eod49ug3lg4k', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_477b97a6fb3aa55c16239262', 'cmqcgp5kk01a9eod4v1g0qq4z', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_47961da6dc3b9fa14690df02', 'cmqcgp51e00z3eod4cpmn1tap', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_47a1fb4dfdeb15463a7270e2', 'cmqcgp5qs01efeod4ei9x7um5', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_47f0b6b850fe3c60fa7c19fd', 'cmqcgp5j2019ceod4xgrab0ih', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_48eec791132569baa1a57f22', 'cmqcgp51m00z6eod4yodxuhuz', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_495b2ed3e1ea6a8f642cfe1e', 'cmqcgp4s100sleod4icgdcjz8', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4985f012a416c9111f15dac4', 'cmqcgp5ie018oeod4wsdk60ci', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_49df2ae9d5650ac282d831f2', 'cmqcgp5p101d6eod4fx3fbwr1', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_49ef7246fa6c50826c0a7a2c', 'cmqcgp5s801fceod41yr9oqnr', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4a05b2f4da0c44940480399b', 'cmqcgp4us00uoeod43z6iowtn', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4a3864804b92ae11c6eb8c30', 'cmqcgp4vn00vieod45wwludhn', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4a53febc3b222ce679688482', 'cmqcgp5lm01axeod4xmvsvq17', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4a5409540ccf391d15e79058', 'cmqcgp51400yxeod44nw6inoh', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4a96874b484bb955ef765dbe', 'cmqcgp5le01aoeod4j0temrq4', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4ad37d5797d2ed41a9abcf53', 'cmqcgp5gc0173eod41p2vcv8y', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4b04cb46cc55eafcb2a1a75d', 'cmqcgp4wu00w6eod4rl07htee', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4b5103172613bfaff390143b', 'cmqcgp5iq0190eod4eob26c1o', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4b8647f71b5282746a46bbb9', 'cmqcgp4ud00u9eod48a952ui3', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4b8e3a188e9afc73e9902bad', 'cmqcgp4qx00roeod4z8rlqt3u', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4bc7adbe7b43139e17578dfe', 'cmqcgp5fd0166eod4lxh71x4p', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4bd1b43b281fa33480907755', 'cmqcgp5ak013leod4rczzzayd', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4c043cd19287ba36e591134f', 'cmqcgp54v0113eod42r0pwx3c', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4c0d839c139289f82efa675c', 'cmqcgp4px00queod4sqdov0qo', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4cc18f4303f30ae23986b17b', 'cmqcgp4tq00toeod4xykep27v', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4cff5b73a5591b0cb20da53a', 'cmqcgp5eh015ieod4rsb7dfk7', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d02f7eea9cc087515d603a6', 'cmqcgp4tx00tueod4epmnqiow', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d0d408adc52b13fa0e9596d', 'cmqcgp4vu00vleod4rgoucpqt', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d25beaa7a774a2d22619195', 'cmqcgp5dg014xeod45x0yptp7', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d3706c03b6f9ea625a15945', 'cmqcgp4vh00vfeod4dpv9usjn', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d4a02b8eaeb42156db2bc90', 'cmqcgp576012feod42gajwam9', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4d85afcc3d1ac7900830ea8d', 'cmqcgp4r000rreod4282176bg', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4dc96b0319ecfc2cb366b23f', 'cmqcgp54a010leod4m4lr8wwz', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4dcdaa9d5ffa5864a5399d5e', 'cmqcgp5iz0199eod4t01y78ya', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4dd2478cf12e8cad061c9215', 'cmqcgp5lm01axeod4xmvsvq17', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4df20aaebfe3601a2454d4a6', 'cmqcgp55z011reod4cd2b5zlg', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4e4f9f1ca96deafc34178a89', 'cmqcgp5fn016ieod4lqq6btoa', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4e5094c62badc5034ed02c91', 'cmqcgp5qs01efeod4ei9x7um5', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4e6a841b78306c46a67e5d77', 'cmqcgp5n801bueod4b04kw2j4', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4eca183c512fb319beccbb5d', 'cmqcgp4tq00toeod4xykep27v', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4edaa5d2887b9c41749de0ee', 'cmqcgp4wc00vueod4e4kzqtai', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4f5b763504d1f18f29f6a498', 'cmqcgp4ss00sueod4z0tbsyow', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4f723d10d8ec45fc1ca83ee1', 'cmqcgp4ug00uceod42d0387do', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4f793b494581577711ad5c56', 'cmqcgp4wi00vxeod4yl8l3yih', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4f88328c34a876b19e8fb169', 'cmqcgp4s100sleod4icgdcjz8', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4fa06fb1088061d60ccbad8b', 'cmqcgp5pa01dfeod4tejnn9pv', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4fdea90f41fa9541cc67f542', 'cmqcgp5mt01bleod48cwaosu4', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_4fe6685809e6304adca00911', 'cmqcgp4yg00xceod4vdoxorvv', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_503dc1ca0e213abda4b53a38', 'cmqcgp4td00tceod4s3aje6ls', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_503ebeea84ca77c7d42826d3', 'cmqcgp5rx01f9eod4pez1p7jj', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_503fdb95836ff1bd883a8bc7', 'cmqcgp5gr017leod4c0p9noqp', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_50430e1e00ad086c243854e7', 'cmqcgp5e00159eod4aenbn94v', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5049cd40deb9f5fce9f4f5e4', 'cmqcgp4y200x0eod49ug3lg4k', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_50538c884101b41b3855f1ca', 'cmqcgp5kc01a3eod46uampe0s', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_507d763dd7148b37a2a9c3ca', 'cmqcgp5940133eod41au6bv7r', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_509fe4736705cb88eeaac87c', 'cmqcgp52600zfeod4fy0l6wud', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_50b421c326508e1481fe3c65', 'cmqcgp5el015leod4wrz0wla3', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_50b5a6bf1971ba621a855415', 'cmqcgp5hp0189eod4grmlmigk', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_50bd2b7c5b97e18dad2d9b5a', 'cmqcgp5hp0189eod4grmlmigk', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_513313d1e9bcc930af94fdc1', 'cmqcgp5ol01creod4a1veu4jn', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_518ea378fda12ec90814b44d', 'cmqcgp5b0013reod4cexeng5m', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_51dec8a6c88f7ac738a3647b', 'cmqcgp4xd00woeod4g122gfli', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_52971b9da2da13be8c7f64bc', 'cmqcgp4yg00xceod4vdoxorvv', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_529de9aeeb0b039ab49fec22', 'cmqcgp5f4015xeod4uf9rrpsw', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_52fb65d53f8f2c3322431b39', 'cmqcgp4q400r0eod4z5sjnrxp', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_53217cfa07d3bfc1f8bffa8b', 'cmqcgp5rf01f0eod41sdkeowf', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_53ed7ac20a9e7ea42d293d23', 'cmqcgp4sv00sxeod4wlb2lzlw', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54559e2beaee90aa2230758c', 'cmqcgp5qk01e9eod4tuipd0ec', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_546b259dd6d628854777ccb1', 'cmqcgp54r0110eod48ph12abe', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54897764f274399dca6a55de', 'cmqcgp5mh01bfeod4i9cnva1n', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54900d43c4780f45aca966d3', 'cmqcgp5lg01areod46btou4ey', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54b00d59111bc5d364c18005', 'cmqcgp50900y9eod4tc9xvu40', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54bd84186f42a75da52b141c', 'cmqcgp4qn00rfeod41yxlwt6z', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_54c0e6dfd97427af6ecb477f', 'cmqcgp5p101d6eod4fx3fbwr1', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_551798899d4e00ed84c4f452', 'cmqcgp5o701cieod4bpv4qhn1', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_552b5dd90730296e4e981249', 'cmqcgp5da014ueod4ux7icuj8', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5530cd2d955b282715b1b62a', 'cmqcgp4td00tceod4s3aje6ls', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_55312857d117095989f1094c', 'cmqcgp56k0126eod45b1pdqr0', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_55b5fdd3b1422c93e5a373c4', 'cmqcgp5gm017feod4gtthidst', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5609a2eb2791638a843796c7', 'cmqcgp55m011feod4sg9vxv5u', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5619bcc4cdfc27b098da2245', 'cmqcgp51400yxeod44nw6inoh', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_561f84d03f673de2c5fcc57b', 'cmqcgp4ss00sueod4z0tbsyow', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_566ec49f04b23242916cb915', 'cmqcgp5q401dueod4rbcjemsc', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_56d597fa1ac9df0f3159526c', 'cmqcgp4t900t9eod4k7mkpm68', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5710661a2254d3e393ccd395', 'cmqcgp5d5014reod4p6gspx7i', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57439225a6ae8df9dd0d0f38', 'cmqcgp5qi01e6eod4njzctt8p', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_578a224b94e8a1af79c9849d', 'cmqcgp5er015oeod4l1y8pb8x', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57b0c6a5b1dcd8a2790f1d11', 'cmqcgp55z011reod4cd2b5zlg', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57d4ef1290d6debe1c8e1363', 'cmqcgp51r00z9eod4or7pfscv', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57dad1c6b65ddd71726f86f6', 'cmqcgp54l010ueod4upym4h9c', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57dec614ddaf23cf9357cf38', 'cmqcgp5sp01fleod453vep6zq', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_57e077630270cf2745850347', 'cmqcgp5940133eod41au6bv7r', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_582fdc19b228c513c96bd9f0', 'cmqcgp5cl014ceod4wkpw2ygi', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_58588bc92b0ec2265494820e', 'cmqcgp4yg00xceod4vdoxorvv', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_589f5a9edf57350532bcfaf5', 'cmqcgp5fn016ieod4lqq6btoa', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_592b03dd510c362e8f7b6f69', 'cmqcgp4u400u0eod452kfpfqj', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_593cedd7a856d02327a650e0', 'cmqcgp4x100wceod42g2rxond', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_59a74eafd18088f236e5f8a3', 'cmqcgp4yo00xieod4dpw507wc', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_59c792b906d9d8cae6b868e4', 'cmqcgp5gc0173eod41p2vcv8y', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_59ebd084eb94346d5cf1def8', 'cmqcgp5op01cueod4p10q7fs7', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_59faac80a67b039cab92ab06', 'cmqcgp4tq00toeod4xykep27v', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5a96e8bb085bd735f8afa99a', 'cmqcgp50h00yieod4rv61gbzz', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5acf0252d84fe3936b7c2c57', 'cmqcgp5qp01eceod4nqn840k2', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5adec9fe4d54e1d203d07dc8', 'cmqcgp50j00yleod4miapxt3m', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b0fcd21dd472accecf7abff', 'cmqcgp4tj00tieod4toczzyy4', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b2b4824e1c6cf0c03b5cde4', 'cmqcgp4ra00s0eod4ayibe744', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b461752c4c33527db3ae251', 'cmqcgp53r0106eod4h9aa02a2', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b51ea5d91e6f738bef2a0c8', 'cmqcgp5d5014reod4p6gspx7i', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b601a6d54669c985c650b52', 'cmqcgp5mo01bieod41qft9ih0', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5b8b562f3a70043c6a5ae4be', 'cmqcgp5ly01b6eod4e2syjgkp', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5bd4b578c1f013ede6118c64', 'cmqcgp5kc01a3eod46uampe0s', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5bd9ed76d3aabc21c9c8ea10', 'cmqcgp5ib018leod4fh1d33bc', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5c076550db7b13df7bf58c68', 'cmqcgp5i3018feod4h5te1fci', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5cffe5ec07bde0a08381af88', 'cmqcgp4zv00y0eod4k2av0rrd', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5d368fc8a609044efb7ee015', 'cmqcgp5gp017ieod47sx3smuu', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5d43285325d851869d0c1dd1', 'cmqcgp5px01doeod4izzrcf6b', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5d4acad7a3269062c20b5664', 'cmqcgp54v0113eod42r0pwx3c', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5d4f5dc2cea00861c284759d', 'cmqcgp55t011leod4b62u8ech', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5d950efe38bae8099ddf5c5a', 'cmqcgp4qq00rieod46fwz8kuf', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5dfc47d42a9993b26eaf3536', 'cmqcgp54d010oeod4x9qzjsbm', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5e10a83ccff128d16415f59e', 'cmqcgp4uu00ureod4s18a0jw7', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5ee8943ef5d14a529c2af26f', 'cmqcgp4xg00wreod4phy040z8', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5f0ea3092c629840ce0183b7', 'cmqcgp5qf01e3eod44vows1nf', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5f43566a580fdf3264385b44', 'cmqcgp5nc01bxeod4ijurri2b', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5f473e67e24e69811f597f77', 'cmqcgp5it0193eod4v9we04bn', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5f4987a561a52297d0817030', 'cmqcgp54i010reod454jqs28f', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5f80140e73f2cd5cf95dcfce', 'cmqcgp4u000txeod4cr60lpne', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_5ffbae1d0970655fc3796a5b', 'cmqcgp50r00yreod4p0m0nfrj', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_600b15b3154096afb1baa6b5', 'cmqcgp57o012ueod48ib0rbmc', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6028b935cbfe20fe144b8b1e', 'cmqcgp5oy01d3eod4iv00zrau', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_605d3319d24982a01cf17b0e', 'cmqcgp5ea015feod4tggbv3je', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_60962e01d8ee7ee97c9da8ff', 'cmqcgp5sl01fieod4blt1ptl5', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_60984df397582882a324af1a', 'cmqcgp5j7019ieod4br9sza49', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_60ec91a207dc9dd62a426028', 'cmqcgp52t00zoeod4fbua0px6', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_60f4176f488feeab3b2b41bf', 'cmqcgp4wi00vxeod4yl8l3yih', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_610488f455f03d5ff0e06093', 'cmqcgp5pu01dleod4xziw7x5x', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_614ffe08789c6103d7906495', 'cmqcgp5in018xeod41nfivs26', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_616b2a77dfc6f1c8b080d6b1', 'cmqcgp4yk00xfeod4d4849ptm', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_619a38633210783f0ae0ce07', 'cmqcgp4yq00xleod4wvwq9541', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_61bfe584beb187a8cd1295e2', 'cmqcgp4rd00s3eod4qj0jck3s', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_61cfa61d9daa535f3fa86758', 'cmqcgp56d0123eod4s1nd4g5w', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_620c5fe0a67727c4b372d69d', 'cmqcgp51w00zceod44wvzvi0y', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6260d703b3471ca436fec162', 'cmqcgp50e00yfeod4gh2y5y6e', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_627373894563679c24bbd1f7', 'cmqcgp5oh01coeod42uzejbg5', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6277b8c00a43c9bf365a2248', 'cmqcgp5f1015ueod4t9bfifph', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_628658f78939339ad2d913a9', 'cmqcgp4ud00u9eod48a952ui3', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_62a1dd19a7fd8cd384a4e55e', 'cmqcgp5e00159eod4aenbn94v', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_62a1ff0039032e4a91db0c3d', 'cmqcgp55m011feod4sg9vxv5u', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_62e9669a9abbf70e370ee875', 'cmqcgp5m501b9eod4a1uev4ua', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_62eed730ee8469935757af71', 'cmqcgp5hv018ceod42kndlyoa', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6309fe0b973fea3ee7a0bbb8', 'cmqcgp4zh00xxeod40m2dwxiw', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_631a2aee158194ee6edcb5dc', 'cmqcgp4ui00ufeod47zzosj75', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_631f167985c3b11b289b429a', 'cmqcgp5qx01eleod43d0t6yvr', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_635f7a7004d145c090a111f3', 'cmqcgp4zh00xxeod40m2dwxiw', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_63fc78528bbaab12c553679f', 'cmqcgp540010ceod45zez8tq6', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_64102f86ce6e783a977320c8', 'cmqcgp4rw00sieod4dvbxpfeu', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_641cf2cea7081c788ca0b266', 'cmqcgp4qn00rfeod41yxlwt6z', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_642d29f84087e27a365c6d9f', 'cmqcgp5hd0183eod4tpgo8j03', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6472c9fabfc8bc204c132b19', 'cmqcgp5ou01d0eod4n8r1gamh', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_64a7727b3cdff95cb510a764', 'cmqcgp4xy00wxeod491j0b1g1', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_64b8d089f36ae79d16679010', 'cmqcgp5la01aleod4f0ib3vig', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_64cf563c139f6922282a2508', 'cmqcgp59k0136eod4b7f2hmyw', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_65b642adad199948c6e5d4b4', 'cmqcgp5ii018reod41huno7mu', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_65d98f156e66119faa343217', 'cmqcgp4tt00treod433rzgc55', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_65ebb3fdcede3fb9ec0b0de7', 'cmqcgp5fk016feod480b7ainn', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_664c27f37787e0669d4d6af2', 'cmqcgp4rq00sfeod4bn7nmlfx', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6715546eb9f1ba4944097fff', 'cmqcgp543010feod4er9rrfis', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_675493d704cebbc03b78a265', 'cmqcgp4pq00qreod4532aezdd', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_675e5ea73cb1431a6aea5fb3', 'cmqcgp59k0136eod4b7f2hmyw', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_676bb4d8404b82c024ea935c', 'cmqcgp5k701a0eod4qynbglya', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_677fa7a4a4fb6fd5431b7296', 'cmqcgp4s100sleod4icgdcjz8', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_678625e70aa35d5467f4a146', 'cmqcgp5jh019oeod4gkanbwkm', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_67f531dcfe78a09a2bb7a48c', 'cmqcgp5eh015ieod4rsb7dfk7', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_681d047735ffc9fc554cbece', 'cmqcgp5690120eod4wwb44vkx', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6856eb2df1a674936c76e3ef', 'cmqcgp4wq00w3eod4my16h4y3', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_689f18cd4b12e14c1b4b6748', 'cmqcgp5g6016xeod4mfbssdgt', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_68cdcf49d5ea8ac2c421205c', 'cmqcgp5e00159eod4aenbn94v', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6915c847916bc025a67ee45d', 'cmqcgp5qx01eleod43d0t6yvr', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_692211033218b20c07591754', 'cmqcgp4um00uieod4xz5hpval', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_692a508f8e098b794ae7379f', 'cmqcgp59n0139eod4a0pnpeo2', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_69478f60886d7c4f02685de3', 'cmqcgp5ce0149eod4pkx5ltig', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_694c7717c10cd58b06b89210', 'cmqcgp5ex015reod4qsofyu6l', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_69659d4b9c83fa1710066d81', 'cmqcgp54v0113eod42r0pwx3c', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6a09b637cb2b9eb8eed03e92', 'cmqcgp5nt01c9eod4yqe7nhu8', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6a2657292e3bc1395be52144', 'cmqcgp5jv019ueod41gqmyx2g', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6a866dfd756fc0ce63db7621', 'cmqcgp5ea015feod4tggbv3je', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6a8f3ff3ab85f144c78177f6', 'cmqcgp4q000qxeod4ouh797ut', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6abd09976970a95761b7f307', 'cmqcgp5sp01fleod453vep6zq', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6b025f7d5a4bbcf9d49d9d9c', 'cmqcgp5o301cfeod4ozjnlmz6', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6c3107f9536e84a0f280e8b2', 'cmqcgp5ie018oeod4wsdk60ci', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6c3964d008635a9e3331c9f6', 'cmqcgp4vd00vceod43p1h28yj', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6cbdcc58715d8b3376c4242a', 'cmqcgp50r00yreod4p0m0nfrj', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6d364d64faeae17e193b58ca', 'cmqcgp5rc01exeod4etvaf5mh', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6d556c5dfb872a50cebf0d95', 'cmqcgp5bu0140eod41p668lkc', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6dc7412dda8e1a71b2c0de26', 'cmqcgp4x400wfeod4ben8nh48', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6e24a15013316f5ceadd9dca', 'cmqcgp4zh00xxeod40m2dwxiw', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6e9a7cf43067f9e97dc295e6', 'cmqcgp54a010leod4m4lr8wwz', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6ec84cf390b528a13b2d5ac5', 'cmqcgp4rf00s6eod4z854yw3g', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6ed102fbc1f5d086b7d3cf99', 'cmqcgp4y800x6eod4teecjons', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6f0b4123fab46419c15bc17d', 'cmqcgp4tx00tueod4epmnqiow', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6f594c72ca3d3316531da80c', 'cmqcgp55z011reod4cd2b5zlg', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6fe65668371ed286b0d09a72', 'cmqcgp4wy00w9eod42d7v9aho', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_6fec175a684e87fc01d6cb92', 'cmqcgp50900y9eod4tc9xvu40', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_701c3aef6dbd1a8a1328a6a9', 'cmqcgp4u700u3eod4325h573o', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_707fcdcd404d09df6d95360b', 'cmqcgp5hd0183eod4tpgo8j03', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7081f7af09aa777cca83ebc0', 'cmqcgp4ui00ufeod47zzosj75', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_70a3f95b64bc2d0d430af6b2', 'cmqcgp4xd00woeod4g122gfli', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_70c6f621ec6a56c5257bb0ee', 'cmqcgp52o00zleod4abuysb1c', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_70e64db9ce8390e27651f525', 'cmqcgp51w00zceod44wvzvi0y', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_714fb75d5b95f7f02006b906', 'cmqcgp54i010reod454jqs28f', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_715bf729f85ad52abf84f3b0', 'cmqcgp53r0106eod4h9aa02a2', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7172dee1b6a67197d3034d98', 'cmqcgp579012ieod43pu3utiq', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_71c26786b5c5960cf59c3b77', 'cmqcgp4q000qxeod4ouh797ut', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7229bc6364fd44899eb12198', 'cmqcgp59z013feod4n0cv5eco', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_72c8c9cd39b4c6b99d0b98d7', 'cmqcgp4t900t9eod4k7mkpm68', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_733a4524f71db7fed18057e8', 'cmqcgp51e00z3eod4cpmn1tap', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7395476762bfc1f3d2fde5e7', 'cmqcgp5l401aieod4fvhtzzyx', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_73c592fa3b805563d2480dbc', 'cmqcgp5du0156eod4wwdq845t', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_740aaa806ba604a6f56b0357', 'cmqcgp5hj0186eod4vgzyvlub', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_743fa4b2d47dc294f38e4b58', 'cmqcgp5be013xeod4koiyyk0j', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_744fe7e28d5b8ef7a142cba4', 'cmqcgp5gj017ceod4e4odcv0b', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_747787703c5c6522461d7b69', 'cmqcgp5p401d9eod4mc8yfjvm', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_748b145967b32dc4d2dc2087', 'cmqcgp4rw00sieod4dvbxpfeu', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_748f022ca738885e9412433b', 'cmqcgp53r0106eod4h9aa02a2', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_74cd368b931069f020e82755', 'cmqcgp4z400xueod48pljwg52', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_74fab39b1c9d56e9c494c527', 'cmqcgp50r00yreod4p0m0nfrj', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7589052f689aa769a73e157f', 'cmqcgp4vu00vleod4rgoucpqt', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_75b2f01762016ef70415481f', 'cmqcgp5hd0183eod4tpgo8j03', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_75dec3861206816920ae6082', 'cmqcgp4vh00vfeod4dpv9usjn', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7663d84605191c44218a3827', 'cmqcgp57c012leod4sq229zra', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_76cb23e5096895425c3ca173', 'cmqcgp4tg00tfeod4h0317mzs', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_76d72faa40deccf98342661b', 'cmqcgp4q800r3eod42hfya9f5', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_76f6cba98e12af5ce91ad4f9', 'cmqcgp5j5019feod45i78yr67', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_77512dd8ac45d5173712a89c', 'cmqcgp5mt01bleod48cwaosu4', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_786717608bac742ee1994b27', 'cmqcgp5bu0140eod41p668lkc', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_78b4ae4ecab531374e2ea854', 'cmqcgp4x100wceod42g2rxond', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_78e7d0314b512890f651eca2', 'cmqcgp572012ceod42blw63of', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_79129e3c7338f680d40edf69', 'cmqcgp5aa013ieod4evgpq6zv', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_79b807ca7e0dd7d412604c7f', 'cmqcgp5gr017leod4c0p9noqp', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_79e3de700a6b4cd3e127e0e4', 'cmqcgp5b9013ueod42fqjc4k7', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7a35d84fea9683ca626debce', 'cmqcgp572012ceod42blw63of', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7a431c9ae1acb4de6f12a4ae', 'cmqcgp5nt01c9eod4yqe7nhu8', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000');
+INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `markedAt`, `ipAddress`, `createdAt`, `updatedAt`) VALUES
+('AR_7a56f73033e81e831a48a3f6', 'cmqcgp50c00yceod4jn0za7gp', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7a74a34f4290dcc511bd439f', 'cmqcgp54v0113eod42r0pwx3c', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7a7e81327aaace4f157da32b', 'cmqcgp4v500v3eod404gdcqdk', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7b1c73689531d7288b853cea', 'cmqcgp5lq01b0eod4rub5tcq5', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7ba4edcd63c7ed2ed85803f5', 'cmqcgp5gw017reod47l4woz22', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7c0b4a2a604ca6cfef65b406', 'cmqcgp5np01c6eod4fclbxrgb', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7c55a87040b1f5679524f9c7', 'cmqcgp5r001eoeod4no3541zj', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7cbb64550a4a8a350f8bbf0e', 'cmqcgp51800z0eod4bdsv6l22', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7ce041cebacd53fbd5fa3eef', 'cmqcgp5gm017feod4gtthidst', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7d60b039754582400278828f', 'cmqcgp4qk00rceod41qnjeh7g', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7d69968ad6a798bab5db3783', 'cmqcgp4qc00r6eod4mhrie5ph', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7dad9bea1dc5ab80be09b6c4', 'cmqcgp5940133eod41au6bv7r', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7dd787cd52eb53da1a252ca2', 'cmqcgp5qf01e3eod44vows1nf', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7e0263ed4aba924b96f49bb1', 'cmqcgp53d00zxeod4b53kyq3d', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7e6b87a30bdf8e4d39a0eb10', 'cmqcgp5f4015xeod4uf9rrpsw', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7eae932153242748a365a59e', 'cmqcgp4qg00r9eod4vcdgd29e', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7ee04652f80d2228f1f6701c', 'cmqcgp5l401aieod4fvhtzzyx', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7f1337b1e7e455da7a8b3ed9', 'cmqcgp5qi01e6eod4njzctt8p', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7f3586e217f4586a6f08fd6f', 'cmqcgp5gr017leod4c0p9noqp', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7fc002e1a84ab59de67d3500', 'cmqcgp5da014ueod4ux7icuj8', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_7fc45987f23f0abf53741484', 'cmqcgp54l010ueod4upym4h9c', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_80319a6616d124c6db34187c', 'cmqcgp51400yxeod44nw6inoh', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8055f4a519c3cb16f8b198b8', 'cmqcgp4wm00w0eod4geg88ykx', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_806f29f8d1f40da591f7d900', 'cmqcgp4w200voeod46jrmz3q9', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_80a5e744fcc9daf3e2e59e04', 'cmqcgp56w0129eod4unhemzv0', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_811bc0330f9ed64c122130a1', 'cmqcgp5kg01a6eod4fd41ky83', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8122ff842c91dade35d8f306', 'cmqcgp5f70160eod4ptu2c77i', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_814bc54da3cee1035d671e3b', 'cmqcgp4va00v9eod45j4u2y5p', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_81675a497d8cc5d2ecb41cec', 'cmqcgp5g90170eod4poeynhc0', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_81d0bf1f4ae1ae271928b1f1', 'cmqcgp4vn00vieod45wwludhn', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_81f260bdeb3cb37319b6a3d7', 'cmqcgp4w200voeod46jrmz3q9', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_821b23b3cd68864cfecfa3e1', 'cmqcgp5lg01areod46btou4ey', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_825e0e964e75b9dcdf247162', 'cmqcgp547010ieod4w6mttpb7', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_826ab48a173c9ebda42910c7', 'cmqcgp5gr017leod4c0p9noqp', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_829cb1f2c4e6545b7b67e2c7', 'cmqcgp5q101dreod473hwf5yq', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_82ddd960dcd0ee1ed8ddef1e', 'cmqcgp5cx014leod4ccdrxr0x', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_82f6123209503e039e3809c7', 'cmqcgp5ly01b6eod4e2syjgkp', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_82f804d1d9843399cb48bc3a', 'cmqcgp50e00yfeod4gh2y5y6e', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_836fed537d86b395300c1306', 'cmqcgp52t00zoeod4fbua0px6', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_83753f51ff1dfe0f294e005f', 'cmqcgp5ex015reod4qsofyu6l', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8496341a56a2ca384856cb94', 'cmqcgp4ra00s0eod4ayibe744', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_84c9cc706097b7b121de9d88', 'cmqcgp4px00queod4sqdov0qo', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8511a01748de9adfc2685f67', 'cmqcgp5oh01coeod42uzejbg5', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_852792937bfbfe23abca20c3', 'cmqcgp565011xeod4dcb9r2jw', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_868bb4f713f6d0a5fe987125', 'cmqcgp58h0130eod4v13il0in', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_869e4f992417c8dd46c7b7a9', 'cmqcgp572012ceod42blw63of', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_86d8e9ce50edb3383e3d0046', 'cmqcgp5r801eueod40n7zpq08', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_876e940bb6a686ddd72c7984', 'cmqcgp54x0116eod4r9khlxjt', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_87773e3973220cf8dafc7fbe', 'cmqcgp5or01cxeod4pi8wh1a1', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_87983d0f469a91cff1423c44', 'cmqcgp4yq00xleod4wvwq9541', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_87a12c38bbc20ea172b88521', 'cmqcgp572012ceod42blw63of', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_87b815b21c006d5efc5b29b2', 'cmqcgp53300zreod4knm5lhbh', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8921b110ced098171dfc7984', 'cmqcgp4tm00tleod4sczn0ms7', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_89569356c2f5c5dfb4f0b4d5', 'cmqcgp5i7018ieod41ybeb6gw', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_896b5169fde3084adca6cfe0', 'cmqcgp5sp01fleod453vep6zq', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_896e7b4b6a45cf4fde4216d1', 'cmqcgp5oy01d3eod4iv00zrau', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_897ee473517840553744229a', 'cmqcgp5f1015ueod4t9bfifph', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_899686613af0ba52822d3a04', 'cmqcgp4rd00s3eod4qj0jck3s', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_89b6dddcf366f7274078d6bd', 'cmqcgp5cl014ceod4wkpw2ygi', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_89ff1717a4d27907ad17cd43', 'cmqcgp59z013feod4n0cv5eco', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8a372d7bcf6008d90f188691', 'cmqcgp4ug00uceod42d0387do', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8a4e71378a0af971dab44140', 'cmqcgp50n00yoeod4t8obatli', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8aa001a9dbb57f34ce23e936', 'cmqcgp4ux00uueod4lav7688o', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8b1fe15e8c81bd4cf3c6f725', 'cmqcgp5cx014leod4ccdrxr0x', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8b8bd805b6e220cbc1903cf4', 'cmqcgp5690120eod4wwb44vkx', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8ba7bba17abc1ad4c40773d7', 'cmqcgp5n801bueod4b04kw2j4', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8ba8d5f925edca9a44ee6999', 'cmqcgp543010feod4er9rrfis', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8c3210864d46e79bce1d908d', 'cmqcgp5ff0169eod4xatyj6sy', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8cc3bb8a85d82feb4eafb7e4', 'cmqcgp5qx01eleod43d0t6yvr', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8cf654b34fcce10b0ccbb996', 'cmqcgp50n00yoeod4t8obatli', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8d335ab7e0f2c96274d09258', 'cmqcgp4yq00xleod4wvwq9541', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8d3707e9eab61d6862769cc6', 'cmqcgp4u400u0eod452kfpfqj', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8d422b88c0283b3d47432b85', 'cmqcgp58h0130eod4v13il0in', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8d91dd72e12e5be6f8de1d3b', 'cmqcgp59n0139eod4a0pnpeo2', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8db76508b828177d675737aa', 'cmqcgp4x900wleod4fu7b80zj', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8df1774dcb1160bdd58946f4', 'cmqcgp57o012ueod48ib0rbmc', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8df7889727cba8649314b999', 'cmqcgp4y200x0eod49ug3lg4k', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8e254d916a0c57bc55702a41', 'cmqcgp5fk016feod480b7ainn', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8e381577db4493c2bb233e12', 'cmqcgp52k00zieod4o9exvts5', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8e6c7f6a4278a6a92cc1b01b', 'cmqcgp4r000rreod4282176bg', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8e8c284e09c9bc64d46c6d29', 'cmqcgp5ol01creod4a1veu4jn', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_8f3a0c2bdf3f77ae89f24307', 'cmqcgp5mo01bieod41qft9ih0', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9033c90a0bba5ede31853809', 'cmqcgp5dk0150eod4j1roea56', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9078dea07614c9de69775497', 'cmqcgp4tt00treod433rzgc55', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_909271aed48abb199b6f4f52', 'cmqcgp5p401d9eod4mc8yfjvm', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_90acf93fc7977c201076b43f', 'cmqcgp5g0016reod4j4ebk0dr', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_90c3a472242bb00b36e5ccad', 'cmqcgp5gm017feod4gtthidst', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_90de6cf7fd732bc8bb7dc164', 'cmqcgp4y800x6eod4teecjons', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_91b746216db914bdc9a8e049', 'cmqcgp5j7019ieod4br9sza49', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_91c4829858fb1ee573f0fed4', 'cmqcgp5lj01aueod433l6az18', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_91e05f6e0927103a5ee097fb', 'cmqcgp5rc01exeod4etvaf5mh', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9201a4605b43e666824debba', 'cmqcgp53300zreod4knm5lhbh', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9203f77b3a7205053023f6be', 'cmqcgp4yk00xfeod4d4849ptm', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_92b1908ce0e0f1bd9a836db5', 'cmqcgp5gz017ueod4p0y0scc6', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_92e4ab01ebca559b62461ace', 'cmqcgp54d010oeod4x9qzjsbm', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_930a6aca82b8d341e5cf72a4', 'cmqcgp4s100sleod4icgdcjz8', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_93115d83960fedb54844c472', 'cmqcgp4sm00sreod4h7fmtwnf', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9340d166bed6cb684e695d61', 'cmqcgp55e0119eod4qkzxy5nu', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_93452a8f2fc216b9a19b70c2', 'cmqcgp50e00yfeod4gh2y5y6e', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9388eec49f178f7ef465e63a', 'cmqcgp51800z0eod4bdsv6l22', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_939c84f7f4b16ff45462398e', 'cmqcgp56w0129eod4unhemzv0', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_93b9909d44610fdf5d65df25', 'cmqcgp4qx00roeod4z8rlqt3u', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_93baa3d931edf955838ee2d8', 'cmqcgp5r801eueod40n7zpq08', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9446ea01d033d5e6f8cd97ea', 'cmqcgp4tm00tleod4sczn0ms7', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_94b8a5a2a41c2bf6b917dfc0', 'cmqcgp4v000uxeod4t2jact6r', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_94e8b6d7e5c9022913543de5', 'cmqcgp52600zfeod4fy0l6wud', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_94fa101df277dc23dbba2832', 'cmqcgp51w00zceod44wvzvi0y', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9535212a25245001c4de7d26', 'cmqcgp5j2019ceod4xgrab0ih', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9552f98cc03f1c0640c19d4c', 'cmqcgp4x600wieod4a70ejsjx', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_955e83c4431ef0bd3e8cd8e8', 'cmqcgp5f4015xeod4uf9rrpsw', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9587519c1ea1632549bc2d83', 'cmqcgp5q101dreod473hwf5yq', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_959e74fd6ad0d741340f04b9', 'cmqcgp55z011reod4cd2b5zlg', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9605d0350add70f771063a49', 'cmqcgp579012ieod43pu3utiq', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_96ce89fdcee55a40a9409027', 'cmqcgp5er015oeod4l1y8pb8x', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_96dd7c27a56fa348eafdaaeb', 'cmqcgp5as013oeod413zo6qfe', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9731b24671570aade227c64d', 'cmqcgp5gz017ueod4p0y0scc6', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9752dc37713f4522a713916b', 'cmqcgp4sg00soeod45auktp41', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_977cc5a7f549bf8582d40e5e', 'cmqcgp4rk00sceod4by355yoj', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97a21ecd49eb4e364024d5e8', 'cmqcgp5h3017xeod412shn8hc', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97a794c7ce49ddc543c4ee50', 'cmqcgp4v800v6eod41pazzesf', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97bc298175ae544265078c7c', 'cmqcgp5rc01exeod4etvaf5mh', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97cb014f1024baec8d12ce4c', 'cmqcgp5fq016leod49oijrekx', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97d819bcd17952730248c357', 'cmqcgp5it0193eod4v9we04bn', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_97fe280c1ad61f8e2f17615d', 'cmqcgp5ib018leod4fh1d33bc', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_98010555e8a3d13f6628b0f3', 'cmqcgp4sz00t0eod4tallxt7z', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_982dd3551d34389bcf340239', 'cmqcgp4us00uoeod43z6iowtn', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_988b036034172369e03ef69c', 'cmqcgp53v0109eod4ucleyzi4', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9997332af6b9eb9435ff6247', 'cmqcgp4qg00r9eod4vcdgd29e', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_99d08ea721c21318df8befae', 'cmqcgp5r001eoeod4no3541zj', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9a316200aff28661f6687dcb', 'cmqcgp5ol01creod4a1veu4jn', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9a73a4f35ae7a8b7a93c506f', 'cmqcgp5nx01cceod4gl2ibxvq', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9a79f15b78ab0c06db99868b', 'cmqcgp4yb00x9eod48qje6s9z', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9ab5c04d0e7b5417eac35052', 'cmqcgp4uu00ureod4s18a0jw7', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9ade23e297e9bf8e0495c3b7', 'cmqcgp4q400r0eod4z5sjnrxp', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9b28eae32b680ab62e01a583', 'cmqcgp5g0016reod4j4ebk0dr', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9b2b5d880531084a924482b8', 'cmqcgp51800z0eod4bdsv6l22', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9b4f0ff1d0b1b0785ae1b335', 'cmqcgp50400y6eod4op1477cy', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9b825dc9e246ea1bc03bd85f', 'cmqcgp5ku01aceod4d91ju8sw', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9be7998648ebdf68f47ae7c9', 'cmqcgp5qi01e6eod4njzctt8p', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9c038d794ccdb4dfb18db72a', 'cmqcgp5iq0190eod4eob26c1o', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9c69f73fbbc46c75466179a3', 'cmqcgp4tg00tfeod4h0317mzs', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9c7dc8473c9a2da2f5db4e28', 'cmqcgp5gp017ieod47sx3smuu', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9c983628a1b20d12cfe40af9', 'cmqcgp5jh019oeod4gkanbwkm', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9ccba4941849d0f08380b19b', 'cmqcgp5q401dueod4rbcjemsc', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9ccee37dd12ae8d7d99aa92b', 'cmqcgp565011xeod4dcb9r2jw', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9d1dce92a0ae42783972819b', 'cmqcgp5o301cfeod4ozjnlmz6', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9d26c41914a4739afc36bfd1', 'cmqcgp59t013ceod4xydrecca', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9d70971565d503c6cbca0db2', 'cmqcgp4qc00r6eod4mhrie5ph', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9df884fdb391aabb8be7b41c', 'cmqcgp4yo00xieod4dpw507wc', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9e75b97d1e1c31423015ef59', 'cmqcgp5q101dreod473hwf5yq', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9e96c444f125fef418d8a7cd', 'cmqcgp4ua00u6eod47iuuf7k2', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9eaaaf4353fbd30ad730372e', 'cmqcgp5g6016xeod4mfbssdgt', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9ed41bc3eeb130069ad519f1', 'cmqcgp57c012leod4sq229zra', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9f0c25caf68fb44877b46ffc', 'cmqcgp5qc01e0eod42us89wrm', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_9f3a8ca00634d66b31ad9297', 'cmqcgp4y200x0eod49ug3lg4k', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a02d5df4ee3457b14afefa57', 'cmqcgp53o0103eod4b6ka08nj', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a0513b69c13da7c4407a2178', 'cmqcgp5my01boeod4qq8rvxpp', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a0b12159e8f3141393411fb8', 'cmqcgp5nx01cceod4gl2ibxvq', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a0da775bf58c2346037b5bfb', 'cmqcgp51m00z6eod4yodxuhuz', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a0e37a7970d26681ffca5135', 'cmqcgp5r001eoeod4no3541zj', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a15e2dbc32d9730dc4a4d1c9', 'cmqcgp4ss00sueod4z0tbsyow', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a1b47db3b7a80ef25219c0ef', 'cmqcgp4qk00rceod41qnjeh7g', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a1d31819eb7b08800140e98e', 'cmqcgp5dg014xeod45x0yptp7', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a20d4e88eeee2def2343d920', 'cmqcgp53v0109eod4ucleyzi4', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a22df4d5e3b6253a26376ace', 'cmqcgp51r00z9eod4or7pfscv', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a24f03e378b383cce56feff3', 'cmqcgp580012xeod4m9oke6xe', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a279cfdb50863ae7922caf5c', 'cmqcgp4t500t6eod4ut2vo9rm', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a2b12c454ebb718764c2e83d', 'cmqcgp5cq014feod4zlaow1nb', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a2e52dfe52df50eaaa64779e', 'cmqcgp4vh00vfeod4dpv9usjn', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a2eccb7ff64dce1f68679026', 'cmqcgp59z013feod4n0cv5eco', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a32b3d3071d571f1f9bffa82', 'cmqcgp5jb019leod46flj7pav', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a38800d819f25bc2d7e19137', 'cmqcgp4tg00tfeod4h0317mzs', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a3b70523ac1055796b7f16ab', 'cmqcgp53d00zxeod4b53kyq3d', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a4418f05b0c7f81a38fdecff', 'cmqcgp5nc01bxeod4ijurri2b', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a49279106c9e191b1787872d', 'cmqcgp4ud00u9eod48a952ui3', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a4d79369a64d4163745d83d6', 'cmqcgp55o011ieod4svuebazw', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a4fb358cbe9b11d2ff8b633b', 'cmqcgp5px01doeod4izzrcf6b', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a51c1dbcaf6972ba9ccd039a', 'cmqcgp4ua00u6eod47iuuf7k2', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a549b956adabd6b02879212c', 'cmqcgp4us00uoeod43z6iowtn', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a5cc290a46ef049ab2bba786', 'cmqcgp5fk016feod480b7ainn', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a5e739695857e4ab653f56eb', 'cmqcgp4vd00vceod43p1h28yj', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a6ce60dfd5851f010301a33e', 'cmqcgp4r300rueod4bx2layal', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a71e7ce428742741c3c9c579', 'cmqcgp5le01aoeod4j0temrq4', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a7689c4c272fc1cb58b172f8', 'cmqcgp5rx01f9eod4pez1p7jj', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a76b2cc6a9ba559a621ceea0', 'cmqcgp5g3016ueod4cby3spx3', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a7bf6e29043d5baabebc3a7e', 'cmqcgp4wm00w0eod4geg88ykx', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a860c51a9eab89e90483396d', 'cmqcgp5b9013ueod42fqjc4k7', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a8a7a4188854f5e77ba5e0e5', 'cmqcgp580012xeod4m9oke6xe', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a8d57e464431fef2e2260ac8', 'cmqcgp5gu017oeod4q2ze9w17', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a94cb84080b93769636b7eb9', 'cmqcgp4v000uxeod4t2jact6r', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a98216d79254beb4796480ff', 'cmqcgp55o011ieod4svuebazw', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a9b6f905c8ed7a2e8bb786d6', 'cmqcgp5ex015reod4qsofyu6l', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_a9cf03b23c63b2680b92e50b', 'cmqcgp5q801dxeod48pzsa9tk', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_aa27447601e423b31d89f20c', 'cmqcgp5ak013leod4rczzzayd', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_aa9e1db1b35ff0c176843595', 'cmqcgp4qn00rfeod41yxlwt6z', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ab101e512033fc7b488ccf29', 'cmqcgp4z400xueod48pljwg52', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ab164f1aab879790a6b33c35', 'cmqcgp5mh01bfeod4i9cnva1n', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ac0ea18da8f855da210a23bf', 'cmqcgp4w200voeod46jrmz3q9', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ac192fb2b409dcf137640bad', 'cmqcgp50000y3eod4350bxxdh', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ac2ad9ef0cb74c107b522ba7', 'cmqcgp4rf00s6eod4z854yw3g', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_acb1ee50c25402faf68685a9', 'cmqcgp5ix0196eod4yllqrdxc', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_acbaaa7515c7a5105efbee12', 'cmqcgp4qc00r6eod4mhrie5ph', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_accf953089a095d9ccaf0df7', 'cmqcgp5i7018ieod41ybeb6gw', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_acfea7eb158ed4e5420cca50', 'cmqcgp5sp01fleod453vep6zq', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_adbe197f1d55d6614ccebf83', 'cmqcgp4tg00tfeod4h0317mzs', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_adcdb88cc6956f3d0a9a52fd', 'cmqcgp5ou01d0eod4n8r1gamh', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ae44130988d8307f302fbb03', 'cmqcgp4qx00roeod4z8rlqt3u', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_aeec7c9528cee7e01e868e49', 'cmqcgp5qu01eieod407bgqjwk', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_aeed71b85bee10d84167ff4b', 'cmqcgp5oc01cleod45aysn9k1', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af232a138c9fe50ccbe8ae4d', 'cmqcgp5qs01efeod4ei9x7um5', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af26af3729852460ace990ce', 'cmqcgp5ff0169eod4xatyj6sy', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af45f0a0a50c47bea5f6e280', 'cmqcgp5qk01e9eod4tuipd0ec', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af653b01973e37c584c33502', 'cmqcgp4vn00vieod45wwludhn', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af83940b5b9a0de51bb2b8d4', 'cmqcgp565011xeod4dcb9r2jw', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_af912de8fb1d05aaea3b4982', 'cmqcgp4y500x3eod4v52ggv0v', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_afaba8956992ec30c54eb575', 'cmqcgp52o00zleod4abuysb1c', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_afdf71f99987228d4a9699f3', 'cmqcgp4wu00w6eod4rl07htee', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b02fd7f37d353b3cf394707a', 'cmqcgp4ux00uueod4lav7688o', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b045790f95096d66f9ba1934', 'cmqcgp4v800v6eod41pazzesf', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b086082bb7ed4c94da4f6d23', 'cmqcgp4qq00rieod46fwz8kuf', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b096d7f296b67ca8df898719', 'cmqcgp5d2014oeod4nii9gn5a', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b147ff62ff514bf3d62f8440', 'cmqcgp5le01aoeod4j0temrq4', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b1518aa1756aa153daf70128', 'cmqcgp576012feod42gajwam9', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b166d272d381c575991612df', 'cmqcgp5p101d6eod4fx3fbwr1', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b18dc131bae969d0bc6cc5f9', 'cmqcgp4z400xueod48pljwg52', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b1be44232f4afce6f7f9958b', 'cmqcgp5qp01eceod4nqn840k2', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b1bec234892005817312aee1', 'cmqcgp5cq014feod4zlaow1nb', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b26dfa234e0d9ecf25e52ee7', 'cmqcgp4t500t6eod4ut2vo9rm', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b2888e90c9b1b4bafe04aaf0', 'cmqcgp5690120eod4wwb44vkx', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b2953e470d5d4e1640de1173', 'cmqcgp5gu017oeod4q2ze9w17', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b317ec75d84163f68cc6078d', 'cmqcgp51m00z6eod4yodxuhuz', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b32294074dea8e034444c9f4', 'cmqcgp5ii018reod41huno7mu', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b34a935a286bc4e922c60b15', 'cmqcgp5fq016leod49oijrekx', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b361a1c009a708d00d0a835b', 'cmqcgp4qq00rieod46fwz8kuf', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b3633c0e37163edad541fd13', 'cmqcgp4ud00u9eod48a952ui3', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b3bab4f2236d3a54184c3d56', 'cmqcgp5k1019xeod46av9s6ez', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b3fc3aeb3d053db3a99fc80a', 'cmqcgp4t200t3eod4xv8hgdmn', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b567b83cd8514f4c18c9699d', 'cmqcgp50h00yieod4rv61gbzz', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b5723ab44c4b6d71bcc998e2', 'cmqcgp5n401breod4ly8zy2xh', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b5749ddc36c4cb2d15569516', 'cmqcgp5p701dceod46nsbuomh', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b698e62b4e99aa14f8da8b12', 'cmqcgp5ol01creod4a1veu4jn', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b79c9b2a0a5a0dad73ca751e', 'cmqcgp4sv00sxeod4wlb2lzlw', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b7a597f87b10db1850bca25b', 'cmqcgp50c00yceod4jn0za7gp', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b7f62a1d367c696f0704ba24', 'cmqcgp53k0100eod47ectu3x4', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b7f8fc3787a4d701ececb688', 'cmqcgp4u400u0eod452kfpfqj', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b833cef4a370103da5120040', 'cmqcgp4qu00rleod48kswlny1', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b83e9572e8752f207f3ce92c', 'cmqcgp4qu00rleod48kswlny1', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b898c50cb55966a4c6fb3fd6', 'cmqcgp5ix0196eod4yllqrdxc', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b8c0f7c58d11b3634ded225f', 'cmqcgp5gm017feod4gtthidst', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b929dd9891372e1201e0ae56', 'cmqcgp5qc01e0eod42us89wrm', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b951bcf7f67dd66b9cd37de5', 'cmqcgp4pq00qreod4532aezdd', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b966c60489fd151585532463', 'cmqcgp5nc01bxeod4ijurri2b', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b9699b8647aec921f2fe304c', 'cmqcgp4vu00vleod4rgoucpqt', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b999e656ad19908eafd92921', 'cmqcgp5or01cxeod4pi8wh1a1', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b9f50d24200475c05174c68b', 'cmqcgp5hv018ceod42kndlyoa', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_b9fde354e3f06a6cfe7ab3e8', 'cmqcgp51m00z6eod4yodxuhuz', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ba1054e88af55fc86c3bb36a', 'cmqcgp4tj00tieod4toczzyy4', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ba20a243932cb19bbb8e3e92', 'cmqcgp4yo00xieod4dpw507wc', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ba5f1294e6eb18fbc144b524', 'cmqcgp5dg014xeod45x0yptp7', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ba60479a7953992791ca4a35', 'cmqcgp54i010reod454jqs28f', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ba6b0f03bc98830a6241427c', 'cmqcgp5kc01a3eod46uampe0s', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bab2e482e223ed292f09ede1', 'cmqcgp5ly01b6eod4e2syjgkp', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_badf7344ca4c2e977a747d6a', 'cmqcgp5j7019ieod4br9sza49', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_baeeebc2ae82406e435c5cc4', 'cmqcgp5c40143eod4803moqvb', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_baf9d99b6b96e71f3ac64e01', 'cmqcgp5el015leod4wrz0wla3', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000');
+INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `markedAt`, `ipAddress`, `createdAt`, `updatedAt`) VALUES
+('AR_bb05b0c4baac19f7081583c7', 'cmqcgp57c012leod4sq229zra', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bb458bd1805bbc7ec7f2f3a8', 'cmqcgp5gp017ieod47sx3smuu', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bb46a39c3b6605fdafb84d7d', 'cmqcgp56k0126eod45b1pdqr0', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bbb6cb718faa7792ddf72e51', 'cmqcgp5q401dueod4rbcjemsc', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bbc1319782d0d416d8b37d35', 'cmqcgp4xj00wueod41j9x0k00', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bc3c1b888c3bf5ed1cbc059d', 'cmqcgp50c00yceod4jn0za7gp', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bd0930dd6185ff7be7377fe4', 'cmqcgp5in018xeod41nfivs26', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bdc0ca73afff5d31bcf5bd23', 'cmqcgp4y500x3eod4v52ggv0v', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bdc10caef6a49624aefef003', 'cmqcgp4tx00tueod4epmnqiow', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_beef6a8edf288b067dd45e20', 'cmqcgp5rr01f6eod48s144x42', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bef857dc9cbfbd434a975ca8', 'cmqcgp5g90170eod4poeynhc0', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bf2a4ae34adc582fe1f3fa58', 'cmqcgp4tm00tleod4sczn0ms7', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bf5a991667966540e216c71b', 'cmqcgp4w700vreod443l6ks1m', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bfac601bf951d23b07202d8e', 'cmqcgp5do0153eod4fxadtggk', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bfe3deaf3e92db95927b7d94', 'cmqcgp5lg01areod46btou4ey', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_bff7aeb6c7f65b3d1bca6d10', 'cmqcgp4v300v0eod4hb5ft239', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c010d6c248d505693b627c5e', 'cmqcgp5it0193eod4v9we04bn', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c011f7f3ee08ac75d7a780e6', 'cmqcgp5r201ereod4x0ow11cp', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c0ec7ef644da7ea0adfb4fe0', 'cmqcgp50900y9eod4tc9xvu40', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c16f719eadefdaa7dad310ae', 'cmqcgp562011ueod4y04fyf70', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c2819308053b5b67e70eeedc', 'cmqcgp4v500v3eod404gdcqdk', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c2bd49c292d9a8988f64721e', 'cmqcgp55e0119eod4qkzxy5nu', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c2e4f3fe6430dd58aed7fb32', 'cmqcgp4uo00uleod4eqr02wwf', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c31d3395100ac11710d6ce49', 'cmqcgp55o011ieod4svuebazw', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c325d7bf74e535e34540971c', 'cmqcgp55j011ceod4vgrps5kz', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c3b9cfbe7a6a391c8a1fcd72', 'cmqcgp53800zueod4ziq4vmqa', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c3c1f9df9fac7b1902ad12ff', 'cmqcgp4vu00vleod4rgoucpqt', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c3dcd2716e68984bef6dbfea', 'cmqcgp53o0103eod4b6ka08nj', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c45c7ce5b982baea993b66cc', 'cmqcgp5c40143eod4803moqvb', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c46d4a8c84294e7661af9710', 'cmqcgp5j2019ceod4xgrab0ih', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c4ae9d8206e24ec87d8a4f0e', 'cmqcgp5f1015ueod4t9bfifph', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c4cc54063f4feb94527b279e', 'cmqcgp4x100wceod42g2rxond', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c525ddf92bda983d9a46f952', 'cmqcgp59t013ceod4xydrecca', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c5508b6b79785e84adf66d31', 'cmqcgp4w700vreod443l6ks1m', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c5664260a12c09cd19b76013', 'cmqcgp5ik018ueod4ln7elibb', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c64633ab3ad8fcbf3f14137d', 'cmqcgp5hp0189eod4grmlmigk', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c77aa3486370b8fc745b4ccd', 'cmqcgp52k00zieod4o9exvts5', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c7a124c5b8f4052af3ace342', 'cmqcgp5ou01d0eod4n8r1gamh', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c80d821ad19cd4cd26464fbf', 'cmqcgp4vd00vceod43p1h28yj', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c8289e9d20b406191e60e48e', 'cmqcgp5cq014feod4zlaow1nb', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c84d5e54cb2df46427e4e7a3', 'cmqcgp5d2014oeod4nii9gn5a', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c86eb8dca685cf25618a4f66', 'cmqcgp5jb019leod46flj7pav', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c8722f59976d4db35cdb6be6', 'cmqcgp5fd0166eod4lxh71x4p', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c900b812de4321bb6162bf92', 'cmqcgp5s801fceod41yr9oqnr', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c913de64d2a2c49e31292977', 'cmqcgp5hj0186eod4vgzyvlub', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c974ea38783329ea6c7cc1a7', 'cmqcgp5b9013ueod42fqjc4k7', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c977ce9ab137a4adbcd96e8d', 'cmqcgp5ce0149eod4pkx5ltig', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_c982f776f7802a5a4baac572', 'cmqcgp59t013ceod4xydrecca', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ca2b08b8e2917b8fd6abf557', 'cmqcgp55j011ceod4vgrps5kz', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cac78fff94ecee02e886b0d9', 'cmqcgp4r600rxeod4wi45lk3w', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_caf5adaaca34d9fbd5b8335f', 'cmqcgp5p701dceod46nsbuomh', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb03af9e9462914e9f827653', 'cmqcgp5hj0186eod4vgzyvlub', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb081a1126d1711d07595c3c', 'cmqcgp4u000txeod4cr60lpne', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb191c195c651365ad47e4a6', 'cmqcgp4v300v0eod4hb5ft239', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb41c675d8f1a819f9f495a1', 'cmqcgp5ce0149eod4pkx5ltig', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb466d11abb8897024ece8e4', 'cmqcgp5kk01a9eod4v1g0qq4z', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cb4f9e7afcc1c975ea0879f8', 'cmqcgp5qf01e3eod44vows1nf', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cbd8e92747932471ad78e1b5', 'cmqcgp4td00tceod4s3aje6ls', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cbd90bb8e95daa2d12db5f3e', 'cmqcgp56w0129eod4unhemzv0', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ccbd270bebf525af0eb02836', 'cmqcgp5nt01c9eod4yqe7nhu8', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ccf7577936480b7da33d57eb', 'cmqcgp4qk00rceod41qnjeh7g', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cd24fdeb648df90e7a0b6555', 'cmqcgp4y500x3eod4v52ggv0v', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cd59c5cf1379927c71a8e641', 'cmqcgp4uo00uleod4eqr02wwf', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cd832b0b198006790c295080', 'cmqcgp5fq016leod49oijrekx', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cdd040f07a919c938fa3027d', 'cmqcgp4x400wfeod4ben8nh48', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ce031edec967fc7963f41e82', 'cmqcgp5ib018leod4fh1d33bc', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ceb507c55d04fdbf237be4d1', 'cmqcgp4xj00wueod41j9x0k00', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ced82fe5a5b8520bf48437fd', 'cmqcgp5ik018ueod4ln7elibb', 'AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ceec85b33ccb49fd8ac7d4d2', 'cmqcgp4uu00ureod4s18a0jw7', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cf8b1909c5918d80e214fa49', 'cmqcgp57i012reod4acrejsqr', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cf8dd962aa8f4d54cb6f3791', 'cmqcgp4xg00wreod4phy040z8', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cfcb9fb314ccf06289e79328', 'cmqcgp57o012ueod48ib0rbmc', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cfd58dd4253c2cbc50c53dd7', 'cmqcgp55o011ieod4svuebazw', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_cfe6ae39a404dc16972066fd', 'cmqcgp59k0136eod4b7f2hmyw', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d074326b32062f460a9df750', 'cmqcgp5h3017xeod412shn8hc', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d0b4381932fbcbf85fbd5197', 'cmqcgp57i012reod4acrejsqr', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d0bb0830d4a18cea1c6a1d68', 'cmqcgp5j5019feod45i78yr67', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d0cd0f8a9374324bbd675309', 'cmqcgp4ua00u6eod47iuuf7k2', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d0ebb663648c62ffac65e772', 'cmqcgp53300zreod4knm5lhbh', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d16c86ffb771bcc69771848b', 'cmqcgp5ku01aceod4d91ju8sw', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d1dd46534ec4085ff8bdac36', 'cmqcgp4qg00r9eod4vcdgd29e', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d1ee24dcf702c4706f613a56', 'cmqcgp5kz01afeod4cn61vzxg', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d2a35bdc6040be87bcdf6c2b', 'cmqcgp54x0116eod4r9khlxjt', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d4945905058594a28e9c67da', 'cmqcgp540010ceod45zez8tq6', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d4a88c8d1137792d890db40d', 'cmqcgp4x900wleod4fu7b80zj', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d4ca7096f6be370835e2357d', 'cmqcgp5kk01a9eod4v1g0qq4z', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d5213ccca57ae314c35c88a0', 'cmqcgp5er015oeod4l1y8pb8x', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d54a94eb4e61c7ee6ab668ab', 'cmqcgp5g0016reod4j4ebk0dr', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d56490671df2aae5958c834c', 'cmqcgp4uo00uleod4eqr02wwf', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d58dd4114048c2e865d9b863', 'cmqcgp5qu01eieod407bgqjwk', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d5b85767488a7a6b11ccceed', 'cmqcgp5ix0196eod4yllqrdxc', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d5d778d58342c3998e5493aa', 'cmqcgp5lg01areod46btou4ey', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d6064b4c3af9eafceaeddd05', 'cmqcgp57f012oeod4rw05fgdf', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d6341408197bbbf1d4c922b4', 'cmqcgp4wq00w3eod4my16h4y3', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d63b6705b464c30bef547f15', 'cmqcgp4qu00rleod48kswlny1', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d64f7169896033285f13b0b8', 'cmqcgp4z400xueod48pljwg52', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d6a4686f39bc398a3c5f43d6', 'cmqcgp5e5015ceod4axtz50xi', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d6da746b4b2dce63bd1be594', 'cmqcgp4rd00s3eod4qj0jck3s', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d718f6cf124b77e670e86015', 'cmqcgp5hp0189eod4grmlmigk', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d73899f0ed2bad1ac3c0d805', 'cmqcgp4wy00w9eod42d7v9aho', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d7a62853616fcdff13a7793e', 'cmqcgp55t011leod4b62u8ech', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d7cd5cefe58bf9df484822f0', 'cmqcgp5l401aieod4fvhtzzyx', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d8623610249ef0a28a0bcfa8', 'cmqcgp5el015leod4wrz0wla3', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d8b156eed4034115eb620998', 'cmqcgp53r0106eod4h9aa02a2', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d8fc840ed31087ba9b868630', 'cmqcgp5du0156eod4wwdq845t', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d914141a7cf1b1902e5a6e88', 'cmqcgp4zv00y0eod4k2av0rrd', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d9530618252624553f4b320e', 'cmqcgp5qk01e9eod4tuipd0ec', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d98dbacf9b4e969fb5d2e41a', 'cmqcgp5my01boeod4qq8rvxpp', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d99cbaad6f8fab50af2765c6', 'cmqcgp5pd01dieod4g6mvu7ue', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d9e3edd062cee9e9bdac72fc', 'cmqcgp5da014ueod4ux7icuj8', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_d9f6d118f416c53ab648ae6a', 'cmqcgp5fi016ceod4241c3ksp', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_da21bef50d78e763cd3676ae', 'cmqcgp5in018xeod41nfivs26', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_da30ff6eab1796486ae2fb88', 'cmqcgp5ou01d0eod4n8r1gamh', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_da73046cd6918c257566d3e8', 'cmqcgp4ui00ufeod47zzosj75', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dab44b77d24ebe6b23c6e9b9', 'cmqcgp5nc01bxeod4ijurri2b', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dab5ef04c1c0de251bdba6ab', 'cmqcgp5ge0176eod4zh2054fd', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dac37708d0731ab6d567626b', 'cmqcgp4yb00x9eod48qje6s9z', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dadfab288654c8d310cb587d', 'cmqcgp4ri00s9eod4y0k6nru9', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_db16dc4a5fb812ab3cd77dd5', 'cmqcgp53800zueod4ziq4vmqa', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dbb4e3c7900a523d1da1221d', 'cmqcgp50x00yueod4sjbybsqz', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dbc297da81f8b467bec8874d', 'cmqcgp5n401breod4ly8zy2xh', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dbe4707c50e4d44d33a1bf1d', 'cmqcgp5ea015feod4tggbv3je', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dc48e5f2bf4cbf5fa1d2ba8a', 'cmqcgp5c90146eod4zlu2fum4', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dc804c1bf1ea29477a1fb119', 'cmqcgp57f012oeod4rw05fgdf', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dca7692cee50711b91280647', 'cmqcgp5d2014oeod4nii9gn5a', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dcb449bda7c3a3b54deac177', 'cmqcgp4yb00x9eod48qje6s9z', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dcc5fe51349126d2142d8061', 'cmqcgp4sg00soeod45auktp41', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dcf371186b01521e7e6c5cd9', 'cmqcgp50x00yueod4sjbybsqz', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dcfd8516d9ec25120ba2662a', 'cmqcgp5o701cieod4bpv4qhn1', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dcfdc349f2b4bf6a60165433', 'cmqcgp4xy00wxeod491j0b1g1', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ddf737f35b2cd34fe1076c04', 'cmqcgp4wq00w3eod4my16h4y3', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dea44ca81c2ebb7951201142', 'cmqcgp565011xeod4dcb9r2jw', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_deec7b1512cdf0e42b8d7cfe', 'cmqcgp5cu014ieod48pmmncuz', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_df0f85e45cc41519bd16f5db', 'cmqcgp5jn019reod4lqqz2w5h', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_df192bd336df08a53a921d28', 'cmqcgp4yu00xoeod46g98vxs0', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_df3d722854d284a35a8bc7d3', 'cmqcgp4wi00vxeod4yl8l3yih', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_df59bd04d4587ba2ba17453b', 'cmqcgp5fn016ieod4lqq6btoa', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_dfd1f5c7690b2db553c4426c', 'cmqcgp5np01c6eod4fclbxrgb', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e046d91fab8cfdfca76b238e', 'cmqcgp5qu01eieod407bgqjwk', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e08fed504642a6e8ecbaef5d', 'cmqcgp4t200t3eod4xv8hgdmn', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e13aee57f4c6da9a43d8362b', 'cmqcgp5sf01ffeod4y6v08hv5', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e14798667729a6e7775c3ef5', 'cmqcgp4rd00s3eod4qj0jck3s', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e159b01a695b87198e15e23c', 'cmqcgp5h70180eod4qxa0e1zs', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e16b71c34472dd9d7a3f56d5', 'cmqcgp5gg0179eod4sq57v1ge', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e16f891eab82fff677e5d733', 'cmqcgp5np01c6eod4fclbxrgb', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e1e67d49b3f512b4db40c943', 'cmqcgp5h3017xeod412shn8hc', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e2407018b70e64ab7b95263e', 'cmqcgp50900y9eod4tc9xvu40', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e268904c8866e3cfb21d262e', 'cmqcgp4ri00s9eod4y0k6nru9', 'AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e295d079b6929eac830781f7', 'cmqcgp57c012leod4sq229zra', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e296c9d5c84e549e6f200e6d', 'cmqcgp4yu00xoeod46g98vxs0', 'AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e2a0f3109202e57d7d0ac5a9', 'cmqcgp54a010leod4m4lr8wwz', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e3887c9449409b8c9a64563c', 'cmqcgp53800zueod4ziq4vmqa', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e43c833b04d88fc1a79292f8', 'cmqcgp5ff0169eod4xatyj6sy', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e445412789fbdcbb7eb7bc9b', 'cmqcgp56k0126eod45b1pdqr0', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e48078610478bc398c2dae42', 'cmqcgp5pu01dleod4xziw7x5x', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e481ab4f804d682b4402cb01', 'cmqcgp5g6016xeod4mfbssdgt', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e4a51867d24975bfdc3bd28d', 'cmqcgp53800zueod4ziq4vmqa', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e525522efb3cbb761010a6cc', 'cmqcgp5mo01bieod41qft9ih0', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e5dd2b370701ac3413749a25', 'cmqcgp5my01boeod4qq8rvxpp', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e62bc07d2ffbfb53255ca354', 'cmqcgp5f1015ueod4t9bfifph', 'AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e65008a0fbe38ee1946fdc6e', 'cmqcgp5dk0150eod4j1roea56', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e69a29dc8ab5d2b5b686fdfe', 'cmqcgp5lq01b0eod4rub5tcq5', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e6cd49600d4dc0513ecbb188', 'cmqcgp5fb0163eod44fleydev', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e7194c825745ba5dc263b2ff', 'cmqcgp5g0016reod4j4ebk0dr', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e7246129650a5260d0a5d5d7', 'cmqcgp4tq00toeod4xykep27v', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e74a3da53534ba49b963b51d', 'cmqcgp5mc01bceod49a0janor', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e77bdcd713ee6d378ee701c0', 'cmqcgp5f70160eod4ptu2c77i', 'AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e7e88e62a29a9f9e4b5e079b', 'cmqcgp5o301cfeod4ozjnlmz6', 'AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e7f6d78b8f0bf1886f2ec974', 'cmqcgp5rj01f3eod4xqbbaf01', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e7faac3b78c834751ace8ffe', 'cmqcgp4q800r3eod42hfya9f5', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e801c1789af549fa0fa56a1c', 'cmqcgp4qx00roeod4z8rlqt3u', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e804e00d33a9e0a5bd5d0dd8', 'cmqcgp5ik018ueod4ln7elibb', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e828fe3b393b919e169c85eb', 'cmqcgp5j7019ieod4br9sza49', 'AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e8504e40c719108f4d12062d', 'cmqcgp5hj0186eod4vgzyvlub', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e873be220ff23e0b23a24031', 'cmqcgp5j5019feod45i78yr67', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e893c4340c6342bb44b72280', 'cmqcgp5qf01e3eod44vows1nf', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e923ec06684edb498ffeee92', 'cmqcgp4td00tceod4s3aje6ls', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e92b73b74a5b662bb4913b34', 'cmqcgp5rc01exeod4etvaf5mh', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e92e8413482e30052e67e960', 'cmqcgp547010ieod4w6mttpb7', 'AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_e984d9ab923e2c4ac76370dd', 'cmqcgp5b0013reod4cexeng5m', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ea0594636bfd1e5c3975f64f', 'cmqcgp5pa01dfeod4tejnn9pv', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ea2e591c67507b23f2e2c051', 'cmqcgp5g90170eod4poeynhc0', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eabf3cf44a1b76823e59c9a2', 'cmqcgp5p101d6eod4fx3fbwr1', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ead569b2ed86b8765a92ab4c', 'cmqcgp5jn019reod4lqqz2w5h', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eb04898a78958472c01d4f92', 'cmqcgp4qn00rfeod41yxlwt6z', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eb4b83ee76d7f2be537a9296', 'cmqcgp5e5015ceod4axtz50xi', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eb5ae800cfa898c533f56ca1', 'cmqcgp5pd01dieod4g6mvu7ue', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eba4b6af67ebf707fa6e7463', 'cmqcgp4q000qxeod4ouh797ut', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ebc07b3722c97ca475837474', 'cmqcgp5k1019xeod46av9s6ez', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ebd3fcd18f528b8f2b317c59', 'cmqcgp5mh01bfeod4i9cnva1n', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ecad75acc88e551eae4f89de', 'cmqcgp5px01doeod4izzrcf6b', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eccd319930278aeb02ea4827', 'cmqcgp4va00v9eod45j4u2y5p', 'AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ed27dcf1ebb8bd4e00866b86', 'cmqcgp4yu00xoeod46g98vxs0', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ed63cd1d4b006a837767e4ec', 'cmqcgp55m011feod4sg9vxv5u', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ed886d4981f198149ce4a8e8', 'cmqcgp5rj01f3eod4xqbbaf01', 'AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ed8a8d65e68b8092cb7f1098', 'cmqcgp4wu00w6eod4rl07htee', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_edeaa4529af494bba856df60', 'cmqcgp4r300rueod4bx2layal', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_eec2a148d1911800fa1c86dd', 'cmqcgp55w011oeod45umi0wcc', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_efb933d23d74f552cb851489', 'cmqcgp5eh015ieod4rsb7dfk7', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_efc65f869a706d5f2e1ace51', 'cmqcgp5i3018feod4h5te1fci', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f01a7238904b17b51d0d9e22', 'cmqcgp5jh019oeod4gkanbwkm', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f09014875d84cc8c7ad2f992', 'cmqcgp4ua00u6eod47iuuf7k2', 'AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f0d2b0a6221536bfe0b5cce1', 'cmqcgp4pq00qreod4532aezdd', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f12c241dc2dea4445786ff60', 'cmqcgp5rr01f6eod48s144x42', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f17dc15ed9941c727b5f0aea', 'cmqcgp5s801fceod41yr9oqnr', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f1d5e4c4f14bc5b9837740a3', 'cmqcgp59n0139eod4a0pnpeo2', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f28d66414acc23659f25446c', 'cmqcgp5iz0199eod4t01y78ya', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f2908245a5ec2380229f7111', 'cmqcgp5oc01cleod45aysn9k1', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f29e965c80f63d27e094cc88', 'cmqcgp54x0116eod4r9khlxjt', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f3133d328c0ba3d9fe117d26', 'cmqcgp5or01cxeod4pi8wh1a1', 'AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f35a8fffc7864334c952f9d7', 'cmqcgp5sf01ffeod4y6v08hv5', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f48bc505856f1bf87354f35b', 'cmqcgp5lj01aueod433l6az18', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f51bb7c49bc7dba80a9aea37', 'cmqcgp4ri00s9eod4y0k6nru9', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f53b68adb869de19ce2ed1e2', 'cmqcgp4r300rueod4bx2layal', 'AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f563fb82ec75c7d3419ae94a', 'cmqcgp5fd0166eod4lxh71x4p', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f56ac90f5cf4201902ba8bb2', 'cmqcgp5mc01bceod49a0janor', 'AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f58441ae2e6a8b8da56204ca', 'cmqcgp5ik018ueod4ln7elibb', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f5a93e59860218ae1dc54536', 'cmqcgp4sv00sxeod4wlb2lzlw', 'AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f5b8f3a6e63313b71411d9be', 'cmqcgp4x400wfeod4ben8nh48', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f5b965ec49cf97860e0a0e8e', 'cmqcgp4t900t9eod4k7mkpm68', 'AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f6542ce4a903b47202a9a762', 'cmqcgp57f012oeod4rw05fgdf', 'AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f6a0dcec1ee23182de02466e', 'cmqcgp5gu017oeod4q2ze9w17', 'AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f70d70cdfc66f759db85fb2f', 'cmqcgp4xy00wxeod491j0b1g1', 'AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f76a21e96114e18b50d2feff', 'cmqcgp5s801fceod41yr9oqnr', 'AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f791d175c978b86a77e28040', 'cmqcgp4x600wieod4a70ejsjx', 'AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f7990cd957a353068c02cb60', 'cmqcgp5c90146eod4zlu2fum4', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f7e758bb4bf928f784e29e9d', 'cmqcgp5rr01f6eod48s144x42', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f8d7c7d6dfceaac0932161bd', 'cmqcgp5c40143eod4803moqvb', 'AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f96cfbe12ee882bb925a09e0', 'cmqcgp54o010xeod4dccnj0jv', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_f9ce5296307c0e69944dff98', 'cmqcgp4sz00t0eod4tallxt7z', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fb10695d5a9ee0472a59625d', 'cmqcgp53v0109eod4ucleyzi4', 'AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fb98b485611be4b98e137c07', 'cmqcgp53k0100eod47ectu3x4', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fba98e78f2b1d77d405214e6', 'cmqcgp50000y3eod4350bxxdh', 'AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fbbfc96ff54ed7139f5019d2', 'cmqcgp5er015oeod4l1y8pb8x', 'AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fbedc52b208f22a6711634bd', 'cmqcgp56k0126eod45b1pdqr0', 'AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fbf2234dfbc51293399ab618', 'cmqcgp5kk01a9eod4v1g0qq4z', 'AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fc31742ccf30695249e4fd2c', 'cmqcgp5g3016ueod4cby3spx3', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fc48f2eb1de871c088ffd88d', 'cmqcgp52t00zoeod4fbua0px6', 'AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fc84db6864fd00026b67ad35', 'cmqcgp55j011ceod4vgrps5kz', 'AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-01 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fc9cde2ef3df7cd9a5934d69', 'cmqcgp5as013oeod413zo6qfe', 'AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fd2d43d8c5ab283e5f3d4825', 'cmqcgp4sm00sreod4h7fmtwnf', 'AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fd4c64742850c3b751147a81', 'cmqcgp5q801dxeod48pzsa9tk', 'AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fd6f66b98797c93341adb58e', 'cmqcgp5in018xeod41nfivs26', 'AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fe213783ba283873d78d26ef', 'cmqcgp5oc01cleod45aysn9k1', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fe7638216d8d577eff17d85a', 'cmqcgp51800z0eod4bdsv6l22', 'AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fe8e22921c7fd0898f16f524', 'cmqcgp4tx00tueod4epmnqiow', 'AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fed5e94308246d90ecfcdb12', 'cmqcgp5q101dreod473hwf5yq', 'AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fee913b579b6c190fc4e8111', 'cmqcgp5nl01c3eod4suw5wyu5', 'AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_fef55b2889d62a5b1cd0d82d', 'cmqcgp5cq014feod4zlaow1nb', 'AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', '2026-05-25 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ff07a924579b5f13ee2d7d85', 'cmqcgp54r0110eod48ph12abe', 'AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', '2026-06-15 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000'),
+('AR_ffc1031bca2fb463a4fe37d2', 'cmqcgp5gw017reod47l4woz22', 'AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', '2026-06-08 09:05:00.000', NULL, '2026-06-15 13:16:28.000', '2026-06-15 13:16:28.000');
 
 -- --------------------------------------------------------
 
@@ -6557,7 +7606,8 @@ INSERT INTO `attendance_records` (`id`, `studentId`, `attendanceSessionId`, `mar
 -- Table structure for table `attendance_sessions`
 --
 
-CREATE TABLE `attendance_sessions` (
+DROP TABLE IF EXISTS `attendance_sessions`;
+CREATE TABLE IF NOT EXISTS `attendance_sessions` (
   `id` varchar(191) NOT NULL,
   `teacherId` varchar(191) NOT NULL,
   `subjectId` varchar(191) NOT NULL,
@@ -6570,18 +7620,191 @@ CREATE TABLE `attendance_sessions` (
   `startedAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
   `endedAt` datetime(3) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `attendance_sessions_qrCode_key` (`qrCode`),
+  KEY `attendance_sessions_qrCode_idx` (`qrCode`),
+  KEY `attendance_sessions_isActive_idx` (`isActive`),
+  KEY `attendance_sessions_teacherId_idx` (`teacherId`),
+  KEY `attendance_sessions_subjectId_idx` (`subjectId`),
+  KEY `attendance_sessions_departmentId_fkey` (`departmentId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `attendance_sessions`:
+--   `departmentId`
+--       `departments` -> `id`
+--   `subjectId`
+--       `subjects` -> `id`
+--   `teacherId`
+--       `teachers` -> `id`
+--
 
 --
 -- Dumping data for table `attendance_sessions`
 --
 
 INSERT INTO `attendance_sessions` (`id`, `teacherId`, `subjectId`, `departmentId`, `semester`, `section`, `qrCode`, `isActive`, `duration`, `startedAt`, `endedAt`, `createdAt`, `updatedAt`) VALUES
-('manual_session_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
-('manual_session_2', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_2', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
-('manual_session_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000'),
-('manual_session_4', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_TEST_4', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 12:06:36.000', '2026-06-15 12:06:36.000');
+('AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 1, 'A', 'QR_0525_cmqcgp3rb0000eod4owh4fkqe_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3t7000veod4k64l2ned', 'cmqcgp3rb0000eod4owh4fkqe', 3, 'A', 'QR_0525_cmqcgp3rb0000eod4owh4fkqe_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_5', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3tp001feod4ie7ht907', 'cmqcgp3rb0000eod4owh4fkqe', 5, 'A', 'QR_0525_cmqcgp3rb0000eod4owh4fkqe_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rb0000eod4owh4fkqe_7', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3u9001zeod4hdhfl76k', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_0525_cmqcgp3rb0000eod4owh4fkqe_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rh0001eod47yosjqrx_1', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3uq002jeod4q2qx1v7c', 'cmqcgp3rh0001eod47yosjqrx', 1, 'A', 'QR_0525_cmqcgp3rh0001eod47yosjqrx_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rh0001eod47yosjqrx_3', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3va0033eod4zcijsmjy', 'cmqcgp3rh0001eod47yosjqrx', 3, 'A', 'QR_0525_cmqcgp3rh0001eod47yosjqrx_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rh0001eod47yosjqrx_5', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3vs003neod4015e8y6q', 'cmqcgp3rh0001eod47yosjqrx', 5, 'A', 'QR_0525_cmqcgp3rh0001eod47yosjqrx_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rh0001eod47yosjqrx_7', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3w70047eod4zeghti9n', 'cmqcgp3rh0001eod47yosjqrx', 7, 'A', 'QR_0525_cmqcgp3rh0001eod47yosjqrx_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rl0002eod4taul62m8_1', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3wo004reod4aq9xppfi', 'cmqcgp3rl0002eod4taul62m8', 1, 'A', 'QR_0525_cmqcgp3rl0002eod4taul62m8_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rl0002eod4taul62m8_3', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3x2005beod48wxsgxr3', 'cmqcgp3rl0002eod4taul62m8', 3, 'A', 'QR_0525_cmqcgp3rl0002eod4taul62m8_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rl0002eod4taul62m8_5', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xf005veod4k1s1kuq3', 'cmqcgp3rl0002eod4taul62m8', 5, 'A', 'QR_0525_cmqcgp3rl0002eod4taul62m8_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rl0002eod4taul62m8_7', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xt006feod4dz694xpn', 'cmqcgp3rl0002eod4taul62m8', 7, 'A', 'QR_0525_cmqcgp3rl0002eod4taul62m8_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_1', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3y9006zeod4o99aq4yr', 'cmqcgp3ro0003eod4dunu4xiz', 1, 'A', 'QR_0525_cmqcgp3ro0003eod4dunu4xiz_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_3', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3yt007jeod4ha1948c2', 'cmqcgp3ro0003eod4dunu4xiz', 3, 'A', 'QR_0525_cmqcgp3ro0003eod4dunu4xiz_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_5', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zc0083eod4e2muex04', 'cmqcgp3ro0003eod4dunu4xiz', 5, 'A', 'QR_0525_cmqcgp3ro0003eod4dunu4xiz_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ro0003eod4dunu4xiz_7', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zu008neod4wr7q3sy7', 'cmqcgp3ro0003eod4dunu4xiz', 7, 'A', 'QR_0525_cmqcgp3ro0003eod4dunu4xiz_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_1', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp40q0097eod4s1ubynf3', 'cmqcgp3rq0004eod4gdnorf0d', 1, 'A', 'QR_0525_cmqcgp3rq0004eod4gdnorf0d_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_3', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp416009reod4h0ccdroz', 'cmqcgp3rq0004eod4gdnorf0d', 3, 'A', 'QR_0525_cmqcgp3rq0004eod4gdnorf0d_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_5', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp41l00abeod4qw4zibix', 'cmqcgp3rq0004eod4gdnorf0d', 5, 'A', 'QR_0525_cmqcgp3rq0004eod4gdnorf0d_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rq0004eod4gdnorf0d_7', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp42100aveod42gqa9ryc', 'cmqcgp3rq0004eod4gdnorf0d', 7, 'A', 'QR_0525_cmqcgp3rq0004eod4gdnorf0d_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_1', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42i00bfeod426la23o4', 'cmqcgp3rt0005eod4s6zyrk7p', 1, 'A', 'QR_0525_cmqcgp3rt0005eod4s6zyrk7p_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_3', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42y00bzeod4n1aho7lb', 'cmqcgp3rt0005eod4s6zyrk7p', 3, 'A', 'QR_0525_cmqcgp3rt0005eod4s6zyrk7p_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_5', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43c00cjeod4umx86lrc', 'cmqcgp3rt0005eod4s6zyrk7p', 5, 'A', 'QR_0525_cmqcgp3rt0005eod4s6zyrk7p_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rt0005eod4s6zyrk7p_7', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43q00d3eod4hix9gs41', 'cmqcgp3rt0005eod4s6zyrk7p', 7, 'A', 'QR_0525_cmqcgp3rt0005eod4s6zyrk7p_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rw0006eod4ji2szpge_1', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp44400dneod4cl07p2r3', 'cmqcgp3rw0006eod4ji2szpge', 1, 'A', 'QR_0525_cmqcgp3rw0006eod4ji2szpge_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rw0006eod4ji2szpge_3', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp45200e7eod47kqvbklh', 'cmqcgp3rw0006eod4ji2szpge', 3, 'A', 'QR_0525_cmqcgp3rw0006eod4ji2szpge_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rw0006eod4ji2szpge_5', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp46j00ereod425m0vc0i', 'cmqcgp3rw0006eod4ji2szpge', 5, 'A', 'QR_0525_cmqcgp3rw0006eod4ji2szpge_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3rw0006eod4ji2szpge_7', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp47j00fbeod49mcanepu', 'cmqcgp3rw0006eod4ji2szpge', 7, 'A', 'QR_0525_cmqcgp3rw0006eod4ji2szpge_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ry0007eod47n49ci0g_1', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp48m00fveod4x4wn2gkt', 'cmqcgp3ry0007eod47n49ci0g', 1, 'A', 'QR_0525_cmqcgp3ry0007eod47n49ci0g_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ry0007eod47n49ci0g_3', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp49c00gfeod4v8t5hf4t', 'cmqcgp3ry0007eod47n49ci0g', 3, 'A', 'QR_0525_cmqcgp3ry0007eod47n49ci0g_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ry0007eod47n49ci0g_5', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4ah00gzeod4h3euklp0', 'cmqcgp3ry0007eod47n49ci0g', 5, 'A', 'QR_0525_cmqcgp3ry0007eod47n49ci0g_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3ry0007eod47n49ci0g_7', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4bi00hjeod44n24bc9r', 'cmqcgp3ry0007eod47n49ci0g', 7, 'A', 'QR_0525_cmqcgp3ry0007eod47n49ci0g_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s20008eod42mm9qn1z_1', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4c000i3eod4ooxgl44f', 'cmqcgp3s20008eod42mm9qn1z', 1, 'A', 'QR_0525_cmqcgp3s20008eod42mm9qn1z_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s20008eod42mm9qn1z_3', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4cq00ineod4xgeiuqjg', 'cmqcgp3s20008eod42mm9qn1z', 3, 'A', 'QR_0525_cmqcgp3s20008eod42mm9qn1z_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s20008eod42mm9qn1z_5', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4dv00j7eod4v6cf6amf', 'cmqcgp3s20008eod42mm9qn1z', 5, 'A', 'QR_0525_cmqcgp3s20008eod42mm9qn1z_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s20008eod42mm9qn1z_7', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4ef00jreod40tqfn7ky', 'cmqcgp3s20008eod42mm9qn1z', 7, 'A', 'QR_0525_cmqcgp3s20008eod42mm9qn1z_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s40009eod4alj6k5iu_1', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4eu00kbeod4lr0ftpki', 'cmqcgp3s40009eod4alj6k5iu', 1, 'A', 'QR_0525_cmqcgp3s40009eod4alj6k5iu_1', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s40009eod4alj6k5iu_3', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4f800kveod4tnuzbij3', 'cmqcgp3s40009eod4alj6k5iu', 3, 'A', 'QR_0525_cmqcgp3s40009eod4alj6k5iu_3', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s40009eod4alj6k5iu_5', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4fs00lfeod4ctblnq2n', 'cmqcgp3s40009eod4alj6k5iu', 5, 'A', 'QR_0525_cmqcgp3s40009eod4alj6k5iu_5', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0525_cmqcgp3s40009eod4alj6k5iu_7', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4i100lzeod4z029ktog', 'cmqcgp3s40009eod4alj6k5iu', 7, 'A', 'QR_0525_cmqcgp3s40009eod4alj6k5iu_7', 0, 60, '2026-05-25 09:00:00.000', '2026-05-25 10:00:00.000', '2026-06-15 13:10:43.000', '2026-06-15 13:10:43.000'),
+('AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 1, 'A', 'QR_0601_cmqcgp3rb0000eod4owh4fkqe_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3t7000veod4k64l2ned', 'cmqcgp3rb0000eod4owh4fkqe', 3, 'A', 'QR_0601_cmqcgp3rb0000eod4owh4fkqe_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_5', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3tp001feod4ie7ht907', 'cmqcgp3rb0000eod4owh4fkqe', 5, 'A', 'QR_0601_cmqcgp3rb0000eod4owh4fkqe_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rb0000eod4owh4fkqe_7', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3u9001zeod4hdhfl76k', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_0601_cmqcgp3rb0000eod4owh4fkqe_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rh0001eod47yosjqrx_1', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3uq002jeod4q2qx1v7c', 'cmqcgp3rh0001eod47yosjqrx', 1, 'A', 'QR_0601_cmqcgp3rh0001eod47yosjqrx_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rh0001eod47yosjqrx_3', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3va0033eod4zcijsmjy', 'cmqcgp3rh0001eod47yosjqrx', 3, 'A', 'QR_0601_cmqcgp3rh0001eod47yosjqrx_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rh0001eod47yosjqrx_5', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3vs003neod4015e8y6q', 'cmqcgp3rh0001eod47yosjqrx', 5, 'A', 'QR_0601_cmqcgp3rh0001eod47yosjqrx_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rh0001eod47yosjqrx_7', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3w70047eod4zeghti9n', 'cmqcgp3rh0001eod47yosjqrx', 7, 'A', 'QR_0601_cmqcgp3rh0001eod47yosjqrx_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rl0002eod4taul62m8_1', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3wo004reod4aq9xppfi', 'cmqcgp3rl0002eod4taul62m8', 1, 'A', 'QR_0601_cmqcgp3rl0002eod4taul62m8_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rl0002eod4taul62m8_3', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3x2005beod48wxsgxr3', 'cmqcgp3rl0002eod4taul62m8', 3, 'A', 'QR_0601_cmqcgp3rl0002eod4taul62m8_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rl0002eod4taul62m8_5', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xf005veod4k1s1kuq3', 'cmqcgp3rl0002eod4taul62m8', 5, 'A', 'QR_0601_cmqcgp3rl0002eod4taul62m8_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rl0002eod4taul62m8_7', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xt006feod4dz694xpn', 'cmqcgp3rl0002eod4taul62m8', 7, 'A', 'QR_0601_cmqcgp3rl0002eod4taul62m8_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_1', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3y9006zeod4o99aq4yr', 'cmqcgp3ro0003eod4dunu4xiz', 1, 'A', 'QR_0601_cmqcgp3ro0003eod4dunu4xiz_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_3', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3yt007jeod4ha1948c2', 'cmqcgp3ro0003eod4dunu4xiz', 3, 'A', 'QR_0601_cmqcgp3ro0003eod4dunu4xiz_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_5', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zc0083eod4e2muex04', 'cmqcgp3ro0003eod4dunu4xiz', 5, 'A', 'QR_0601_cmqcgp3ro0003eod4dunu4xiz_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ro0003eod4dunu4xiz_7', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zu008neod4wr7q3sy7', 'cmqcgp3ro0003eod4dunu4xiz', 7, 'A', 'QR_0601_cmqcgp3ro0003eod4dunu4xiz_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_1', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp40q0097eod4s1ubynf3', 'cmqcgp3rq0004eod4gdnorf0d', 1, 'A', 'QR_0601_cmqcgp3rq0004eod4gdnorf0d_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_3', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp416009reod4h0ccdroz', 'cmqcgp3rq0004eod4gdnorf0d', 3, 'A', 'QR_0601_cmqcgp3rq0004eod4gdnorf0d_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_5', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp41l00abeod4qw4zibix', 'cmqcgp3rq0004eod4gdnorf0d', 5, 'A', 'QR_0601_cmqcgp3rq0004eod4gdnorf0d_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rq0004eod4gdnorf0d_7', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp42100aveod42gqa9ryc', 'cmqcgp3rq0004eod4gdnorf0d', 7, 'A', 'QR_0601_cmqcgp3rq0004eod4gdnorf0d_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_1', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42i00bfeod426la23o4', 'cmqcgp3rt0005eod4s6zyrk7p', 1, 'A', 'QR_0601_cmqcgp3rt0005eod4s6zyrk7p_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_3', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42y00bzeod4n1aho7lb', 'cmqcgp3rt0005eod4s6zyrk7p', 3, 'A', 'QR_0601_cmqcgp3rt0005eod4s6zyrk7p_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_5', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43c00cjeod4umx86lrc', 'cmqcgp3rt0005eod4s6zyrk7p', 5, 'A', 'QR_0601_cmqcgp3rt0005eod4s6zyrk7p_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rt0005eod4s6zyrk7p_7', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43q00d3eod4hix9gs41', 'cmqcgp3rt0005eod4s6zyrk7p', 7, 'A', 'QR_0601_cmqcgp3rt0005eod4s6zyrk7p_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rw0006eod4ji2szpge_1', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp44400dneod4cl07p2r3', 'cmqcgp3rw0006eod4ji2szpge', 1, 'A', 'QR_0601_cmqcgp3rw0006eod4ji2szpge_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rw0006eod4ji2szpge_3', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp45200e7eod47kqvbklh', 'cmqcgp3rw0006eod4ji2szpge', 3, 'A', 'QR_0601_cmqcgp3rw0006eod4ji2szpge_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rw0006eod4ji2szpge_5', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp46j00ereod425m0vc0i', 'cmqcgp3rw0006eod4ji2szpge', 5, 'A', 'QR_0601_cmqcgp3rw0006eod4ji2szpge_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3rw0006eod4ji2szpge_7', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp47j00fbeod49mcanepu', 'cmqcgp3rw0006eod4ji2szpge', 7, 'A', 'QR_0601_cmqcgp3rw0006eod4ji2szpge_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ry0007eod47n49ci0g_1', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp48m00fveod4x4wn2gkt', 'cmqcgp3ry0007eod47n49ci0g', 1, 'A', 'QR_0601_cmqcgp3ry0007eod47n49ci0g_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ry0007eod47n49ci0g_3', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp49c00gfeod4v8t5hf4t', 'cmqcgp3ry0007eod47n49ci0g', 3, 'A', 'QR_0601_cmqcgp3ry0007eod47n49ci0g_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ry0007eod47n49ci0g_5', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4ah00gzeod4h3euklp0', 'cmqcgp3ry0007eod47n49ci0g', 5, 'A', 'QR_0601_cmqcgp3ry0007eod47n49ci0g_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3ry0007eod47n49ci0g_7', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4bi00hjeod44n24bc9r', 'cmqcgp3ry0007eod47n49ci0g', 7, 'A', 'QR_0601_cmqcgp3ry0007eod47n49ci0g_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s20008eod42mm9qn1z_1', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4c000i3eod4ooxgl44f', 'cmqcgp3s20008eod42mm9qn1z', 1, 'A', 'QR_0601_cmqcgp3s20008eod42mm9qn1z_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s20008eod42mm9qn1z_3', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4cq00ineod4xgeiuqjg', 'cmqcgp3s20008eod42mm9qn1z', 3, 'A', 'QR_0601_cmqcgp3s20008eod42mm9qn1z_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s20008eod42mm9qn1z_5', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4dv00j7eod4v6cf6amf', 'cmqcgp3s20008eod42mm9qn1z', 5, 'A', 'QR_0601_cmqcgp3s20008eod42mm9qn1z_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s20008eod42mm9qn1z_7', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4ef00jreod40tqfn7ky', 'cmqcgp3s20008eod42mm9qn1z', 7, 'A', 'QR_0601_cmqcgp3s20008eod42mm9qn1z_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s40009eod4alj6k5iu_1', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4eu00kbeod4lr0ftpki', 'cmqcgp3s40009eod4alj6k5iu', 1, 'A', 'QR_0601_cmqcgp3s40009eod4alj6k5iu_1', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s40009eod4alj6k5iu_3', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4f800kveod4tnuzbij3', 'cmqcgp3s40009eod4alj6k5iu', 3, 'A', 'QR_0601_cmqcgp3s40009eod4alj6k5iu_3', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s40009eod4alj6k5iu_5', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4fs00lfeod4ctblnq2n', 'cmqcgp3s40009eod4alj6k5iu', 5, 'A', 'QR_0601_cmqcgp3s40009eod4alj6k5iu_5', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0601_cmqcgp3s40009eod4alj6k5iu_7', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4i100lzeod4z029ktog', 'cmqcgp3s40009eod4alj6k5iu', 7, 'A', 'QR_0601_cmqcgp3s40009eod4alj6k5iu_7', 0, 60, '2026-06-01 09:00:00.000', '2026-06-01 10:00:00.000', '2026-06-15 13:11:52.000', '2026-06-15 13:11:52.000'),
+('AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 1, 'A', 'QR_0608_cmqcgp3rb0000eod4owh4fkqe_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3t7000veod4k64l2ned', 'cmqcgp3rb0000eod4owh4fkqe', 3, 'A', 'QR_0608_cmqcgp3rb0000eod4owh4fkqe_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_5', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3tp001feod4ie7ht907', 'cmqcgp3rb0000eod4owh4fkqe', 5, 'A', 'QR_0608_cmqcgp3rb0000eod4owh4fkqe_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rb0000eod4owh4fkqe_7', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3u9001zeod4hdhfl76k', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_0608_cmqcgp3rb0000eod4owh4fkqe_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rh0001eod47yosjqrx_1', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3uq002jeod4q2qx1v7c', 'cmqcgp3rh0001eod47yosjqrx', 1, 'A', 'QR_0608_cmqcgp3rh0001eod47yosjqrx_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rh0001eod47yosjqrx_3', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3va0033eod4zcijsmjy', 'cmqcgp3rh0001eod47yosjqrx', 3, 'A', 'QR_0608_cmqcgp3rh0001eod47yosjqrx_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rh0001eod47yosjqrx_5', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3vs003neod4015e8y6q', 'cmqcgp3rh0001eod47yosjqrx', 5, 'A', 'QR_0608_cmqcgp3rh0001eod47yosjqrx_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rh0001eod47yosjqrx_7', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3w70047eod4zeghti9n', 'cmqcgp3rh0001eod47yosjqrx', 7, 'A', 'QR_0608_cmqcgp3rh0001eod47yosjqrx_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rl0002eod4taul62m8_1', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3wo004reod4aq9xppfi', 'cmqcgp3rl0002eod4taul62m8', 1, 'A', 'QR_0608_cmqcgp3rl0002eod4taul62m8_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rl0002eod4taul62m8_3', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3x2005beod48wxsgxr3', 'cmqcgp3rl0002eod4taul62m8', 3, 'A', 'QR_0608_cmqcgp3rl0002eod4taul62m8_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rl0002eod4taul62m8_5', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xf005veod4k1s1kuq3', 'cmqcgp3rl0002eod4taul62m8', 5, 'A', 'QR_0608_cmqcgp3rl0002eod4taul62m8_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rl0002eod4taul62m8_7', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xt006feod4dz694xpn', 'cmqcgp3rl0002eod4taul62m8', 7, 'A', 'QR_0608_cmqcgp3rl0002eod4taul62m8_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_1', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3y9006zeod4o99aq4yr', 'cmqcgp3ro0003eod4dunu4xiz', 1, 'A', 'QR_0608_cmqcgp3ro0003eod4dunu4xiz_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_3', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3yt007jeod4ha1948c2', 'cmqcgp3ro0003eod4dunu4xiz', 3, 'A', 'QR_0608_cmqcgp3ro0003eod4dunu4xiz_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_5', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zc0083eod4e2muex04', 'cmqcgp3ro0003eod4dunu4xiz', 5, 'A', 'QR_0608_cmqcgp3ro0003eod4dunu4xiz_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ro0003eod4dunu4xiz_7', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zu008neod4wr7q3sy7', 'cmqcgp3ro0003eod4dunu4xiz', 7, 'A', 'QR_0608_cmqcgp3ro0003eod4dunu4xiz_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_1', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp40q0097eod4s1ubynf3', 'cmqcgp3rq0004eod4gdnorf0d', 1, 'A', 'QR_0608_cmqcgp3rq0004eod4gdnorf0d_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_3', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp416009reod4h0ccdroz', 'cmqcgp3rq0004eod4gdnorf0d', 3, 'A', 'QR_0608_cmqcgp3rq0004eod4gdnorf0d_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_5', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp41l00abeod4qw4zibix', 'cmqcgp3rq0004eod4gdnorf0d', 5, 'A', 'QR_0608_cmqcgp3rq0004eod4gdnorf0d_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rq0004eod4gdnorf0d_7', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp42100aveod42gqa9ryc', 'cmqcgp3rq0004eod4gdnorf0d', 7, 'A', 'QR_0608_cmqcgp3rq0004eod4gdnorf0d_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_1', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42i00bfeod426la23o4', 'cmqcgp3rt0005eod4s6zyrk7p', 1, 'A', 'QR_0608_cmqcgp3rt0005eod4s6zyrk7p_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_3', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42y00bzeod4n1aho7lb', 'cmqcgp3rt0005eod4s6zyrk7p', 3, 'A', 'QR_0608_cmqcgp3rt0005eod4s6zyrk7p_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_5', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43c00cjeod4umx86lrc', 'cmqcgp3rt0005eod4s6zyrk7p', 5, 'A', 'QR_0608_cmqcgp3rt0005eod4s6zyrk7p_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rt0005eod4s6zyrk7p_7', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43q00d3eod4hix9gs41', 'cmqcgp3rt0005eod4s6zyrk7p', 7, 'A', 'QR_0608_cmqcgp3rt0005eod4s6zyrk7p_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rw0006eod4ji2szpge_1', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp44400dneod4cl07p2r3', 'cmqcgp3rw0006eod4ji2szpge', 1, 'A', 'QR_0608_cmqcgp3rw0006eod4ji2szpge_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rw0006eod4ji2szpge_3', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp45200e7eod47kqvbklh', 'cmqcgp3rw0006eod4ji2szpge', 3, 'A', 'QR_0608_cmqcgp3rw0006eod4ji2szpge_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rw0006eod4ji2szpge_5', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp46j00ereod425m0vc0i', 'cmqcgp3rw0006eod4ji2szpge', 5, 'A', 'QR_0608_cmqcgp3rw0006eod4ji2szpge_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3rw0006eod4ji2szpge_7', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp47j00fbeod49mcanepu', 'cmqcgp3rw0006eod4ji2szpge', 7, 'A', 'QR_0608_cmqcgp3rw0006eod4ji2szpge_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ry0007eod47n49ci0g_1', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp48m00fveod4x4wn2gkt', 'cmqcgp3ry0007eod47n49ci0g', 1, 'A', 'QR_0608_cmqcgp3ry0007eod47n49ci0g_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ry0007eod47n49ci0g_3', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp49c00gfeod4v8t5hf4t', 'cmqcgp3ry0007eod47n49ci0g', 3, 'A', 'QR_0608_cmqcgp3ry0007eod47n49ci0g_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ry0007eod47n49ci0g_5', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4ah00gzeod4h3euklp0', 'cmqcgp3ry0007eod47n49ci0g', 5, 'A', 'QR_0608_cmqcgp3ry0007eod47n49ci0g_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3ry0007eod47n49ci0g_7', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4bi00hjeod44n24bc9r', 'cmqcgp3ry0007eod47n49ci0g', 7, 'A', 'QR_0608_cmqcgp3ry0007eod47n49ci0g_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s20008eod42mm9qn1z_1', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4c000i3eod4ooxgl44f', 'cmqcgp3s20008eod42mm9qn1z', 1, 'A', 'QR_0608_cmqcgp3s20008eod42mm9qn1z_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s20008eod42mm9qn1z_3', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4cq00ineod4xgeiuqjg', 'cmqcgp3s20008eod42mm9qn1z', 3, 'A', 'QR_0608_cmqcgp3s20008eod42mm9qn1z_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s20008eod42mm9qn1z_5', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4dv00j7eod4v6cf6amf', 'cmqcgp3s20008eod42mm9qn1z', 5, 'A', 'QR_0608_cmqcgp3s20008eod42mm9qn1z_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s20008eod42mm9qn1z_7', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4ef00jreod40tqfn7ky', 'cmqcgp3s20008eod42mm9qn1z', 7, 'A', 'QR_0608_cmqcgp3s20008eod42mm9qn1z_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s40009eod4alj6k5iu_1', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4eu00kbeod4lr0ftpki', 'cmqcgp3s40009eod4alj6k5iu', 1, 'A', 'QR_0608_cmqcgp3s40009eod4alj6k5iu_1', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s40009eod4alj6k5iu_3', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4f800kveod4tnuzbij3', 'cmqcgp3s40009eod4alj6k5iu', 3, 'A', 'QR_0608_cmqcgp3s40009eod4alj6k5iu_3', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s40009eod4alj6k5iu_5', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4fs00lfeod4ctblnq2n', 'cmqcgp3s40009eod4alj6k5iu', 5, 'A', 'QR_0608_cmqcgp3s40009eod4alj6k5iu_5', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0608_cmqcgp3s40009eod4alj6k5iu_7', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4i100lzeod4z029ktog', 'cmqcgp3s40009eod4alj6k5iu', 7, 'A', 'QR_0608_cmqcgp3s40009eod4alj6k5iu_7', 0, 60, '2026-06-08 09:00:00.000', '2026-06-08 10:00:00.000', '2026-06-15 13:12:03.000', '2026-06-15 13:12:03.000'),
+('AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_1', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3s8000beod4txa6b8d7', 'cmqcgp3rb0000eod4owh4fkqe', 1, 'A', 'QR_0615_cmqcgp3rb0000eod4owh4fkqe_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_3', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3t7000veod4k64l2ned', 'cmqcgp3rb0000eod4owh4fkqe', 3, 'A', 'QR_0615_cmqcgp3rb0000eod4owh4fkqe_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_5', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3tp001feod4ie7ht907', 'cmqcgp3rb0000eod4owh4fkqe', 5, 'A', 'QR_0615_cmqcgp3rb0000eod4owh4fkqe_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rb0000eod4owh4fkqe_7', 'cmqcgp4ky00mleod45qqkm1iu', 'cmqcgp3u9001zeod4hdhfl76k', 'cmqcgp3rb0000eod4owh4fkqe', 7, 'A', 'QR_0615_cmqcgp3rb0000eod4owh4fkqe_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rh0001eod47yosjqrx_1', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3uq002jeod4q2qx1v7c', 'cmqcgp3rh0001eod47yosjqrx', 1, 'A', 'QR_0615_cmqcgp3rh0001eod47yosjqrx_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rh0001eod47yosjqrx_3', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3va0033eod4zcijsmjy', 'cmqcgp3rh0001eod47yosjqrx', 3, 'A', 'QR_0615_cmqcgp3rh0001eod47yosjqrx_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rh0001eod47yosjqrx_5', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3vs003neod4015e8y6q', 'cmqcgp3rh0001eod47yosjqrx', 5, 'A', 'QR_0615_cmqcgp3rh0001eod47yosjqrx_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rh0001eod47yosjqrx_7', 'cmqcgp4lr00n0eod41q6d5pjz', 'cmqcgp3w70047eod4zeghti9n', 'cmqcgp3rh0001eod47yosjqrx', 7, 'A', 'QR_0615_cmqcgp3rh0001eod47yosjqrx_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rl0002eod4taul62m8_1', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3wo004reod4aq9xppfi', 'cmqcgp3rl0002eod4taul62m8', 1, 'A', 'QR_0615_cmqcgp3rl0002eod4taul62m8_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rl0002eod4taul62m8_3', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3x2005beod48wxsgxr3', 'cmqcgp3rl0002eod4taul62m8', 3, 'A', 'QR_0615_cmqcgp3rl0002eod4taul62m8_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rl0002eod4taul62m8_5', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xf005veod4k1s1kuq3', 'cmqcgp3rl0002eod4taul62m8', 5, 'A', 'QR_0615_cmqcgp3rl0002eod4taul62m8_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rl0002eod4taul62m8_7', 'cmqcgp4m600nfeod4pa5q2n5p', 'cmqcgp3xt006feod4dz694xpn', 'cmqcgp3rl0002eod4taul62m8', 7, 'A', 'QR_0615_cmqcgp3rl0002eod4taul62m8_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_1', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3y9006zeod4o99aq4yr', 'cmqcgp3ro0003eod4dunu4xiz', 1, 'A', 'QR_0615_cmqcgp3ro0003eod4dunu4xiz_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_3', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3yt007jeod4ha1948c2', 'cmqcgp3ro0003eod4dunu4xiz', 3, 'A', 'QR_0615_cmqcgp3ro0003eod4dunu4xiz_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_5', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zc0083eod4e2muex04', 'cmqcgp3ro0003eod4dunu4xiz', 5, 'A', 'QR_0615_cmqcgp3ro0003eod4dunu4xiz_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ro0003eod4dunu4xiz_7', 'cmqcgp4mk00nueod435isqx1l', 'cmqcgp3zu008neod4wr7q3sy7', 'cmqcgp3ro0003eod4dunu4xiz', 7, 'A', 'QR_0615_cmqcgp3ro0003eod4dunu4xiz_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_1', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp40q0097eod4s1ubynf3', 'cmqcgp3rq0004eod4gdnorf0d', 1, 'A', 'QR_0615_cmqcgp3rq0004eod4gdnorf0d_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_3', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp416009reod4h0ccdroz', 'cmqcgp3rq0004eod4gdnorf0d', 3, 'A', 'QR_0615_cmqcgp3rq0004eod4gdnorf0d_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_5', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp41l00abeod4qw4zibix', 'cmqcgp3rq0004eod4gdnorf0d', 5, 'A', 'QR_0615_cmqcgp3rq0004eod4gdnorf0d_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rq0004eod4gdnorf0d_7', 'cmqcgp4n100o9eod45czk5kro', 'cmqcgp42100aveod42gqa9ryc', 'cmqcgp3rq0004eod4gdnorf0d', 7, 'A', 'QR_0615_cmqcgp3rq0004eod4gdnorf0d_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_1', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42i00bfeod426la23o4', 'cmqcgp3rt0005eod4s6zyrk7p', 1, 'A', 'QR_0615_cmqcgp3rt0005eod4s6zyrk7p_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_3', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp42y00bzeod4n1aho7lb', 'cmqcgp3rt0005eod4s6zyrk7p', 3, 'A', 'QR_0615_cmqcgp3rt0005eod4s6zyrk7p_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_5', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43c00cjeod4umx86lrc', 'cmqcgp3rt0005eod4s6zyrk7p', 5, 'A', 'QR_0615_cmqcgp3rt0005eod4s6zyrk7p_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rt0005eod4s6zyrk7p_7', 'cmqcgp4ni00ooeod4qgjx61kh', 'cmqcgp43q00d3eod4hix9gs41', 'cmqcgp3rt0005eod4s6zyrk7p', 7, 'A', 'QR_0615_cmqcgp3rt0005eod4s6zyrk7p_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rw0006eod4ji2szpge_1', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp44400dneod4cl07p2r3', 'cmqcgp3rw0006eod4ji2szpge', 1, 'A', 'QR_0615_cmqcgp3rw0006eod4ji2szpge_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rw0006eod4ji2szpge_3', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp45200e7eod47kqvbklh', 'cmqcgp3rw0006eod4ji2szpge', 3, 'A', 'QR_0615_cmqcgp3rw0006eod4ji2szpge_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rw0006eod4ji2szpge_5', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp46j00ereod425m0vc0i', 'cmqcgp3rw0006eod4ji2szpge', 5, 'A', 'QR_0615_cmqcgp3rw0006eod4ji2szpge_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3rw0006eod4ji2szpge_7', 'cmqcgp4nw00p3eod4lg7m8kki', 'cmqcgp47j00fbeod49mcanepu', 'cmqcgp3rw0006eod4ji2szpge', 7, 'A', 'QR_0615_cmqcgp3rw0006eod4ji2szpge_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ry0007eod47n49ci0g_1', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp48m00fveod4x4wn2gkt', 'cmqcgp3ry0007eod47n49ci0g', 1, 'A', 'QR_0615_cmqcgp3ry0007eod47n49ci0g_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ry0007eod47n49ci0g_3', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp49c00gfeod4v8t5hf4t', 'cmqcgp3ry0007eod47n49ci0g', 3, 'A', 'QR_0615_cmqcgp3ry0007eod47n49ci0g_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ry0007eod47n49ci0g_5', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4ah00gzeod4h3euklp0', 'cmqcgp3ry0007eod47n49ci0g', 5, 'A', 'QR_0615_cmqcgp3ry0007eod47n49ci0g_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3ry0007eod47n49ci0g_7', 'cmqcgp4oi00pieod403vthgcd', 'cmqcgp4bi00hjeod44n24bc9r', 'cmqcgp3ry0007eod47n49ci0g', 7, 'A', 'QR_0615_cmqcgp3ry0007eod47n49ci0g_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s20008eod42mm9qn1z_1', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4c000i3eod4ooxgl44f', 'cmqcgp3s20008eod42mm9qn1z', 1, 'A', 'QR_0615_cmqcgp3s20008eod42mm9qn1z_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s20008eod42mm9qn1z_3', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4cq00ineod4xgeiuqjg', 'cmqcgp3s20008eod42mm9qn1z', 3, 'A', 'QR_0615_cmqcgp3s20008eod42mm9qn1z_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s20008eod42mm9qn1z_5', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4dv00j7eod4v6cf6amf', 'cmqcgp3s20008eod42mm9qn1z', 5, 'A', 'QR_0615_cmqcgp3s20008eod42mm9qn1z_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s20008eod42mm9qn1z_7', 'cmqcgp4oy00pxeod4cpajmyd9', 'cmqcgp4ef00jreod40tqfn7ky', 'cmqcgp3s20008eod42mm9qn1z', 7, 'A', 'QR_0615_cmqcgp3s20008eod42mm9qn1z_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s40009eod4alj6k5iu_1', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4eu00kbeod4lr0ftpki', 'cmqcgp3s40009eod4alj6k5iu', 1, 'A', 'QR_0615_cmqcgp3s40009eod4alj6k5iu_1', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s40009eod4alj6k5iu_3', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4f800kveod4tnuzbij3', 'cmqcgp3s40009eod4alj6k5iu', 3, 'A', 'QR_0615_cmqcgp3s40009eod4alj6k5iu_3', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s40009eod4alj6k5iu_5', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4fs00lfeod4ctblnq2n', 'cmqcgp3s40009eod4alj6k5iu', 5, 'A', 'QR_0615_cmqcgp3s40009eod4alj6k5iu_5', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000'),
+('AUTO_0615_cmqcgp3s40009eod4alj6k5iu_7', 'cmqcgp4pc00qceod48bj9l8po', 'cmqcgp4i100lzeod4z029ktog', 'cmqcgp3s40009eod4alj6k5iu', 7, 'A', 'QR_0615_cmqcgp3s40009eod4alj6k5iu_7', 0, 60, '2026-06-15 09:00:00.000', '2026-06-15 10:00:00.000', '2026-06-15 13:12:15.000', '2026-06-15 13:12:15.000');
 
 -- --------------------------------------------------------
 
@@ -6589,13 +7812,21 @@ INSERT INTO `attendance_sessions` (`id`, `teacherId`, `subjectId`, `departmentId
 -- Table structure for table `departments`
 --
 
-CREATE TABLE `departments` (
+DROP TABLE IF EXISTS `departments`;
+CREATE TABLE IF NOT EXISTS `departments` (
   `id` varchar(191) NOT NULL,
   `name` varchar(191) NOT NULL,
   `code` varchar(191) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `departments_name_key` (`name`),
+  UNIQUE KEY `departments_code_key` (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `departments`:
+--
 
 --
 -- Dumping data for table `departments`
@@ -6620,7 +7851,8 @@ INSERT INTO `departments` (`id`, `name`, `code`, `createdAt`, `updatedAt`) VALUE
 -- Table structure for table `leave_requests`
 --
 
-CREATE TABLE `leave_requests` (
+DROP TABLE IF EXISTS `leave_requests`;
+CREATE TABLE IF NOT EXISTS `leave_requests` (
   `id` varchar(191) NOT NULL,
   `userId` varchar(191) NOT NULL,
   `type` varchar(191) NOT NULL,
@@ -6631,8 +7863,20 @@ CREATE TABLE `leave_requests` (
   `approvedBy` varchar(191) DEFAULT NULL,
   `comments` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `leave_requests_userId_idx` (`userId`),
+  KEY `leave_requests_status_idx` (`status`),
+  KEY `leave_requests_approvedBy_fkey` (`approvedBy`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `leave_requests`:
+--   `approvedBy`
+--       `users` -> `id`
+--   `userId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `leave_requests`
@@ -6686,7 +7930,8 @@ INSERT INTO `leave_requests` (`id`, `userId`, `type`, `startDate`, `endDate`, `r
 -- Table structure for table `marks`
 --
 
-CREATE TABLE `marks` (
+DROP TABLE IF EXISTS `marks`;
+CREATE TABLE IF NOT EXISTS `marks` (
   `id` varchar(191) NOT NULL,
   `studentId` varchar(191) NOT NULL,
   `subjectId` varchar(191) NOT NULL,
@@ -6696,8 +7941,24 @@ CREATE TABLE `marks` (
   `totalMarks` double NOT NULL,
   `remarks` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `marks_studentId_subjectId_teacherId_examType_key` (`studentId`,`subjectId`,`teacherId`,`examType`),
+  KEY `marks_studentId_idx` (`studentId`),
+  KEY `marks_subjectId_idx` (`subjectId`),
+  KEY `marks_examType_idx` (`examType`),
+  KEY `marks_teacherId_fkey` (`teacherId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `marks`:
+--   `studentId`
+--       `students` -> `id`
+--   `subjectId`
+--       `subjects` -> `id`
+--   `teacherId`
+--       `teachers` -> `id`
+--
 
 --
 -- Dumping data for table `marks`
@@ -8217,7 +9478,8 @@ INSERT INTO `marks` (`id`, `studentId`, `subjectId`, `teacherId`, `examType`, `m
 -- Table structure for table `notices`
 --
 
-CREATE TABLE `notices` (
+DROP TABLE IF EXISTS `notices`;
+CREATE TABLE IF NOT EXISTS `notices` (
   `id` varchar(191) NOT NULL,
   `authorId` varchar(191) NOT NULL,
   `title` varchar(191) NOT NULL,
@@ -8226,8 +9488,19 @@ CREATE TABLE `notices` (
   `priority` varchar(191) NOT NULL DEFAULT 'normal',
   `isPinned` tinyint(1) NOT NULL DEFAULT 0,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `notices_targetRole_idx` (`targetRole`),
+  KEY `notices_priority_idx` (`priority`),
+  KEY `notices_createdAt_idx` (`createdAt`),
+  KEY `notices_authorId_fkey` (`authorId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `notices`:
+--   `authorId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `notices`
@@ -8252,12 +9525,25 @@ INSERT INTO `notices` (`id`, `authorId`, `title`, `content`, `targetRole`, `prio
 -- Table structure for table `notice_reads`
 --
 
-CREATE TABLE `notice_reads` (
+DROP TABLE IF EXISTS `notice_reads`;
+CREATE TABLE IF NOT EXISTS `notice_reads` (
   `id` varchar(191) NOT NULL,
   `userId` varchar(191) NOT NULL,
   `noticeId` varchar(191) NOT NULL,
-  `readAt` datetime(3) NOT NULL DEFAULT current_timestamp(3)
+  `readAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `notice_reads_userId_noticeId_key` (`userId`,`noticeId`),
+  KEY `notice_reads_userId_idx` (`userId`),
+  KEY `notice_reads_noticeId_idx` (`noticeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `notice_reads`:
+--   `noticeId`
+--       `notices` -> `id`
+--   `userId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `notice_reads`
@@ -8290,7 +9576,8 @@ INSERT INTO `notice_reads` (`id`, `userId`, `noticeId`, `readAt`) VALUES
 -- Table structure for table `recommendations`
 --
 
-CREATE TABLE `recommendations` (
+DROP TABLE IF EXISTS `recommendations`;
+CREATE TABLE IF NOT EXISTS `recommendations` (
   `id` varchar(191) NOT NULL,
   `studentId` varchar(191) NOT NULL,
   `type` varchar(191) NOT NULL,
@@ -8300,8 +9587,18 @@ CREATE TABLE `recommendations` (
   `priority` varchar(191) NOT NULL DEFAULT 'medium',
   `isRead` tinyint(1) NOT NULL DEFAULT 0,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `recommendations_studentId_idx` (`studentId`),
+  KEY `recommendations_type_idx` (`type`),
+  KEY `recommendations_isRead_idx` (`isRead`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `recommendations`:
+--   `studentId`
+--       `users` -> `id`
+--
 
 -- --------------------------------------------------------
 
@@ -8309,22 +9606,33 @@ CREATE TABLE `recommendations` (
 -- Table structure for table `sessions`
 --
 
-CREATE TABLE `sessions` (
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE IF NOT EXISTS `sessions` (
   `id` varchar(191) NOT NULL,
   `userId` varchar(191) NOT NULL,
   `token` varchar(191) NOT NULL,
   `role` varchar(191) NOT NULL,
   `expiresAt` datetime(3) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sessions_token_key` (`token`),
+  KEY `sessions_token_idx` (`token`),
+  KEY `sessions_userId_idx` (`userId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `sessions`:
+--   `userId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `sessions`
 --
 
 INSERT INTO `sessions` (`id`, `userId`, `token`, `role`, `expiresAt`, `createdAt`, `updatedAt`) VALUES
-('cmqeuqyuw0005eoeotc1kixwh', 'cmqcgp4kd00mieod4sbmhglm2', '14369b55-3851-489a-8d4d-2075c14fd6a0', 'admin', '2026-06-16 06:48:44.025', '2026-06-15 06:48:44.024', '2026-06-15 06:48:44.024');
+('cmqgac7bh0001eo0o42s0whkl', 'cmqcgp4ku00mjeod4b8m863ew', 'df49630c-1936-468f-9956-41fd6542f0a0', 'teacher', '2026-06-17 06:52:55.178', '2026-06-16 06:52:55.178', '2026-06-16 06:52:55.178');
 
 -- --------------------------------------------------------
 
@@ -8332,7 +9640,8 @@ INSERT INTO `sessions` (`id`, `userId`, `token`, `role`, `expiresAt`, `createdAt
 -- Table structure for table `students`
 --
 
-CREATE TABLE `students` (
+DROP TABLE IF EXISTS `students`;
+CREATE TABLE IF NOT EXISTS `students` (
   `id` varchar(191) NOT NULL,
   `userId` varchar(191) NOT NULL,
   `rollNumber` varchar(191) NOT NULL,
@@ -8347,8 +9656,22 @@ CREATE TABLE `students` (
   `collegeEmail` varchar(191) DEFAULT NULL,
   `bio` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `students_userId_key` (`userId`),
+  UNIQUE KEY `students_rollNumber_key` (`rollNumber`),
+  KEY `students_rollNumber_idx` (`rollNumber`),
+  KEY `students_departmentId_idx` (`departmentId`),
+  KEY `students_semester_idx` (`semester`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `students`:
+--   `departmentId`
+--       `departments` -> `id`
+--   `userId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `students`
@@ -8663,7 +9986,8 @@ INSERT INTO `students` (`id`, `userId`, `rollNumber`, `semester`, `departmentId`
 -- Table structure for table `study_materials`
 --
 
-CREATE TABLE `study_materials` (
+DROP TABLE IF EXISTS `study_materials`;
+CREATE TABLE IF NOT EXISTS `study_materials` (
   `id` varchar(191) NOT NULL,
   `teacherId` varchar(191) NOT NULL,
   `subjectId` varchar(191) NOT NULL,
@@ -8675,8 +9999,20 @@ CREATE TABLE `study_materials` (
   `fileSize` int(11) NOT NULL,
   `downloads` int(11) NOT NULL DEFAULT 0,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `study_materials_teacherId_idx` (`teacherId`),
+  KEY `study_materials_subjectId_idx` (`subjectId`),
+  KEY `study_materials_fileType_idx` (`fileType`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `study_materials`:
+--   `subjectId`
+--       `subjects` -> `id`
+--   `teacherId`
+--       `teachers` -> `id`
+--
 
 --
 -- Dumping data for table `study_materials`
@@ -9092,7 +10428,8 @@ INSERT INTO `study_materials` (`id`, `teacherId`, `subjectId`, `title`, `descrip
 -- Table structure for table `subjects`
 --
 
-CREATE TABLE `subjects` (
+DROP TABLE IF EXISTS `subjects`;
+CREATE TABLE IF NOT EXISTS `subjects` (
   `id` varchar(191) NOT NULL,
   `name` varchar(191) NOT NULL,
   `code` varchar(191) NOT NULL,
@@ -9101,8 +10438,19 @@ CREATE TABLE `subjects` (
   `credits` int(11) NOT NULL DEFAULT 3,
   `type` varchar(191) NOT NULL DEFAULT 'theory',
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `subjects_code_key` (`code`),
+  KEY `subjects_code_idx` (`code`),
+  KEY `subjects_departmentId_idx` (`departmentId`),
+  KEY `subjects_semester_idx` (`semester`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `subjects`:
+--   `departmentId`
+--       `departments` -> `id`
+--
 
 --
 -- Dumping data for table `subjects`
@@ -9517,7 +10865,8 @@ INSERT INTO `subjects` (`id`, `name`, `code`, `departmentId`, `semester`, `credi
 -- Table structure for table `teachers`
 --
 
-CREATE TABLE `teachers` (
+DROP TABLE IF EXISTS `teachers`;
+CREATE TABLE IF NOT EXISTS `teachers` (
   `id` varchar(191) NOT NULL,
   `userId` varchar(191) NOT NULL,
   `employeeId` varchar(191) NOT NULL,
@@ -9530,8 +10879,21 @@ CREATE TABLE `teachers` (
   `bio` varchar(191) DEFAULT NULL,
   `researchArea` varchar(191) DEFAULT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `teachers_userId_key` (`userId`),
+  UNIQUE KEY `teachers_employeeId_key` (`employeeId`),
+  KEY `teachers_employeeId_idx` (`employeeId`),
+  KEY `teachers_departmentId_idx` (`departmentId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `teachers`:
+--   `departmentId`
+--       `departments` -> `id`
+--   `userId`
+--       `users` -> `id`
+--
 
 --
 -- Dumping data for table `teachers`
@@ -9595,7 +10957,8 @@ INSERT INTO `teachers` (`id`, `userId`, `employeeId`, `departmentId`, `specializ
 -- Table structure for table `timetables`
 --
 
-CREATE TABLE `timetables` (
+DROP TABLE IF EXISTS `timetables`;
+CREATE TABLE IF NOT EXISTS `timetables` (
   `id` varchar(191) NOT NULL,
   `departmentId` varchar(191) NOT NULL,
   `semester` int(11) NOT NULL,
@@ -9608,8 +10971,23 @@ CREATE TABLE `timetables` (
   `startTime` varchar(191) NOT NULL,
   `endTime` varchar(191) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `timetables_departmentId_semester_section_dayOfWeek_periodNum_key` (`departmentId`,`semester`,`section`,`dayOfWeek`,`periodNumber`),
+  KEY `timetables_departmentId_idx` (`departmentId`),
+  KEY `timetables_teacherId_idx` (`teacherId`),
+  KEY `timetables_subjectId_fkey` (`subjectId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `timetables`:
+--   `departmentId`
+--       `departments` -> `id`
+--   `subjectId`
+--       `subjects` -> `id`
+--   `teacherId`
+--       `teachers` -> `id`
+--
 
 --
 -- Dumping data for table `timetables`
@@ -9924,7 +11302,8 @@ INSERT INTO `timetables` (`id`, `departmentId`, `semester`, `section`, `dayOfWee
 -- Table structure for table `users`
 --
 
-CREATE TABLE `users` (
+DROP TABLE IF EXISTS `users`;
+CREATE TABLE IF NOT EXISTS `users` (
   `id` varchar(191) NOT NULL,
   `email` varchar(191) NOT NULL,
   `password` varchar(191) NOT NULL,
@@ -9933,8 +11312,16 @@ CREATE TABLE `users` (
   `avatar` varchar(191) DEFAULT NULL,
   `isActive` tinyint(1) NOT NULL DEFAULT 1,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `users_email_key` (`email`),
+  KEY `users_email_idx` (`email`),
+  KEY `users_role_idx` (`role`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- RELATIONSHIPS FOR TABLE `users`:
+--
 
 --
 -- Dumping data for table `users`
@@ -10295,173 +11682,6 @@ INSERT INTO `users` (`id`, `email`, `password`, `name`, `role`, `avatar`, `isAct
 ('cmqcgp5sr01fmeod4hcg9fqor', 'as2060300@student.campus.edu', '$2a$10$DzusyMEhRWgSeVk6Uvh9/Ou0YX03flakFUaqjBABgduQCLeUajCaS', 'Siddharth Verma', 'student', NULL, 0, '2026-06-13 14:39:52.731', '2026-06-14 12:10:36.145');
 
 --
--- Indexes for dumped tables
---
-
---
--- Indexes for table `assignments`
---
-ALTER TABLE `assignments`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `assignments_teacherId_idx` (`teacherId`),
-  ADD KEY `assignments_subjectId_idx` (`subjectId`),
-  ADD KEY `assignments_deadline_idx` (`deadline`);
-
---
--- Indexes for table `assignment_submissions`
---
-ALTER TABLE `assignment_submissions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `assignment_submissions_assignmentId_studentId_key` (`assignmentId`,`studentId`),
-  ADD KEY `assignment_submissions_assignmentId_idx` (`assignmentId`),
-  ADD KEY `assignment_submissions_studentId_idx` (`studentId`);
-
---
--- Indexes for table `attendance_records`
---
-ALTER TABLE `attendance_records`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `attendance_records_studentId_attendanceSessionId_key` (`studentId`,`attendanceSessionId`),
-  ADD KEY `attendance_records_studentId_idx` (`studentId`),
-  ADD KEY `attendance_records_attendanceSessionId_idx` (`attendanceSessionId`);
-
---
--- Indexes for table `attendance_sessions`
---
-ALTER TABLE `attendance_sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `attendance_sessions_qrCode_key` (`qrCode`),
-  ADD KEY `attendance_sessions_qrCode_idx` (`qrCode`),
-  ADD KEY `attendance_sessions_isActive_idx` (`isActive`),
-  ADD KEY `attendance_sessions_teacherId_idx` (`teacherId`),
-  ADD KEY `attendance_sessions_subjectId_idx` (`subjectId`),
-  ADD KEY `attendance_sessions_departmentId_fkey` (`departmentId`);
-
---
--- Indexes for table `departments`
---
-ALTER TABLE `departments`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `departments_name_key` (`name`),
-  ADD UNIQUE KEY `departments_code_key` (`code`);
-
---
--- Indexes for table `leave_requests`
---
-ALTER TABLE `leave_requests`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `leave_requests_userId_idx` (`userId`),
-  ADD KEY `leave_requests_status_idx` (`status`),
-  ADD KEY `leave_requests_approvedBy_fkey` (`approvedBy`);
-
---
--- Indexes for table `marks`
---
-ALTER TABLE `marks`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `marks_studentId_subjectId_teacherId_examType_key` (`studentId`,`subjectId`,`teacherId`,`examType`),
-  ADD KEY `marks_studentId_idx` (`studentId`),
-  ADD KEY `marks_subjectId_idx` (`subjectId`),
-  ADD KEY `marks_examType_idx` (`examType`),
-  ADD KEY `marks_teacherId_fkey` (`teacherId`);
-
---
--- Indexes for table `notices`
---
-ALTER TABLE `notices`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `notices_targetRole_idx` (`targetRole`),
-  ADD KEY `notices_priority_idx` (`priority`),
-  ADD KEY `notices_createdAt_idx` (`createdAt`),
-  ADD KEY `notices_authorId_fkey` (`authorId`);
-
---
--- Indexes for table `notice_reads`
---
-ALTER TABLE `notice_reads`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `notice_reads_userId_noticeId_key` (`userId`,`noticeId`),
-  ADD KEY `notice_reads_userId_idx` (`userId`),
-  ADD KEY `notice_reads_noticeId_idx` (`noticeId`);
-
---
--- Indexes for table `recommendations`
---
-ALTER TABLE `recommendations`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `recommendations_studentId_idx` (`studentId`),
-  ADD KEY `recommendations_type_idx` (`type`),
-  ADD KEY `recommendations_isRead_idx` (`isRead`);
-
---
--- Indexes for table `sessions`
---
-ALTER TABLE `sessions`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `sessions_token_key` (`token`),
-  ADD KEY `sessions_token_idx` (`token`),
-  ADD KEY `sessions_userId_idx` (`userId`);
-
---
--- Indexes for table `students`
---
-ALTER TABLE `students`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `students_userId_key` (`userId`),
-  ADD UNIQUE KEY `students_rollNumber_key` (`rollNumber`),
-  ADD KEY `students_rollNumber_idx` (`rollNumber`),
-  ADD KEY `students_departmentId_idx` (`departmentId`),
-  ADD KEY `students_semester_idx` (`semester`);
-
---
--- Indexes for table `study_materials`
---
-ALTER TABLE `study_materials`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `study_materials_teacherId_idx` (`teacherId`),
-  ADD KEY `study_materials_subjectId_idx` (`subjectId`),
-  ADD KEY `study_materials_fileType_idx` (`fileType`);
-
---
--- Indexes for table `subjects`
---
-ALTER TABLE `subjects`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `subjects_code_key` (`code`),
-  ADD KEY `subjects_code_idx` (`code`),
-  ADD KEY `subjects_departmentId_idx` (`departmentId`),
-  ADD KEY `subjects_semester_idx` (`semester`);
-
---
--- Indexes for table `teachers`
---
-ALTER TABLE `teachers`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `teachers_userId_key` (`userId`),
-  ADD UNIQUE KEY `teachers_employeeId_key` (`employeeId`),
-  ADD KEY `teachers_employeeId_idx` (`employeeId`),
-  ADD KEY `teachers_departmentId_idx` (`departmentId`);
-
---
--- Indexes for table `timetables`
---
-ALTER TABLE `timetables`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `timetables_departmentId_semester_section_dayOfWeek_periodNum_key` (`departmentId`,`semester`,`section`,`dayOfWeek`,`periodNumber`),
-  ADD KEY `timetables_departmentId_idx` (`departmentId`),
-  ADD KEY `timetables_teacherId_idx` (`teacherId`),
-  ADD KEY `timetables_subjectId_fkey` (`subjectId`);
-
---
--- Indexes for table `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `users_email_key` (`email`),
-  ADD KEY `users_email_idx` (`email`),
-  ADD KEY `users_role_idx` (`role`);
-
---
 -- Constraints for dumped tables
 --
 
@@ -10568,6 +11788,7 @@ ALTER TABLE `timetables`
   ADD CONSTRAINT `timetables_departmentId_fkey` FOREIGN KEY (`departmentId`) REFERENCES `departments` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `timetables_subjectId_fkey` FOREIGN KEY (`subjectId`) REFERENCES `subjects` (`id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `timetables_teacherId_fkey` FOREIGN KEY (`teacherId`) REFERENCES `teachers` (`id`) ON UPDATE CASCADE;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

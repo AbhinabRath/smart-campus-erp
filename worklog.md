@@ -2,7 +2,7 @@
 
 ## To Do list:
 
-1. Admin Time Table Creation: should be dynamic
+1. Admin Time Table Creation: should be dynamic -> Done
 
 2. Teacher Dashboard: Attendance Graph should be dynamic
 

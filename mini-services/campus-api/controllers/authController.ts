@@ -32,22 +32,26 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
   try {
     const { email, password } = req.body;
 
-    // Find user by email. We need the password hash for comparison.
-    const user = await prisma.user.findUnique({ where: { email } });
+// Find user by email. We need the password hash for comparison.
+const user = await prisma.user.findUnique({ where: { email } });
 
-    if (!user) {
-      errorResponse(res, 'Invalid email or password.', 401);
-      return;
-    }
+console.log("LOGIN EMAIL:", email);
+console.log("USER FOUND:", !!user);
 
-    // Compare the plaintext password with the stored bcrypt hash.
-    // bcrypt.compare handles the salt extraction and comparison internally.
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+if (!user) {
+  errorResponse(res, 'Invalid email or password.', 401);
+  return;
+}
 
-    if (!isPasswordValid) {
-      errorResponse(res, 'Invalid email or password.', 401);
-      return;
-    }
+// Compare the plaintext password with the stored bcrypt hash.
+const isPasswordValid = await bcrypt.compare(password, user.password);
+
+console.log("PASSWORD VALID:", isPasswordValid);
+
+if (!isPasswordValid) {
+  errorResponse(res, 'Invalid email or password.', 401);
+  return;
+}
 
     // Check if user account is active (admin may have deactivated it)
     if (!user.isActive) {
