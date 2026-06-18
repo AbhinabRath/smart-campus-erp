@@ -445,26 +445,6 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            {/* Quick login section for demo — enhanced with gradient buttons */}
-            <div className="pt-5 mt-5 border-t">
-              <p className="text-xs text-muted-foreground text-center mb-3">Quick Demo Access</p>
-              <div className="grid grid-cols-3 gap-2">
-                {roleDemos.map((role) => (
-                  <Button
-                    key={role.label}
-                    variant="ghost"
-                    size="sm"
-                    className={`text-white text-xs h-10 rounded-lg bg-gradient-to-r ${role.color} shadow-sm hover:shadow-md transition-all`}
-                    onClick={() => quickLogin(role.email, role.password)}
-                    disabled={loading}
-                  >
-                    <role.icon className="w-4 h-4 mr-1.5" />
-                    {role.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
           </div>
 
           <p className="text-center text-xs text-muted-foreground mt-6">

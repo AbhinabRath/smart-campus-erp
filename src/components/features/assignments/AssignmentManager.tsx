@@ -844,7 +844,33 @@ export default function AssignmentManager() {
                                           <p className="text-xs text-muted-foreground">{sub.student?.rollNumber}</p>
                                         </div>
                                       </TableCell>
-                                      <TableCell>{format(new Date(sub.submittedAt), 'MMM d, h:mm a')}</TableCell>
+                                      <TableCell>
+                                          <div className="flex items-center gap-2">
+                                            <span>
+                                              {format(new Date(sub.submittedAt), 'MMM d, h:mm a')}
+                                            </span>
+
+                                            {sub.filePath && (
+                                              <>
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  asChild
+                                                >
+                                                  <a
+                                                    href={`http://localhost:3001/uploads/${sub.filePath.split('\\').pop()}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                  >
+                                                    View
+                                                  </a>
+                                                </Button>
+
+                                                
+                                              </>
+                                            )}
+                                          </div>
+                                        </TableCell>
                                       <TableCell><Badge className={statusColor(sub.status)}>{sub.status}</Badge></TableCell>
                                       <TableCell>{sub.marksObtained !== null ? `${sub.marksObtained}/${a.maxMarks}` : '-'}</TableCell>
                                       <TableCell>

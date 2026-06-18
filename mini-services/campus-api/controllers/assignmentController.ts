@@ -158,10 +158,36 @@ export async function getAssignments(req: Request, res: Response, next: NextFunc
     const assignments = await prisma.assignment.findMany({
       where,
       include: {
-        subject: { select: { name: true, code: true } },
-        teacher: { include: { user: { select: { name: true } } } },
-        _count: { select: { submissions: true } },
-      },
+  subject: { select: { name: true, code: true } },
+
+  teacher: {
+    include: {
+      user: {
+        select: { name: true }
+      }
+    }
+  },
+
+  submissions: {
+    include: {
+      student: {
+        include: {
+          user: {
+            select: {
+              name: true
+            }
+          }
+        }
+      }
+    }
+  },
+
+  _count: {
+    select: {
+      submissions: true
+    }
+  }
+},
       orderBy: { createdAt: 'desc' },
     });
 

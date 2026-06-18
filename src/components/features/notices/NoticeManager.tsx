@@ -123,6 +123,7 @@ export default function NoticeManager() {
           : n
       )
     );
+    window.dispatchEvent(new Event('noticesUpdated'));
   } catch {
     toast({
       title: 'Error',
@@ -143,7 +144,7 @@ export default function NoticeManager() {
         isRead: true,
       }))
     );
-
+window.dispatchEvent(new Event('noticesUpdated'));
     toast({
       title: 'Done',
       description: 'All notices marked as read',

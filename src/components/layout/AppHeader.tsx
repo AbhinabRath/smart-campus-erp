@@ -76,13 +76,23 @@ export default function AppHeader() {
   // Keeping a minimal version here for the notification popover only.
 
   // Fetch notices for notification count
-  useEffect(() => {
+ useEffect(() => {
+  const loadNotices = () => {
     if (currentUser) {
       api.get('/notices?limit=5')
         .then((res) => setNotices(res.data.data || []))
         .catch(() => {});
     }
-  }, [currentUser]);
+  };
+
+  loadNotices();
+
+  window.addEventListener('noticesUpdated', loadNotices);
+
+  return () => {
+    window.removeEventListener('noticesUpdated', loadNotices);
+  };
+}, [currentUser]);
 
   // ⌘K / Ctrl+K keyboard shortcut is now handled globally by the CommandPalette component.
 

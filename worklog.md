@@ -12,11 +12,11 @@
 
 5. User Management section in Admin dashboard should have an reactivate system, and inactive means they wont be counted
 
-6. For Teachers view assignment is breaking
+6. For Teachers view assignment is breaking ->Done
 
-7. Pdf download is not working in Study Materials
+7. Pdf download is not working in Study Materials 
 
-8. Notifications should change when their number changes, not when refreshed
+8. Notifications should change when their number changes, not when refreshed ->Done
 
 9. Add PRC system here too
 

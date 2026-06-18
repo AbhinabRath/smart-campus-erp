@@ -91,18 +91,19 @@ export default function AppSidebar() {
   const [recommendationCount, setRecommendationCount] = useState(0);
 
   // Fetch unread counts
-  useEffect(() => {
+ useEffect(() => {
+  const loadCounts = () => {
     if (currentUser) {
       api.get('/notices')
-  .then((res) => {
-    const notices = res.data.data || [];
+        .then((res) => {
+          const notices = res.data.data || [];
 
-    const unread = notices.filter(
-  (n: any) => !n.isRead
-).length;
+          const unread = notices.filter(
+            (n: any) => !n.isRead
+          ).length;
 
-setNoticeCount(unread);
-  })
+          setNoticeCount(unread);
+        })
         .catch(() => {});
 
       if (role === 'student') {
@@ -111,7 +112,16 @@ setNoticeCount(unread);
           .catch(() => {});
       }
     }
-  }, [currentUser, role]);
+  };
+
+  loadCounts();
+
+  window.addEventListener('noticesUpdated', loadCounts);
+
+  return () => {
+    window.removeEventListener('noticesUpdated', loadCounts);
+  };
+}, [currentUser, role]);
 
   // Filter navigation items based on user role
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
