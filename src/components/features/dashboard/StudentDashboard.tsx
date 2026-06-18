@@ -218,34 +218,41 @@ export default function StudentDashboard() {
 
   // Simulated subject-wise marks data for the bar chart
   const marksChartData = useMemo(() => {
-    if (!data) return [];
-    const subjects = ['Mathematics', 'Physics', 'Chemistry', 'English', 'Computer Science', 'Electronics'];
-    return subjects.map((name, i) => ({
-      subject: name.length > 8 ? name.substring(0, 8) + '.' : name,
-      marks: Math.min(100, Math.max(30, data.marks.percentage + (Math.random() - 0.5) * 30)),
-    }));
-  }, [data]);
+  if (!data?.marks?.recentMarks) return [];
+
+  return data.marks.recentMarks.map((m) => ({
+    subject:
+      m.subject?.name?.length > 8
+        ? m.subject.name.substring(0, 8) + '.'
+        : m.subject?.name || 'Unknown',
+
+    marks: Math.round(
+      (m.marksObtained / m.totalMarks) * 100
+    ),
+  }));
+}, [data]);
 
   // GPA Calculation
   const gpaData = useMemo(() => {
     if (!data) return { gpa: 0, grades: { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'F': 0 }, totalCourses: 0 };
 
     const recentMarks = data.marks.recentMarks || [];
-    if (recentMarks.length === 0) {
-      // Use simulated data from chart
-      const subjects = ['Mathematics', 'Physics', 'Chemistry', 'English', 'Computer Science', 'Electronics'];
-      const simMarks = subjects.map((name) => ({
-        name,
-        percentage: Math.min(100, Math.max(30, data.marks.percentage + (Math.random() - 0.5) * 30)),
-      }));
-      const totalGPA = simMarks.reduce((sum, m) => sum + marksToGPA(m.percentage), 0);
-      const grades: Record<string, number> = { 'A+': 0, 'A': 0, 'B+': 0, 'B': 0, 'C': 0, 'D': 0, 'E': 0, 'F': 0 };
-      simMarks.forEach((m) => {
-        const g = gradeLabel(m.percentage);
-        if (g in grades) grades[g]++;
-      });
-      return { gpa: Number((totalGPA / simMarks.length).toFixed(2)), grades, totalCourses: simMarks.length };
-    }
+   if (recentMarks.length === 0) {
+  return {
+    gpa: 0,
+    grades: {
+      'A+': 0,
+      'A': 0,
+      'B+': 0,
+      'B': 0,
+      'C': 0,
+      'D': 0,
+      'E': 0,
+      'F': 0,
+    },
+    totalCourses: 0,
+  };
+}
 
     const totalGPA = recentMarks.reduce((sum, m) => {
       const pct = (m.marksObtained / m.totalMarks) * 100;
@@ -436,7 +443,7 @@ export default function StudentDashboard() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{gpaData.gpa}</span>
+                    <span className="text-xl font-bold text-emerald-600 dark:text-emerald-400">{gpaData.totalCourses > 0 ? gpaData.gpa : 'N/A'}</span>
                     </div>
                   </div>
                   <div className="flex-1">
@@ -445,7 +452,9 @@ export default function StudentDashboard() {
                     <div className="mt-2">
                       <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${gradeColor(gradeLabel(gpaData.gpa * 10))}`}>
                         <GraduationCap className="w-3 h-3" />
-                        {gradeLabel(gpaData.gpa * 10)} Average
+                     {gpaData.totalCourses > 0
+  ? `${gradeLabel(gpaData.gpa * 10)} Average`
+  : 'No Marks'}
                       </span>
                     </div>
                   </div>
