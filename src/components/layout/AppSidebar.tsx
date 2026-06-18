@@ -156,7 +156,7 @@ setNoticeCount(unread);
           width: collapsed && sidebarOpen ? 72 : 280,
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`fixed top-0 left-0 z-50 h-full bg-[var(--sidebar)] text-[var(--sidebar-foreground)] flex flex-col shadow-xl lg:relative lg:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-screen bg-[var(--sidebar)] text-[var(--sidebar-foreground)] flex flex-col shadow-xl lg:relative lg:translate-x-0 ${
           sidebarOpen ? 'lg:translate-x-0' : 'lg:-translate-x-[280px]'
         }`}
         style={{ width: sidebarWidth }}

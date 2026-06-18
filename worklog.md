@@ -8,7 +8,7 @@
 
 3. Student Dashboard: Should be dynamic ->Done
 
-4. Sidebar should have its own scrolling system, not with the page itself
+4. Sidebar should have its own scrolling system, not with the page itself ->Done
 
 5. User Management section in Admin dashboard should have an reactivate system, and inactive means they wont be counted
 
@@ -19,3 +19,5 @@
 8. Notifications should change when their number changes, not when refreshed
 
 9. Add PRC system here too
+
+10. Anyone can see someone else's profile, except they cannot see admin's profile

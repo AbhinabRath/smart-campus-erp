@@ -162,7 +162,7 @@ export default function Home() {
   const role = currentUser.role;
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="h-screen flex bg-background overflow-hidden">
       {/* Command Palette - global overlay */}
       {commandPalette}
 
@@ -170,12 +170,12 @@ export default function Home() {
       <AppSidebar />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
         {/* Sticky Header */}
         <AppHeader />
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto h-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {/* Page Title */}
             <AnimatePresence mode="wait">
