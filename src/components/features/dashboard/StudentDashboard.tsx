@@ -1,9 +1,9 @@
 // =============================================================================
-// Smart Campus ERP - Student Dashboard (Enhanced with GPA & Study Tips)
+// Smart Campus ERP - Student Dashboard (Enhanced with GPA & AI Study Assistant)
 // =============================================================================
 // Displays student-specific overview: circular attendance indicator,
 // subject-wise marks bar chart, upcoming deadline cards with countdown,
-// GPA calculator card, study tips card, and visually prominent recommendations.
+// GPA calculator card, AI study assistant card, and visually prominent recommendations.
 // =============================================================================
 
 'use client';
@@ -171,39 +171,7 @@ function gradeColor(grade: string): string {
   }
 }
 
-// Study tips data based on common student challenges
-const studyTips = [
-  {
-    id: 'tip-1',
-    category: 'Time Management',
-    icon: Clock,
-    tip: 'Use the Pomodoro technique: 25 minutes focused study, 5 minutes break. This improves retention by 30%.',
-    priority: 'high' as const,
-    priorityColor: 'text-red-600 dark:text-red-400',
-    bg: 'bg-red-50 dark:bg-red-950/20',
-    border: 'border-red-200 dark:border-red-800/40',
-  },
-  {
-    id: 'tip-2',
-    category: 'Study Strategy',
-    icon: Brain,
-    tip: 'Review your weakest subjects first when your mind is fresh. Schedule them during your peak energy hours.',
-    priority: 'medium' as const,
-    priorityColor: 'text-amber-600 dark:text-amber-400',
-    bg: 'bg-amber-50 dark:bg-amber-950/20',
-    border: 'border-amber-200 dark:border-amber-800/40',
-  },
-  {
-    id: 'tip-3',
-    category: 'Goal Setting',
-    icon: Target,
-    tip: 'Set specific weekly goals for each subject. Track progress to stay motivated and identify gaps early.',
-    priority: 'medium' as const,
-    priorityColor: 'text-emerald-600 dark:text-emerald-400',
-    bg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    border: 'border-emerald-200 dark:border-emerald-800/40',
-  },
-];
+
 
 export default function StudentDashboard() {
   const { setView } = useAppStore();
@@ -270,7 +238,89 @@ export default function StudentDashboard() {
       totalCourses: recentMarks.length,
     };
   }, [data]);
+  // AI study assistant tips based on attendance, marks, and assignments
+const studyTips = useMemo(() => {
+  if (!data) return [];
 
+const tips: Array<{
+  category: string;
+  tip: string;
+  priority: 'high' | 'medium' | 'low';
+}> = [];
+
+  // Attendance based
+  if (data.attendance.percentage < 75) {
+    tips.push({
+      category: 'Attendance Alert',
+      tip: `Your attendance is ${data.attendance.percentage}%. Attend more classes to reach the required 75%.`,
+      priority: 'high',
+    });
+  }
+
+  // Marks based
+  if (data.marks.percentage < 60) {
+    tips.push({
+      category: 'Academic Performance',
+      tip: 'Your average marks are below 60%. Spend more time on revision and practice.',
+      priority: 'high',
+    });
+  }
+
+  // Assignment based
+  if (data.assignments.length > 0) {
+    tips.push({
+      category: 'Pending Assignments',
+      tip: `You have ${data.assignments.length} pending assignments. Complete them before the deadline.`,
+      priority: 'medium',
+    });
+  }
+  // Weakest subject based
+  if (data.marks.recentMarks?.length > 0) {
+  const weakestSubject = data.marks.recentMarks.reduce(
+    (lowest, current) => {
+      const lowestPct =
+        (lowest.marksObtained / lowest.totalMarks) * 100;
+
+      const currentPct =
+        (current.marksObtained / current.totalMarks) * 100;
+
+      return currentPct < lowestPct
+        ? current
+        : lowest;
+    }
+  );
+
+  const weakestPercentage = Math.round(
+    (weakestSubject.marksObtained /
+      weakestSubject.totalMarks) *
+      100
+  );
+
+  tips.push({
+    category: 'Weakest Subject',
+    tip: `Your lowest scoring subject is ${weakestSubject.subject?.name || 'Unknown'} (${weakestPercentage}%). Spend extra study time on this subject this week.`,
+    priority:
+      weakestPercentage < 60
+        ? 'high'
+        : 'medium',
+  });
+}
+
+  // Excellent student
+  if (
+    data.attendance.percentage >= 75 &&
+    data.marks.percentage >= 75 &&
+    data.assignments.length === 0
+  ) {
+    tips.push({
+      category: 'Excellent Progress',
+      tip: 'Great job. Maintain your performance and continue consistent study habits.',
+      priority: 'low',
+    });
+  }
+
+  return tips;
+}, [data]);
   // Semester progress (assuming 8 semesters, student is in semester X)
   const semesterProgress = useMemo(() => {
     if (!data) return 0;
@@ -397,7 +447,7 @@ export default function StudentDashboard() {
         </motion.div>
       </div>
 
-      {/* GPA Calculator + Study Tips Row */}
+      {/* GPA Calculator + AI Study Assistant Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* GPA Calculator Card */}
         <motion.div {...fadeUp} transition={{ delay: 0.45 }}>
@@ -497,48 +547,49 @@ export default function StudentDashboard() {
           </Card>
         </motion.div>
 
-        {/* Study Tips Card */}
+        {/* AI Study Assistant Card */}
         <motion.div {...fadeUp} transition={{ delay: 0.5 }}>
           <Card className="border-amber-200 dark:border-amber-800 bg-gradient-to-br from-amber-50/50 to-background dark:from-amber-950/20">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-lg font-semibold flex items-center gap-2">
                 <Zap className="w-5 h-5 text-amber-600" />
-                Study Tips
+                AI Study Assistant
               </CardTitle>
               <Badge variant="outline" className="text-xs border-amber-300 dark:border-amber-700 text-amber-600 dark:text-amber-400">
-                Personalized
+                Rule-Based AI
               </Badge>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {studyTips.map((tip) => {
-                  const Icon = tip.icon;
-                  return (
-                    <motion.div
-                      key={tip.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className={`flex items-start gap-3 p-3 rounded-lg border ${tip.bg} ${tip.border}`}
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-white dark:bg-background/50 flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                        <Icon className={`w-4 h-4 ${tip.priorityColor}`} />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-semibold text-foreground">{tip.category}</span>
-                          <Badge
-                            variant={tip.priority === 'high' ? 'destructive' : 'secondary'}
-                            className="text-[10px] h-4 px-1.5"
-                          >
-                            {tip.priority}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{tip.tip}</p>
-                      </div>
-                    </motion.div>
-                  );
-                })}
+                {studyTips.map((tip, index) => (
+  <motion.div
+    key={index}
+    initial={{ opacity: 0, x: -10 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.3 }}
+    className="p-3 rounded-lg border bg-muted/30"
+  >
+    <div className="flex items-center gap-2 mb-2">
+      <Badge
+        variant={
+          tip.priority === 'high'
+            ? 'destructive'
+            : 'secondary'
+        }
+      >
+        {tip.priority}
+      </Badge>
+
+      <span className="text-sm font-semibold">
+        {tip.category}
+      </span>
+    </div>
+
+    <p className="text-sm text-muted-foreground">
+      {tip.tip}
+    </p>
+  </motion.div>
+))}
               </div>
             </CardContent>
           </Card>
