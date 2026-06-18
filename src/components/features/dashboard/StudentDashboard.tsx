@@ -31,7 +31,13 @@ import {
 
 interface StudentData {
   student: { name: string; rollNumber: string; semester: number; section: string; department: { name: string; code: string } };
-  attendance: { percentage: number; totalSessions: number; attended: number };
+  attendance: { percentage: number; totalSessions: number; attended: number; subjectAttendance: Array<{
+  subject: string;
+  attended: number;
+  total: number;
+  percentage: number;
+  classesNeeded: number;
+}>; };
   marks: {
     percentage: number;
     totalSubjects: number;
@@ -338,7 +344,7 @@ const tips: Array<{
   }
 
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
-
+console.log('SUBJECT ATTENDANCE', data.attendance.subjectAttendance);
   const pendingAssignments = data.assignments;
   const attendanceColor = data.attendance.percentage >= 75 ? 'text-emerald-600' : data.attendance.percentage >= 50 ? 'text-amber-600' : 'text-red-600';
 
@@ -403,10 +409,32 @@ const tips: Array<{
                     </div>
                     <Progress value={data.attendance.percentage} className="h-3" />
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    {data.attendance.percentage >= 75 ? '✅ You meet the minimum attendance requirement' :
-                     `⚠️ You need ${75 - data.attendance.percentage}% more to meet the 75% requirement`}
-                  </p>
+                  <div className="space-y-2">
+  {data.attendance.subjectAttendance
+    ?.filter((s) => s.percentage < 75)
+    .map((s) => (
+      <div
+        key={s.subject}
+        className="text-xs rounded-md p-2 bg-amber-500/10 border border-amber-500/20"
+      >
+        <span className="font-medium">{s.subject}</span>
+        <br />
+        Attendance: {s.percentage}% • Need to attend{' '}
+        <span className="font-bold text-amber-500">
+          {s.classesNeeded}
+        </span>{' '}
+        more classes to reach 75%
+      </div>
+    ))}
+
+  {data.attendance.subjectAttendance?.every(
+    (s) => s.percentage >= 75
+  ) && (
+    <p className="text-xs text-emerald-500">
+      ✅ All subjects meet the 75% attendance requirement
+    </p>
+  )}
+</div>
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     <div className="bg-muted/50 rounded-lg p-3 text-center">
                       <p className="text-2xl font-bold text-emerald-600">{data.attendance.attended}</p>

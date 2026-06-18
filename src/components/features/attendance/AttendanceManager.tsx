@@ -8,7 +8,7 @@
 // =============================================================================
 
 'use client';
-
+import { Progress } from '@/components/ui/progress';
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -25,7 +25,45 @@ import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+function CircularProgress({ value, size = 140, strokeWidth = 10 }: { value: number; size?: number; strokeWidth?: number }) {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (value / 100) * circumference;
+  const color = value >= 75 ? '#10b981' : value >= 50 ? '#f59e0b' : '#ef4444';
 
+  return (
+    <div className="relative inline-flex items-center justify-center">
+      <svg width={size} height={size} className="-rotate-90">
+        <circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="currentColor"
+          strokeWidth={strokeWidth}
+          fill="none"
+          className="text-muted/30"
+        />
+        <motion.circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke={color}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          strokeDasharray={circumference}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: offset }}
+          transition={{ duration: 1.5, ease: 'easeOut' }}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-3xl font-bold" style={{ color }}>{value}%</span>
+        <span className="text-xs text-muted-foreground">Attendance</span>
+      </div>
+    </div>
+  );
+}
 interface Subject { id: string; name: string; code: string; }
 interface Department { id: string; name: string; code: string; }
 interface Session {
@@ -57,8 +95,12 @@ export default function AttendanceManager() {
   const [qrInput, setQrInput] = useState('');
   const [marking, setMarking] = useState(false);
   const [myRecords, setMyRecords] = useState<Record[]>([]);
-  const [attendancePercent, setAttendancePercent] = useState({ percentage: 0, totalSessions: 0, attended: 0 });
-
+ const [attendancePercent, setAttendancePercent] = useState<any>({
+  overallPercentage: 0,
+  totalSessions: 0,
+  attendedSessions: 0,
+  subjectBreakdown: [],
+});
   // Admin state
   const [adminFilterDept, setAdminFilterDept] = useState('all');
   const [adminFilterSemester, setAdminFilterSemester] = useState('all');
@@ -89,7 +131,14 @@ export default function AttendanceManager() {
         api.get('/attendance/percentage'),
       ]);
       setMyRecords(histRes.data.data || []);
-      setAttendancePercent(pctRes.data.data || { percentage: 0, totalSessions: 0, attended: 0 });
+     setAttendancePercent(
+  pctRes.data.data || {
+    overallPercentage: 0,
+    totalSessions: 0,
+    attendedSessions: 0,
+    subjectBreakdown: [],
+  }
+);
     } catch { /* ignore */ }
   }, []);
 
@@ -377,41 +426,79 @@ export default function AttendanceManager() {
   // Student View
   // =========================================================================
   if (role === 'student') {
+    console.log("ATTENDANCE DATA:", attendancePercent);
+    const attendanceColor =
+  attendancePercent.overallPercentage >= 75
+    ? 'text-emerald-600'
+    : attendancePercent.overallPercentage >= 50
+    ? 'text-amber-600'
+    : 'text-red-600';
     return (
       <div className="space-y-6">
         <h2 className="text-2xl font-bold tracking-tight">My Attendance</h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-400" />
-              <CardContent className="p-5 text-center">
-                <p className="text-sm text-muted-foreground">Attendance %</p>
-                <p className={`text-3xl font-bold ${attendancePercent.percentage >= 75 ? 'text-emerald-600' : 'text-amber-600'}`}>
-                  {attendancePercent.percentage}%
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <Card className="overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-sky-500 to-blue-400" />
-              <CardContent className="p-5 text-center">
-                <p className="text-sm text-muted-foreground">Total Sessions</p>
-                <p className="text-3xl font-bold">{attendancePercent.totalSessions}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <Card className="overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-emerald-500 to-green-400" />
-              <CardContent className="p-5 text-center">
-                <p className="text-sm text-muted-foreground">Attended</p>
-                <p className="text-3xl font-bold text-emerald-600">{attendancePercent.attended}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-semibold">Attendance Overview</CardTitle>
+              
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col sm:flex-row items-center gap-6">
+             <CircularProgress value={attendancePercent.overallPercentage} />
+                <div className="flex-1 space-y-4 w-full">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Current Attendance</span>
+                      <span className={attendanceColor}>{attendancePercent.overallPercentage}%</span>
+                    </div>
+                    <Progress value={attendancePercent.overallPercentage} className="h-3" />
+                  </div>
+                 <div className="space-y-2">
+  {attendancePercent.subjectBreakdown
+    ?.filter((s: any) => s.percentage < 75)
+    .map((s:any, index:number) => (
+      <div
+        key={`${s.subjectId}-${index}`}
+        className="text-xs rounded-md p-2 bg-amber-500/10 border border-amber-500/20"
+      >
+  
+        <span className="font-medium">{s.subjectName}</span>
+        <br />
+      
+
+Attendance: {s.percentage}% • Need to attend{" "}
+<span className="font-bold text-amber-500">
+  {Math.ceil(
+    (0.75 * s.totalSessions - s.attendedSessions) / 0.25
+  )}
+</span>{" "}
+more classes to reach 75% attendance
+      </div>
+    ))}
+
+  {attendancePercent.subjectBreakdown?.length > 0 &&
+    attendancePercent.subjectBreakdown.every(
+      (s: any) => s.percentage >= 75
+    ) && (
+      <p className="text-xs text-emerald-500">
+        ✅ All subjects meet the 75% attendance requirement
+      </p>
+    )}
+</div>
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="bg-muted/50 rounded-lg p-3 text-center">
+                      <p className="text-2xl font-bold text-emerald-600">{attendancePercent.attendedSessions}</p>
+                      <p className="text-xs text-muted-foreground">Attended</p>
+                    </div>
+                    <div className="bg-muted/50 rounded-lg p-3 text-center">
+                      <p className="text-2xl font-bold text-amber-600">{attendancePercent.totalSessions - attendancePercent.attendedSessions}</p>
+                      <p className="text-xs text-muted-foreground">Missed</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card> 
 
         {/* QR Code Input */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>

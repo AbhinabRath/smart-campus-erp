@@ -44,6 +44,7 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
   notices,
   todayTimetable,
   recentMaterials,
+  subjectAttendanceSessions,
 ] = await Promise.all([
       // Total attendance sessions for this student's class
       prisma.attendanceSession.count({
@@ -134,7 +135,21 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
         take: 5,
       }),
 
-     
+     prisma.attendanceSession.findMany({
+  where: {
+    departmentId: student.departmentId,
+    semester: student.semester,
+    section: student.section,
+  },
+  include: {
+    subject: true,
+    records: {
+      where: {
+        studentId: student.id,
+      },
+    },
+  },
+}),
     ]);
 
     // Calculate attendance percentage
@@ -148,7 +163,55 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
     const marksPercentage = totalMaxMarks > 0
       ? Math.round((totalMarksObtained / totalMaxMarks) * 10000) / 100
       : 0;
+const subjectMap = new Map();
 
+subjectAttendanceSessions.forEach((session) => {
+  const key = session.subject.id;
+
+  if (!subjectMap.has(key)) {
+    subjectMap.set(key, {
+      subject: session.subject.name,
+      attended: 0,
+      total: 0,
+    });
+  }
+
+  const item = subjectMap.get(key);
+
+  item.total++;
+
+  if (session.records.length > 0) {
+    item.attended++;
+  }
+});
+
+const subjectAttendance: any[] = [];
+
+subjectMap.forEach((item) => {
+  const percentage =
+    item.total > 0
+      ? Math.round(
+          (item.attended / item.total) * 100
+        )
+      : 0;
+
+  let classesNeeded = 0;
+
+  if (percentage < 75) {
+    classesNeeded = Math.ceil(
+      ((0.75 * item.total) - item.attended) /
+      0.25
+    );
+  }
+
+  subjectAttendance.push({
+    subject: item.subject,
+    attended: item.attended,
+    total: item.total,
+    percentage,
+    classesNeeded,
+  });
+});
     successResponse(res, 'Student dashboard data loaded.', {
       student: {
         name: req.user!.name,
@@ -162,6 +225,7 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
         totalSessions,
         attended: attendedCount,
         recentRecords: recentAttendance,
+        subjectAttendance,
       },
       marks: {
         percentage: marksPercentage,
