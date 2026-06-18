@@ -44,7 +44,6 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
   notices,
   todayTimetable,
   recentMaterials,
-  recommendations,
 ] = await Promise.all([
       // Total attendance sessions for this student's class
       prisma.attendanceSession.count({
@@ -135,12 +134,7 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
         take: 5,
       }),
 
-      // Unread recommendations
-      prisma.recommendation.findMany({
-        where: { studentId: userId, isRead: false },
-        orderBy: { priority: 'desc' },
-        take: 5,
-      }),
+     
     ]);
 
     // Calculate attendance percentage
@@ -178,7 +172,6 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
       notices,
       timetable: todayTimetable,
       materials: recentMaterials,
-      recommendations,
     });
   } catch (err) {
     next(err);

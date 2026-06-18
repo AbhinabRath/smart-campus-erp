@@ -50,9 +50,7 @@ interface StudentData {
   notices: Array<{
     id: string; title: string; priority: string; isPinned: boolean; createdAt: string; targetRole: string;
   }>;
-  recommendations: Array<{
-    id: string; type: string; title: string; priority: string; isRead: boolean;
-  }>;
+  
 }
 
 const fadeUp = {
@@ -298,7 +296,7 @@ export default function StudentDashboard() {
     { label: 'Attendance', value: `${data.attendance.percentage}%`, icon: ClipboardCheck, color: attendanceColor, bg: 'bg-emerald-50 dark:bg-emerald-950/30', sub: `${data.attendance.attended}/${data.attendance.totalSessions} sessions` },
     { label: 'Marks Average', value: `${data.marks.percentage}%`, icon: FileText, color: 'text-sky-600', bg: 'bg-sky-50 dark:bg-sky-950/30', sub: `${data.marks.totalSubjects} subjects` },
     { label: 'Pending Work', value: pendingAssignments.length, icon: FileUp, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/30', sub: 'assignments due' },
-    { label: 'Recommendations', value: data.recommendations.filter((r) => !r.isRead).length, icon: Lightbulb, color: 'text-violet-600', bg: 'bg-violet-50 dark:bg-violet-950/30', sub: 'new suggestions' },
+    
   ];
 
   return (
@@ -593,49 +591,6 @@ export default function StudentDashboard() {
             </CardContent>
           </Card>
         </motion.div>
-
-        {/* Recommendations - Visually Prominent */}
-        <motion.div {...fadeUp} transition={{ delay: 0.6 }}>
-          <Card className="border-violet-200 dark:border-violet-800 bg-gradient-to-br from-violet-50/50 to-background dark:from-violet-950/20">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-2">
-                <Lightbulb className="w-5 h-5 text-violet-600" />
-                Recommendations
-              </CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setView('recommendations')} className="gap-1">
-                View All <ArrowRight className="w-4 h-4" />
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3 max-h-80 overflow-y-auto custom-scrollbar">
-              {data.recommendations.length === 0 ? (
-                <p className="text-muted-foreground text-sm text-center py-4">No recommendations yet</p>
-              ) : (
-                data.recommendations.filter((r) => !r.isRead).slice(0, 5).map((rec) => (
-                  <motion.div
-                    key={rec.id}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    className="flex items-center gap-3 p-3 bg-violet-50 dark:bg-violet-900/20 rounded-lg border border-violet-100 dark:border-violet-800/50"
-                  >
-                    <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center shrink-0">
-                      <Lightbulb className="w-5 h-5 text-violet-600 dark:text-violet-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{rec.title}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{rec.type} recommendation</p>
-                    </div>
-                    <Badge
-                      variant={rec.priority === 'high' ? 'default' : 'outline'}
-                      className={`text-xs shrink-0 ${rec.priority === 'high' ? 'bg-violet-600' : 'border-violet-300 dark:border-violet-700'}`}
-                    >
-                      {rec.priority}
-                    </Badge>
-                  </motion.div>
-                ))
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
       </div>
 
       {/* Notices */}
@@ -685,7 +640,7 @@ export default function StudentDashboard() {
                 { label: 'Mark Attendance', view: 'attendance' as const, icon: ClipboardCheck, color: 'text-emerald-600' },
                 { label: 'View Marks', view: 'marks' as const, icon: FileText, color: 'text-sky-600' },
                 { label: 'Assignments', view: 'assignments' as const, icon: Calendar, color: 'text-amber-600' },
-                { label: 'Recommendations', view: 'recommendations' as const, icon: Lightbulb, color: 'text-violet-600' },
+                
               ].map((action) => (
                 <Button
                   key={action.label}
