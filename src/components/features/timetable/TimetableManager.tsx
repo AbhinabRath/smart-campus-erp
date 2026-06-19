@@ -23,9 +23,9 @@ import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 
-interface Subject { id: string; name: string; code: string; }
+interface Subject { id: string; name: string; code: string; departmentId: string; semester: number; }
 interface Department { id: string; name: string; code: string; }
-interface Teacher { id: string; user: { name: string }; employeeId: string; }
+interface Teacher { id: string; user: { name: string }; employeeId: string; departmentId: string; }
 interface TimetableEntry {
   id: string; dayOfWeek: number; periodNumber: number; roomNumber: string; startTime: string; endTime: string;
   subject: { name: string; code: string };
@@ -140,19 +140,31 @@ export default function TimetableManager() {
       ]);
       const ttData = ttRes.data.data;
       setEntries(Array.isArray(ttData) ? ttData : (ttData?.timetables || []));
-      console.log("first timetable entry:", ttData?.timetables?.[0] || ttData?.[0]);
+     
       setDepartments(deptRes.data.data || []);
-      console.log("departments response:", deptRes.data);
-console.log("departments data:", deptRes.data.data);
+      
       setSubjects(subRes.data.data || []);
+      console.log("FIRST SUBJECT", subRes.data.data?.[0]);
 
       // Load teachers for admin
       if (role === 'admin') {
         const usersRes = await api.get('/users', { params: { role: 'teacher' } });
         const teacherUsers = (usersRes.data.data || []).filter((u: { teacher: unknown }) => u.teacher);
-        setTeachers(teacherUsers.map((u: { teacher: { id: string; employeeId: string }; id: string; name: string }) => ({
-          id: u.teacher.id, user: { name: u.name }, employeeId: u.teacher.employeeId,
-        })));
+        setTeachers(
+  teacherUsers.map((u: {
+    teacher: {
+      id: string;
+      employeeId: string;
+      departmentId: string;
+    };
+    name: string;
+  }) => ({
+    id: u.teacher.id,
+    user: { name: u.name },
+    employeeId: u.teacher.employeeId,
+    departmentId: u.teacher.departmentId,
+  }))
+);
       }
 
       // Set default filter from student profile
@@ -210,6 +222,15 @@ console.log('entries count:', entries.length);
          e.semester === parseInt(filterSemester) &&
          e.section === filterSection;
 });
+const filteredSubjects = subjects.filter(
+  (s) =>
+    s.departmentId === filterDept &&
+    s.semester === parseInt(filterSemester)
+);
+
+const filteredTeachers = teachers.filter(
+  (t) => t.departmentId === filterDept
+);
 console.log("filterDept:", filterDept);
 console.log("first entry department:", entries[0]?.departmentId);
 console.log("departments loaded:", departments.length);
@@ -311,14 +332,14 @@ const periodInfo = periods.map((period) => {
                   <Label className="text-xs">Subject</Label>
                   <Select value={newEntry.subjectId} onValueChange={(v) => setNewEntry((p) => ({ ...p, subjectId: v }))}>
                     <SelectTrigger><SelectValue placeholder="Subject" /></SelectTrigger>
-                    <SelectContent>{subjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.code}</SelectItem>)}</SelectContent>
+                    <SelectContent>{filteredSubjects.map((s) => <SelectItem key={s.id} value={s.id}>{s.code}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs">Teacher</Label>
                   <Select value={newEntry.teacherId} onValueChange={(v) => setNewEntry((p) => ({ ...p, teacherId: v }))}>
                     <SelectTrigger><SelectValue placeholder="Teacher" /></SelectTrigger>
-                    <SelectContent>{teachers.map((t) => <SelectItem key={t.id} value={t.id}>{t.user.name}</SelectItem>)}</SelectContent>
+                    <SelectContent>{filteredTeachers.map((t) => <SelectItem key={t.id} value={t.id}>{t.user.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1">
@@ -384,13 +405,51 @@ const periodInfo = periods.map((period) => {
                             const color = SUBJECT_COLORS[subjectColorIdx];
                             return (
                               <td key={periodIdx} className="p-1 border-b border-r last:border-r-0">
-                                {entry ? (
-                                  <div className={`rounded-lg p-2 shadow-sm text-center border ${color.bg} ${color.border} ${isCurrentCell ? 'ring-2 ring-emerald-500 ring-offset-1 animate-pulse' : ''}`}>
-                                    <p className={`text-xs font-medium ${color.text}`}>{entry.subject?.name || 'N/A'}</p>
-                                    <p className="text-[10px] text-muted-foreground">{entry.teacher?.user?.name || ''}</p>
-                                    <Badge variant="outline" className="text-[10px] mt-1">{entry.roomNumber}</Badge>
-                                  </div>
-                                ) : (
+                               {entry ? (
+                                <div className={`rounded-lg p-2 shadow-sm text-center border ${color.bg} ${color.border} ${isCurrentCell ? 'ring-2 ring-emerald-500 ring-offset-1 animate-pulse' : ''}`}>
+                                  <p className={`text-xs font-medium ${color.text}`}>
+                                    {entry.subject?.name || 'N/A'}
+                                  </p>
+
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {entry.teacher?.user?.name || ''}
+                                  </p>
+
+                                  <Badge variant="outline" className="text-[10px] mt-1">
+                                    {entry.roomNumber}
+                                  </Badge>
+
+                                  {role === 'admin' && (
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      className="mt-2 h-6 text-[10px] w-full"
+                                      onClick={async () => {
+                                        if (!confirm('Delete this timetable slot?')) return;
+
+                                        try {
+                                          await api.delete(`/timetables/${entry.id}`);
+
+                                          toast({
+                                            title: 'Deleted',
+                                            description: 'Timetable slot removed',
+                                          });
+
+                                          loadData();
+                                        } catch {
+                                          toast({
+                                            title: 'Error',
+                                            description: 'Failed to delete timetable slot',
+                                            variant: 'destructive',
+                                          });
+                                        }
+                                      }}
+                                    >
+                                      Delete
+                                    </Button>
+                                  )}
+                                </div>
+                              ) : (
                                   <div className={`h-12 rounded bg-muted/20 dark:bg-muted/10 ${isCurrentCell ? 'ring-1 ring-emerald-300 dark:ring-emerald-700' : ''}`} />
                                 )}
                               </td>

@@ -24,6 +24,25 @@ export async function createTimetable(req: Request, res: Response, next: NextFun
       subjectId, teacherId, roomNumber, startTime, endTime,
     } = req.body;
 
+    const existing = await prisma.timetable.findFirst({
+  where: {
+    departmentId,
+    semester: parseInt(String(semester)),
+    section: section || 'A',
+    dayOfWeek: parseInt(String(dayOfWeek)),
+    periodNumber: parseInt(String(periodNumber)),
+  },
+});
+
+if (existing) {
+  errorResponse(
+    res,
+    'Timetable slot already exists. Delete the existing slot before adding a new one.',
+    409
+  );
+  return;
+}
+
     const timetable = await prisma.timetable.create({
       data: {
         departmentId,
