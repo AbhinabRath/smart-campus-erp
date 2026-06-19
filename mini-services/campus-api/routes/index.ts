@@ -208,7 +208,7 @@ router.get('/dashboard/admin', requireAuth, requireRole('admin'), dashboardCtrl.
 // =============================================================================
 // USER MANAGEMENT ROUTES (Admin Only)
 // =============================================================================
-router.get('/users', requireAuth, requireRole('admin'), userCtrl.getUsers);
+router.get('/users', requireAuth, requireRole('admin', 'teacher'), userCtrl.getUsers);
 router.get('/users/:id', requireAuth, requireRole('admin'), userCtrl.getUserById);
 router.post('/users', requireAuth, requireRole('admin'), validate([
   { field: 'email', required: true, isEmail: true },

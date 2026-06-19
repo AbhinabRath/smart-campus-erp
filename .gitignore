@@ -54,3 +54,4 @@ server.log
 /skills/
 # Uploaded files
 mini-services/campus-api/uploads/*
+!mini-services/campus-api/uploads/.gitkeep

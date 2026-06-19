@@ -14,7 +14,7 @@
 
 6. For Teachers view assignment is breaking ->Done
 
-7. Pdf download is not working in Study Materials 
+7. Pdf download is not working in Study Materials ->Done
 
 8. Notifications should change when their number changes, not when refreshed ->Done
 
