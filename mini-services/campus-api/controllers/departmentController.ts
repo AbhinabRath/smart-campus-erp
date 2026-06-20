@@ -97,7 +97,11 @@ export async function deleteDepartment(req: Request, res: Response, next: NextFu
 
     // Prevent deletion if department has associated records
     if (existing._count.students > 0 || existing._count.teachers > 0 || existing._count.subjects > 0) {
-      errorResponse(res, 'Cannot delete department with associated students, teachers, or subjects.', 400);
+      errorResponse(
+  res,
+  'Cannot delete department. Delete all students, teachers and subjects belonging to this department first.',
+  400
+);
       return;
     }
 

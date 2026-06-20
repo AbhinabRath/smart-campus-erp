@@ -138,9 +138,13 @@ export async function deleteSubject(req: Request, res: Response, next: NextFunct
 
     const hasAssociations = Object.values(existing._count).some(count => count > 0);
     if (hasAssociations) {
-      errorResponse(res, 'Cannot delete subject with associated records.', 400);
-      return;
-    }
+  errorResponse(
+    res,
+    'Cannot delete subject. Delete all marks, attendance sessions, assignments, study materials and timetable entries linked to this subject first.',
+    400
+  );
+  return;
+}
 
     await prisma.subject.delete({ where: { id } });
     successResponse(res, 'Subject deleted.');

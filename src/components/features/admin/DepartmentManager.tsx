@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, Plus, RefreshCw, Users, BookOpen, GraduationCap } from 'lucide-react';
+import { Building2, Plus, RefreshCw, Users, BookOpen, GraduationCap, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -65,7 +65,32 @@ export default function DepartmentManager() {
       setCreating(false);
     }
   };
+const deleteDepartment = async (id: string) => {
+  if (!confirm('Delete this department?')) return;
 
+  try {
+    await api.delete(`/departments/${id}`);
+
+    toast({
+      title: 'Success',
+      description: 'Department deleted'
+    });
+
+    loadDepartments();
+  } catch (err: unknown) {
+    const axiosErr = err as {
+      response?: { data?: { message?: string } };
+    };
+
+    toast({
+      title: 'Error',
+      description:
+        axiosErr.response?.data?.message ||
+        'Failed to delete department',
+      variant: 'destructive',
+    });
+  }
+};
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold tracking-tight">Department Management</h2>
@@ -121,9 +146,20 @@ export default function DepartmentManager() {
                       <h3 className="font-semibold">{dept.name}</h3>
                       <Badge variant="outline" className="mt-1">{dept.code}</Badge>
                     </div>
-                    <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
-                      <Building2 className="w-5 h-5 text-emerald-600" />
-                    </div>
+                    <div className="flex gap-2">
+  <div className="w-10 h-10 bg-emerald-50 rounded-lg flex items-center justify-center">
+    <Building2 className="w-5 h-5 text-emerald-600" />
+  </div>
+
+  <Button
+    size="icon"
+    variant="ghost"
+    className="text-red-500 hover:text-red-600"
+    onClick={() => deleteDepartment(dept.id)}
+  >
+    <Trash2 className="w-4 h-4" />
+  </Button>
+</div>
                   </div>
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="bg-muted/50 rounded p-2">

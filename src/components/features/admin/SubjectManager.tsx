@@ -9,7 +9,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Plus, RefreshCw } from 'lucide-react';
+import { BookOpen, Plus, RefreshCw, Trash2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -84,6 +84,32 @@ export default function SubjectManager() {
       setCreating(false);
     }
   };
+  const deleteSubject = async (id: string) => {
+  if (!confirm('Delete this subject?')) return;
+
+  try {
+    await api.delete(`/subjects/${id}`);
+
+    toast({
+      title: 'Success',
+      description: 'Subject deleted'
+    });
+
+    loadData();
+  } catch (err: unknown) {
+    const axiosErr = err as {
+      response?: { data?: { message?: string } };
+    };
+
+    toast({
+      title: 'Error',
+      description:
+        axiosErr.response?.data?.message ||
+        'Failed to delete subject',
+      variant: 'destructive',
+    });
+  }
+};
 
   // Helper for loadSubjects (same as loadData but we just reuse)
   const loadSubjects = loadData;
@@ -160,6 +186,7 @@ export default function SubjectManager() {
                   <TableHead>Semester</TableHead>
                   <TableHead>Credits</TableHead>
                   <TableHead>Type</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -170,7 +197,22 @@ export default function SubjectManager() {
                     <TableCell><Badge variant="outline">{sub.department?.name || 'N/A'}</Badge></TableCell>
                     <TableCell>Sem {sub.semester}</TableCell>
                     <TableCell>{sub.credits}</TableCell>
-                    <TableCell><Badge className={TYPE_STYLES[sub.type] || TYPE_STYLES.theory}>{sub.type}</Badge></TableCell>
+                    <TableCell>
+  <Badge className={TYPE_STYLES[sub.type] || TYPE_STYLES.theory}>
+    {sub.type}
+  </Badge>
+</TableCell>
+
+<TableCell>
+  <Button
+    size="sm"
+    variant="ghost"
+    className="text-red-500 hover:text-red-600"
+    onClick={() => deleteSubject(sub.id)}
+  >
+    <Trash2 className="w-4 h-4" />
+  </Button>
+</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
