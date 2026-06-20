@@ -86,7 +86,11 @@ const navItems: NavItem[] = [
 export default function AppSidebar() {
   const { currentUser, currentView, setView, sidebarOpen, setSidebarOpen } = useAppStore();
   const role = currentUser?.role || 'student';
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+  if (typeof window === 'undefined') return false;
+
+  return localStorage.getItem('campus-erp-sidebar-compact') === 'true';
+});
   const [noticeCount, setNoticeCount] = useState(0);
   const [recommendationCount, setRecommendationCount] = useState(0);
 
@@ -122,6 +126,27 @@ export default function AppSidebar() {
     window.removeEventListener('noticesUpdated', loadCounts);
   };
 }, [currentUser, role]);
+useEffect(() => {
+  const syncSidebar = () => {
+    setCollapsed(
+      localStorage.getItem(
+        'campus-erp-sidebar-compact'
+      ) === 'true'
+    );
+  };
+
+  window.addEventListener(
+    'sidebarCompactChanged',
+    syncSidebar
+  );
+
+  return () => {
+    window.removeEventListener(
+      'sidebarCompactChanged',
+      syncSidebar
+    );
+  };
+}, []);
 
   // Filter navigation items based on user role
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
@@ -350,7 +375,16 @@ export default function AppSidebar() {
             variant="ghost"
             size="sm"
             className="hidden lg:flex w-full text-[var(--sidebar-foreground)]/60 hover:text-[var(--sidebar-foreground)] hover:bg-[var(--sidebar-accent)] gap-2 justify-center"
-            onClick={() => setCollapsed(!collapsed)}
+            onClick={() => {
+  const newValue = !collapsed;
+
+  setCollapsed(newValue);
+
+  localStorage.setItem(
+    'campus-erp-sidebar-compact',
+    String(newValue)
+  );
+}}
           >
             {collapsed ? (
               <ChevronRight className="w-4 h-4" />

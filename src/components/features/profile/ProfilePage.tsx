@@ -221,7 +221,29 @@ const handleAvatarUpload = async (
     });
   }
 };
+const handleRemoveAvatar = async () => {
+  try {
+    await api.delete('/users/avatar');
 
+    setEditAvatar('');
+
+    login({
+      ...currentUser!,
+      avatar: null
+    });
+
+    toast({
+      title: 'Success',
+      description: 'Avatar removed'
+    });
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Failed to remove avatar',
+      variant: 'destructive'
+    });
+  }
+};
   const roleColor = role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : role === 'teacher' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400';
   const roleIcon = role === 'admin' ? Shield : role === 'teacher' ? GraduationCap : BookOpen;
 
@@ -567,10 +589,20 @@ const handleAvatarUpload = async (
 </div>
   </div>
 )}
-                <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800 shadow-sm hover:shadow-md transition-shadow">
+                
+                <div className="flex gap-2">
+  <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800 shadow-sm hover:shadow-md transition-shadow">
                   <Save className="w-4 h-4 mr-2" />
                   {saving ? 'Saving...' : 'Save Changes'}
                 </Button>
+  <Button
+    type="button"
+    variant="destructive"
+    onClick={handleRemoveAvatar}
+  >
+    Remove Avatar
+  </Button>
+</div>
               </form>
             </CardContent>
           </Card>

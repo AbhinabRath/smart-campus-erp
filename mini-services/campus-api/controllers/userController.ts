@@ -437,6 +437,53 @@ export async function uploadAvatar(
     next(err);
   }
 }
+export async function removeAvatar(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.id;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      errorResponse(res, 'User not found.', 404);
+      return;
+    }
+
+    if (
+      user.avatar &&
+      user.avatar.startsWith('/uploads/avatars/')
+    ) {
+      const avatarPath = path.join(
+        __dirname,
+        '..',
+        user.avatar
+      );
+
+      if (fs.existsSync(avatarPath)) {
+        fs.unlinkSync(avatarPath);
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatar: null
+      }
+    });
+
+    successResponse(
+      res,
+      'Avatar removed successfully.'
+    );
+  } catch (err) {
+    next(err);
+  }
+}
 /**
  * PUT /api/users/:id/password
  * Change password for a user. Must be the user themselves.

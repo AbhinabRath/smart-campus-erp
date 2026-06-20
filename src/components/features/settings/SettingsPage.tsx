@@ -130,31 +130,57 @@ export default function SettingsPage() {
   const [changingPassword, setChangingPassword] = useState(false);
 
   // ---- Load localStorage on mount ----
-  useEffect(() => {
-    setSidebarCompact(loadSidebarCompact());
-    setFontSize(loadFontSize());
-    setNotifPrefs(loadNotificationPrefs());
-  }, []);
+useEffect(() => {
+  setSidebarCompact(loadSidebarCompact());
 
+  const savedSize = loadFontSize();
+  setFontSize(savedSize);
+
+  const root = document.documentElement;
+
+  if (savedSize === 'small') {
+    root.style.setProperty('--app-font-scale', '0.9');
+  } else if (savedSize === 'large') {
+    root.style.setProperty('--app-font-scale', '1.1');
+  } else {
+    root.style.setProperty('--app-font-scale', '1');
+  }
+
+  setNotifPrefs(loadNotificationPrefs());
+}, []);
   // ---- Handlers ----
 
   const handleSidebarCompact = useCallback((val: boolean) => {
     setSidebarCompact(val);
     saveSidebarCompact(val);
+    window.dispatchEvent(
+  new Event('sidebarCompactChanged')
+);
     toast({
       title: val ? 'Compact sidebar enabled' : 'Compact sidebar disabled',
       description: 'This preference is saved locally.',
     });
   }, [toast]);
 
-  const handleFontSize = useCallback((val: string) => {
-    setFontSize(val);
-    saveFontSize(val);
-    toast({
-      title: 'Font size updated',
-      description: `Font size set to ${val}.`,
-    });
-  }, [toast]);
+ const handleFontSize = useCallback((val: string) => {
+  setFontSize(val);
+  saveFontSize(val);
+
+  const root = document.documentElement;
+
+  if (val === 'small') {
+    root.style.setProperty('--app-font-scale', '0.9');
+  } else if (val === 'large') {
+    root.style.setProperty('--app-font-scale', '1.1');
+  } else {
+    root.style.setProperty('--app-font-scale', '1');
+  }
+
+  toast({
+    title: 'Font size updated',
+    description: `Font size set to ${val}.`,
+  });
+}, [toast]);
 
   const handleNotifToggle = useCallback((key: keyof NotificationPrefs, val: boolean) => {
     setNotifPrefs((prev) => {
@@ -219,7 +245,12 @@ export default function SettingsPage() {
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="show" className="space-y-6">
+    <motion.div
+  variants={containerVariants}
+  initial="hidden"
+  animate="show"
+  className="max-w-5xl mx-auto space-y-6"
+>
       {/* Page Title */}
       <motion.div variants={itemVariants} className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
@@ -232,16 +263,12 @@ export default function SettingsPage() {
       </motion.div>
 
       {/* Tabs */}
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs defaultValue="general" className="space-y-4">
         <motion.div variants={itemVariants}>
-          <TabsList className="grid w-full max-w-md grid-cols-3">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="general" className="gap-2">
               <Settings className="w-4 h-4 hidden sm:block" />
               General
-            </TabsTrigger>
-            <TabsTrigger value="notifications" className="gap-2">
-              <Bell className="w-4 h-4 hidden sm:block" />
-              Notifications
             </TabsTrigger>
             <TabsTrigger value="security" className="gap-2">
               <Shield className="w-4 h-4 hidden sm:block" />
@@ -253,7 +280,7 @@ export default function SettingsPage() {
         {/* ================================================================= */}
         {/* GENERAL TAB                                                       */}
         {/* ================================================================= */}
-        <TabsContent value="general" className="space-y-6">
+        <TabsContent value="general" className="space-y-4">
           {/* Appearance Card */}
           <motion.div variants={itemVariants}>
             <Card className="overflow-hidden">
@@ -352,86 +379,9 @@ export default function SettingsPage() {
         </TabsContent>
 
         {/* ================================================================= */}
-        {/* NOTIFICATIONS TAB                                                 */}
-        {/* ================================================================= */}
-        <TabsContent value="notifications" className="space-y-6">
-          <motion.div variants={itemVariants}>
-            <Card className="overflow-hidden">
-              <div className="h-1 bg-gradient-to-r from-amber-500 to-yellow-500" />
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Bell className="w-5 h-5 text-amber-500" />
-                  Notification Preferences
-                </CardTitle>
-                <CardDescription>Choose which notifications you want to receive</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-1">
-                {/* Email notifications */}
-                <NotificationRow
-                  icon={<Mail className="w-4 h-4 text-blue-500" />}
-                  bgColor="bg-blue-100 dark:bg-blue-900/30"
-                  title="Email Notifications"
-                  description="Receive important updates via email"
-                  checked={notifPrefs.email}
-                  onCheckedChange={(val) => handleNotifToggle('email', val)}
-                />
-
-                <Separator />
-
-                {/* Attendance alerts */}
-                <NotificationRow
-                  icon={<ClipboardCheck className="w-4 h-4 text-emerald-500" />}
-                  bgColor="bg-emerald-100 dark:bg-emerald-900/30"
-                  title="Attendance Alerts"
-                  description="Get notified about attendance status changes"
-                  checked={notifPrefs.attendance}
-                  onCheckedChange={(val) => handleNotifToggle('attendance', val)}
-                />
-
-                <Separator />
-
-                {/* Assignment reminders */}
-                <NotificationRow
-                  icon={<FileText className="w-4 h-4 text-orange-500" />}
-                  bgColor="bg-orange-100 dark:bg-orange-900/30"
-                  title="Assignment Reminders"
-                  description="Reminders for upcoming assignment deadlines"
-                  checked={notifPrefs.assignments}
-                  onCheckedChange={(val) => handleNotifToggle('assignments', val)}
-                />
-
-                <Separator />
-
-                {/* Notice alerts */}
-                <NotificationRow
-                  icon={<AlertCircle className="w-4 h-4 text-red-500" />}
-                  bgColor="bg-red-100 dark:bg-red-900/30"
-                  title="Notice Alerts"
-                  description="Alerts for new and urgent notices"
-                  checked={notifPrefs.notices}
-                  onCheckedChange={(val) => handleNotifToggle('notices', val)}
-                />
-
-                <Separator />
-
-                {/* Recommendation alerts */}
-                <NotificationRow
-                  icon={<Lightbulb className="w-4 h-4 text-yellow-500" />}
-                  bgColor="bg-yellow-100 dark:bg-yellow-900/30"
-                  title="Recommendation Alerts"
-                  description="Get personalized academic recommendations"
-                  checked={notifPrefs.recommendations}
-                  onCheckedChange={(val) => handleNotifToggle('recommendations', val)}
-                />
-              </CardContent>
-            </Card>
-          </motion.div>
-        </TabsContent>
-
-        {/* ================================================================= */}
         {/* SECURITY TAB                                                      */}
         {/* ================================================================= */}
-        <TabsContent value="security" className="space-y-6">
+        <TabsContent value="security" className="space-y-4">
           {/* Account Info Card */}
           <motion.div variants={itemVariants}>
             <Card className="overflow-hidden">
@@ -443,7 +393,7 @@ export default function SettingsPage() {
                 </CardTitle>
                 <CardDescription>Your account details (read-only)</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 p-5">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-1">
                     <Label className="text-xs text-muted-foreground uppercase tracking-wider">Name</Label>
@@ -490,7 +440,7 @@ export default function SettingsPage() {
                 </CardTitle>
                 <CardDescription>Update your password to keep your account secure</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-5">
                 <form onSubmit={handleChangePassword} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="settings-current-password">Current Password</Label>
@@ -578,7 +528,7 @@ export default function SettingsPage() {
                   Irreversible and destructive actions
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-5">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-lg bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800">
                   <div>
                     <p className="text-sm font-medium text-red-700 dark:text-red-300">Delete Account</p>

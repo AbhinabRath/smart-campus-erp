@@ -245,6 +245,11 @@ router.post(
   avatarUpload.single('avatar'),
   userCtrl.uploadAvatar
 );
+router.delete(
+  '/users/avatar',
+  requireAuth,
+  userCtrl.removeAvatar
+);
 router.put('/users/:id', requireAuth, userCtrl.updateUser);
 router.put('/users/:id/password', requireAuth, userCtrl.changePassword);
 router.delete('/users/:id', requireAuth, requireRole('admin'), userCtrl.deactivateUser);

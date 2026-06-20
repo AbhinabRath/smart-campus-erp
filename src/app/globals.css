@@ -45,6 +45,8 @@
 
 :root {
   --radius: 0.625rem;
+  --app-font-scale: 1;
+
   /* Emerald/Green campus theme */
   --background: oklch(0.98 0.005 155);
   --foreground: oklch(0.145 0.02 155);
@@ -117,9 +119,13 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground;
-  }
+  html {
+  font-size: calc(16px * var(--app-font-scale));
+}
+
+body {
+  @apply bg-background text-foreground;
+}
 }
 
 /* Custom scrollbar for long lists */
@@ -170,4 +176,15 @@
     background: white !important;
     color: black !important;
   }
+}
+/* ============================================================
+   Global Font Size System
+   ============================================================ */
+
+:root {
+  --app-font-scale: 1;
+}
+
+html {
+  font-size: calc(16px * var(--app-font-scale));
 }
