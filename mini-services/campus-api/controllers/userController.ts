@@ -280,7 +280,27 @@ else if (emailPrefix.startsWith('aids')) deptCode = 'AIDS';
 export async function updateUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const { id } = req.params;
-    const { name, email, avatar, isActive, departmentId, semester, section, specialization, designation } = req.body;
+    const {
+  name,
+  email,
+  avatar,
+  isActive,
+
+  departmentId,
+  semester,
+  section,
+
+  guardianName,
+  guardianPhone,
+
+  specialization,
+  designation,
+  researchArea,
+  qualification,
+  officeRoom,
+  phoneNumber,
+  bio
+} = req.body;
 
     // Non-admin users can only update their own profile
     if (req.user?.role !== 'admin' && req.user?.id !== id) {
@@ -309,23 +329,45 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
     });
 
     // Update role-specific profile if relevant fields are provided
-    if (existing.role === 'student' && (semester || section || departmentId)) {
-      await prisma.student.update({
-        where: { userId: id },
-        data: {
-          semester: semester ? parseInt(String(semester)) : undefined,
-          section: section || undefined,
-          departmentId: departmentId || undefined,
-        },
-      });
-    } else if (existing.role === 'teacher' && (specialization || designation || departmentId)) {
+    if (existing.role === 'student') {
+  await prisma.student.update({
+    where: { userId: id },
+    data: {
+      semester: semester ? parseInt(String(semester)) : undefined,
+      section: section || undefined,
+      departmentId: departmentId || undefined,
+
+      guardianName:
+        guardianName !== undefined ? guardianName : undefined,
+
+      guardianPhone:
+        guardianPhone !== undefined ? guardianPhone : undefined,
+        bio:
+  bio !== undefined ? bio : undefined,
+    },
+  });
+} else if (existing.role === 'teacher') {
       await prisma.teacher.update({
         where: { userId: id },
         data: {
-          specialization: specialization || undefined,
-          designation: designation || undefined,
-          departmentId: departmentId || undefined,
-        },
+  specialization: specialization || undefined,
+  designation: designation || undefined,
+  departmentId: departmentId || undefined,
+
+  researchArea:
+    researchArea !== undefined ? researchArea : undefined,
+
+  qualification:
+    qualification !== undefined ? qualification : undefined,
+
+  officeRoom:
+    officeRoom !== undefined ? officeRoom : undefined,
+
+  phoneNumber:
+    phoneNumber !== undefined ? phoneNumber : undefined,
+    bio:
+  bio !== undefined ? bio : undefined,
+},
       });
     }
 

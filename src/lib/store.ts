@@ -16,21 +16,46 @@ export interface User {
   avatar: string | null;
   isActive: boolean;
   student?: {
-    id: string;
-    rollNumber: string;
-    semester: number;
-    section: string;
-    departmentId: string;
-    department: { name: string; code: string };
-  } | null;
-  teacher?: {
-    id: string;
-    employeeId: string;
-    departmentId: string;
-    specialization: string | null;
-    designation: string;
-    department: { name: string; code: string };
-  } | null;
+  id: string;
+  rollNumber: string;
+
+  semester: number;
+  section: string;
+
+  departmentId: string;
+
+  guardianName?: string | null;
+  guardianPhone?: string | null;
+
+  admissionYear?: number | null;
+  collegeEmail?: string | null;
+bio?: string | null;
+  department: {
+    name: string;
+    code: string;
+  };
+} | null;
+ teacher?: {
+  id: string;
+
+  employeeId: string;
+
+  departmentId: string;
+
+  specialization: string | null;
+  designation: string;
+
+  researchArea?: string | null;
+  qualification?: string | null;
+  officeRoom?: string | null;
+  phoneNumber?: string | null;
+  bio?: string | null;
+
+  department: {
+    name: string;
+    code: string;
+  };
+} | null;
 }
 
 // Available navigation views/modules

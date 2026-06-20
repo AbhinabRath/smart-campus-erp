@@ -32,6 +32,32 @@ export default function ProfilePage() {
 
   const [editName, setEditName] = useState(currentUser?.name || '');
   const [editAvatar, setEditAvatar] = useState(currentUser?.avatar || '');
+  const [guardianName, setGuardianName] = useState(
+  currentUser?.student?.guardianName || ''
+);
+
+const [guardianPhone, setGuardianPhone] = useState(
+  currentUser?.student?.guardianPhone || ''
+);
+
+const [researchArea, setResearchArea] = useState(
+  currentUser?.teacher?.researchArea || ''
+);
+
+const [qualification, setQualification] = useState(
+  currentUser?.teacher?.qualification || ''
+);
+
+const [officeRoom, setOfficeRoom] = useState(
+  currentUser?.teacher?.officeRoom || ''
+);
+
+const [phoneNumber, setPhoneNumber] = useState(
+  currentUser?.teacher?.phoneNumber || ''
+);
+const [bio, setBio] = useState(
+  currentUser?.teacher?.bio || currentUser?.student?.bio || ''
+);
   const [saving, setSaving] = useState(false);
   const [avatarHover, setAvatarHover] = useState(false);
 
@@ -64,16 +90,49 @@ export default function ProfilePage() {
   // Save profile info
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editName.trim()) {
-      toast({ title: 'Error', description: 'Name cannot be empty', variant: 'destructive' });
-      return;
-    }
-    setSaving(true);
+     if (!editName.trim()) {
+  toast({
+    title: 'Error',
+    description: 'Name cannot be empty',
+    variant: 'destructive'
+  });
+  return;
+}
+
+if (guardianPhone && !/^\d{10}$/.test(guardianPhone)) {
+  toast({
+    title: 'Error',
+    description: 'Guardian phone must be exactly 10 digits',
+    variant: 'destructive'
+  });
+  return;
+}
+
+if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {
+  toast({
+    title: 'Error',
+    description: 'Phone number must be exactly 10 digits',
+    variant: 'destructive'
+  });
+  return;
+}
+
+setSaving(true);
     try {
       await api.put(`/users/${currentUser.id}`, {
-        name: editName,
-        avatar: editAvatar || undefined,
-      });
+  name: editName,
+  avatar: editAvatar || undefined,
+
+  guardianName,
+  guardianPhone,
+
+  researchArea,
+  qualification,
+  officeRoom,
+  phoneNumber,
+
+  bio,
+});
       login({ ...currentUser, name: editName, avatar: editAvatar || null });
       toast({ title: 'Success', description: 'Profile updated successfully' });
     } catch (err: unknown) {
@@ -296,6 +355,169 @@ export default function ProfilePage() {
                   />
                   <p className="text-xs text-muted-foreground">Paste a direct URL to an image for your avatar, or click the avatar above to upload</p>
                 </div>
+                {role === 'student' && (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-2">
+      <Label>Guardian Name</Label>
+      <Input
+        value={guardianName}
+        onChange={(e) => setGuardianName(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Guardian Phone</Label>
+     <Input
+  value={guardianPhone}
+  maxLength={10}
+  onChange={(e) =>
+    setGuardianPhone(
+      e.target.value.replace(/\D/g, '').slice(0, 10)
+    )
+  }
+/>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Roll Number</Label>
+      <Input
+        value={currentUser.student?.rollNumber || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Department</Label>
+      <Input
+        value={currentUser.student?.department?.name || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Semester</Label>
+      <Input
+        value={currentUser.student?.semester || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Section</Label>
+      <Input
+        value={currentUser.student?.section || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Admission Year</Label>
+      <Input
+        value={currentUser.student?.admissionYear || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>College Email</Label>
+      <Input
+        value={currentUser.student?.collegeEmail || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+    
+    <div className="space-y-2 md:col-span-2">
+  <Label>Bio</Label>
+  <textarea
+    value={bio}
+    onChange={(e) => setBio(e.target.value)}
+    className="w-full min-h-[120px] rounded-md border px-3 py-2"
+  />
+</div>
+
+  </div>
+)}
+{role === 'teacher' && (
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="space-y-2">
+      <Label>Research Area</Label>
+      <Input
+        value={researchArea}
+        onChange={(e) => setResearchArea(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Qualification</Label>
+      <Input
+        value={qualification}
+        onChange={(e) => setQualification(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Office Room</Label>
+      <Input
+        value={officeRoom}
+        onChange={(e) => setOfficeRoom(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Phone Number</Label>
+      <Input
+  value={phoneNumber}
+  maxLength={10}
+  onChange={(e) =>
+    setPhoneNumber(
+      e.target.value.replace(/\D/g, '').slice(0, 10)
+    )
+  }
+/>
+    </div>
+
+    <div className="space-y-2">
+      <Label>Employee ID</Label>
+      <Input
+        value={currentUser.teacher?.employeeId || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Department</Label>
+      <Input
+        value={currentUser.teacher?.department?.name || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Designation</Label>
+      <Input
+        value={currentUser.teacher?.designation || ''}
+        disabled
+        className="bg-muted"
+      />
+    </div>
+    <div className="space-y-2 md:col-span-2">
+  <Label>Bio</Label>
+  <textarea
+    value={bio}
+    onChange={(e) => setBio(e.target.value)}
+    className="w-full min-h-[120px] rounded-md border px-3 py-2"
+  />
+</div>
+  </div>
+)}
                 <Button type="submit" disabled={saving} className="bg-emerald-700 hover:bg-emerald-800 shadow-sm hover:shadow-md transition-shadow">
                   <Save className="w-4 h-4 mr-2" />
                   {saving ? 'Saving...' : 'Save Changes'}

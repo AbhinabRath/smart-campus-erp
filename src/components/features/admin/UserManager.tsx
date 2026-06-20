@@ -58,6 +58,7 @@ const [researchArea, setResearchArea] = useState('');
 const [phoneNumber, setPhoneNumber] = useState('');
 const [qualification, setQualification] = useState('');
 const [officeRoom, setOfficeRoom] = useState('');
+const [bio, setBio] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
 
   const loadUsers = useCallback(async () => {
@@ -78,6 +79,23 @@ const [officeRoom, setOfficeRoom] = useState('');
       toast({ title: 'Error', description: 'Please fill all fields', variant: 'destructive' });
       return;
     }
+    if (guardianPhone && !/^\d{10}$/.test(guardianPhone)) {
+  toast({
+    title: 'Invalid Guardian Phone',
+    description: 'Guardian phone must contain exactly 10 digits',
+    variant: 'destructive',
+  });
+  return;
+}
+
+if (phoneNumber && !/^\d{10}$/.test(phoneNumber)) {
+  toast({
+    title: 'Invalid Phone Number',
+    description: 'Phone number must contain exactly 10 digits',
+    variant: 'destructive',
+  });
+  return;
+}
     setCreating(true);
     try {
       await api.post('/users', {
@@ -98,6 +116,7 @@ const [officeRoom, setOfficeRoom] = useState('');
   phoneNumber,
   qualification,
   officeRoom,
+  bio,
 });
       toast({ title: 'Success', description: 'User created' });
       window.dispatchEvent(new Event('users-updated'));
@@ -117,7 +136,7 @@ setResearchArea('');
 setPhoneNumber('');
 setQualification('');
 setOfficeRoom('');
-
+setBio('');
 loadUsers();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -223,9 +242,14 @@ window.dispatchEvent(new Event('users-updated'));
     <div className="space-y-2">
       <Label>Guardian Phone</Label>
       <Input
-        value={guardianPhone}
-        onChange={(e) => setGuardianPhone(e.target.value)}
-      />
+  value={guardianPhone}
+  maxLength={10}
+  onChange={(e) =>
+    setGuardianPhone(
+      e.target.value.replace(/\D/g, '').slice(0, 10)
+    )
+  }
+/>
     </div>
   </>
 )}
@@ -261,9 +285,14 @@ window.dispatchEvent(new Event('users-updated'));
     <div className="space-y-2">
       <Label>Phone Number (Optional)</Label>
       <Input
-        value={phoneNumber}
-        onChange={(e) => setPhoneNumber(e.target.value)}
-      />
+  value={phoneNumber}
+  maxLength={10}
+  onChange={(e) =>
+    setPhoneNumber(
+      e.target.value.replace(/\D/g, '').slice(0, 10)
+    )
+  }
+/>
     </div>
 
     <div className="space-y-2">
@@ -281,6 +310,15 @@ window.dispatchEvent(new Event('users-updated'));
         onChange={(e) => setOfficeRoom(e.target.value)}
       />
     </div>
+    <div className="space-y-2">
+  <Label>Bio (Optional)</Label>
+  <textarea
+    value={bio}
+    onChange={(e) => setBio(e.target.value)}
+    className="w-full min-h-[100px] rounded-md border bg-background px-3 py-2"
+    placeholder="Teacher bio..."
+  />
+</div>
   </>
 )}
               <Button type="submit" disabled={creating} className="w-full bg-emerald-700 hover:bg-emerald-800">{creating ? 'Creating...' : 'Create User'}</Button>
