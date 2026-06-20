@@ -220,6 +220,12 @@ router.post('/users', requireAuth, requireRole('admin'), validate([
 router.put('/users/:id', requireAuth, userCtrl.updateUser);
 router.put('/users/:id/password', requireAuth, userCtrl.changePassword);
 router.delete('/users/:id', requireAuth, requireRole('admin'), userCtrl.deactivateUser);
+router.put(
+  '/users/:id/reactivate',
+  requireAuth,
+  requireRole('admin'),
+  userCtrl.reactivateUser
+);
 
 // =============================================================================
 // DEPARTMENT MANAGEMENT ROUTES (Admin Only)

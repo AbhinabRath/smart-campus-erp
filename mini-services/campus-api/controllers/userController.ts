@@ -113,7 +113,28 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
  */
 export async function createUser(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email, password, name, role, departmentId, rollNumber, semester, section, academicYear, employeeId, specialization, designation } = req.body;
+    const {
+  email,
+  password,
+  name,
+  role,
+  departmentId,
+  rollNumber,
+  semester,
+  section,
+  academicYear,
+  guardianName,
+  guardianPhone,
+
+  employeeId,
+  specialization,
+  designation,
+
+  researchArea,
+  phoneNumber,
+  qualification,
+  officeRoom
+} = req.body;
 
     // Check if email already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -135,30 +156,111 @@ export async function createUser(req: Request, res: Response, next: NextFunction
           role,
         },
       });
+      let derivedDepartmentId = departmentId;
+let derivedRollNumber = rollNumber;
 
+if (role === 'student') {
+  const emailPrefix = email.split('@')[0];
+
+  const match = emailPrefix.match(/^([a-zA-Z]+)(\d+)$/);
+
+  if (!match) {
+    throw new Error('Invalid student email format.');
+  }
+
+  const deptCode = match[1].toUpperCase();
+  const rollDigits = match[2];
+
+  const department = await tx.department.findFirst({
+    where: {
+      code: deptCode,
+    },
+  });
+
+  if (!department) {
+    throw new Error(`Department ${deptCode} not found.`);
+  }
+
+  derivedDepartmentId = department.id;
+  derivedRollNumber = `${deptCode}${rollDigits}`;
+}
       // Create role-specific profile based on the user's role
       if (role === 'student') {
-        await tx.student.create({
-          data: {
-            userId: newUser.id,
-            rollNumber,
-            semester: parseInt(String(semester)),
-            departmentId,
-            section: section || 'A',
-            academicYear: academicYear || new Date().getFullYear().toString(),
-          },
-        });
+       const sem = parseInt(String(semester));
+
+const currentYear = new Date().getFullYear();
+
+const admissionYear =
+  sem <= 2 ? currentYear :
+  sem <= 4 ? currentYear - 1 :
+  sem <= 6 ? currentYear - 2 :
+  currentYear - 3;
+
+await tx.student.create({
+  data: {
+    userId: newUser.id,
+    rollNumber: derivedRollNumber,
+    semester: sem,
+    departmentId: derivedDepartmentId!,
+    section: section || 'A',
+
+    admissionYear: admissionYear,
+    academicYear: `${admissionYear}-${admissionYear + 1}`,
+    collegeEmail: email,
+
+    guardianName: guardianName || null,
+    guardianPhone: guardianPhone || null,
+  },
+});
       } else if (role === 'teacher') {
-        await tx.teacher.create({
-          data: {
-            userId: newUser.id,
-            employeeId,
-            departmentId,
-            specialization: specialization || null,
-            designation: designation || 'Assistant Professor',
-          },
-        });
-      }
+
+  const emailPrefix = email.split('@')[0].toLowerCase();
+
+let deptCode = '';
+
+if (emailPrefix.startsWith('cse')) deptCode = 'CSE';
+else if (emailPrefix.startsWith('ece')) deptCode = 'ECE';
+else if (emailPrefix.startsWith('eee')) deptCode = 'EEE';
+else if (emailPrefix.startsWith('me')) deptCode = 'ME';
+else if (emailPrefix.startsWith('ce')) deptCode = 'CE';
+else if (emailPrefix.startsWith('che')) deptCode = 'CHE';
+else if (emailPrefix.startsWith('bt')) deptCode = 'BT';
+else if (emailPrefix.startsWith('mnc')) deptCode = 'MNC';
+else if (emailPrefix.startsWith('as')) deptCode = 'AS';
+else if (emailPrefix.startsWith('aids')) deptCode = 'AIDS';
+
+  const department = await tx.department.findFirst({
+    where: {
+      code: deptCode,
+    },
+  });
+
+  if (!department) {
+    throw new Error(`Department ${deptCode} not found.`);
+  }
+
+  await tx.teacher.create({
+    data: {
+      userId: newUser.id,
+
+      employeeId,
+
+      departmentId: department.id,
+
+      designation: designation || 'Assistant Professor',
+
+      specialization: researchArea,
+
+      researchArea: researchArea,
+
+      phoneNumber: phoneNumber || null,
+
+      qualification: qualification || null,
+
+      officeRoom: officeRoom || null,
+    },
+  });
+}
 
       return newUser;
     });
@@ -309,6 +411,35 @@ export async function deactivateUser(req: Request, res: Response, next: NextFunc
     await prisma.session.deleteMany({ where: { userId: id } });
 
     successResponse(res, 'User deactivated successfully.');
+  } catch (err) {
+    next(err);
+  }
+}
+export async function reactivateUser(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const { id } = req.params;
+
+    const existing = await prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!existing) {
+      errorResponse(res, 'User not found.', 404);
+      return;
+    }
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        isActive: true,
+      },
+    });
+
+    successResponse(res, 'User reactivated successfully.');
   } catch (err) {
     next(err);
   }

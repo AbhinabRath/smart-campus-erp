@@ -10,7 +10,7 @@
 
 4. Sidebar should have its own scrolling system, not with the page itself ->Done
 
-5. User Management section in Admin dashboard should have an reactivate system, and inactive means they wont be counted
+5. User Management section in Admin dashboard should have an reactivate system-> Done
 
 6. For Teachers view assignment is breaking ->Done
 

@@ -46,7 +46,18 @@ export default function UserManager() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('student');
+  const [semester, setSemester] = useState('1');
+  const [section, setSection] = useState('A');
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianPhone, setGuardianPhone] = useState('');
   const [creating, setCreating] = useState(false);
+  const [employeeId, setEmployeeId] = useState('');
+const [designation, setDesignation] = useState('');
+const [researchArea, setResearchArea] = useState('');
+
+const [phoneNumber, setPhoneNumber] = useState('');
+const [qualification, setQualification] = useState('');
+const [officeRoom, setOfficeRoom] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
 
   const loadUsers = useCallback(async () => {
@@ -69,11 +80,44 @@ export default function UserManager() {
     }
     setCreating(true);
     try {
-      await api.post('/users', { name, email, password, role });
+      await api.post('/users', {
+  name,
+  email,
+  password,
+  role,
+
+  semester,
+  section,
+  guardianName,
+  guardianPhone,
+
+  employeeId,
+  designation,
+  researchArea,
+
+  phoneNumber,
+  qualification,
+  officeRoom,
+});
       toast({ title: 'Success', description: 'User created' });
       setCreateOpen(false);
-      setName(''); setEmail(''); setPassword('');
-      loadUsers();
+      setName('');
+setEmail('');
+setPassword('');
+
+setSemester('1');
+setSection('A');
+setGuardianName('');
+setGuardianPhone('');
+
+setEmployeeId('');
+setDesignation('');
+setResearchArea('');
+setPhoneNumber('');
+setQualification('');
+setOfficeRoom('');
+
+loadUsers();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       toast({ title: 'Error', description: axiosErr.response?.data?.message || 'Failed to create user', variant: 'destructive' });
@@ -84,6 +128,7 @@ export default function UserManager() {
 
   // Deactivate user
   const deactivateUser = async (id: string) => {
+    
     try {
       await api.delete(`/users/${id}`);
       toast({ title: 'Deactivated', description: 'User has been deactivated' });
@@ -92,7 +137,24 @@ export default function UserManager() {
       toast({ title: 'Error', description: 'Failed to deactivate user', variant: 'destructive' });
     }
   };
+const reactivateUser = async (id: string) => {
+  try {
+    await api.put(`/users/${id}/reactivate`);
 
+    toast({
+      title: 'Reactivated',
+      description: 'User has been reactivated',
+    });
+
+    loadUsers();
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Failed to reactivate user',
+      variant: 'destructive',
+    });
+  }
+};
   const filtered = filterRole === 'all' ? users : users.filter((u) => u.role === filterRole);
 
   return (
@@ -103,7 +165,7 @@ export default function UserManager() {
           <DialogTrigger asChild>
             <Button className="bg-emerald-700 hover:bg-emerald-800"><Plus className="w-4 h-4 mr-2" /> Add User</Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
             <DialogHeader><DialogTitle>Create New User</DialogTitle></DialogHeader>
             <form onSubmit={handleCreate} className="space-y-4">
               <div className="space-y-2"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
@@ -120,6 +182,100 @@ export default function UserManager() {
                   </SelectContent>
                 </Select>
               </div>
+              {role === 'student' && (
+  <>
+    <div className="space-y-2">
+      <Label>Semester</Label>
+      <Input
+        type="number"
+        min="1"
+        max="8"
+        value={semester}
+        onChange={(e) => setSemester(e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Section</Label>
+      <Input
+        value={section}
+        onChange={(e) => setSection(e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Guardian Name</Label>
+      <Input
+        value={guardianName}
+        onChange={(e) => setGuardianName(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Guardian Phone</Label>
+      <Input
+        value={guardianPhone}
+        onChange={(e) => setGuardianPhone(e.target.value)}
+      />
+    </div>
+  </>
+)}
+{role === 'teacher' && (
+  <>
+    <div className="space-y-2">
+      <Label>Employee ID</Label>
+      <Input
+        value={employeeId}
+        onChange={(e) => setEmployeeId(e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Designation</Label>
+      <Input
+        value={designation}
+        onChange={(e) => setDesignation(e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Research Area</Label>
+      <Input
+        value={researchArea}
+        onChange={(e) => setResearchArea(e.target.value)}
+        required
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Phone Number (Optional)</Label>
+      <Input
+        value={phoneNumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Qualification (Optional)</Label>
+      <Input
+        value={qualification}
+        onChange={(e) => setQualification(e.target.value)}
+      />
+    </div>
+
+    <div className="space-y-2">
+      <Label>Office Room (Optional)</Label>
+      <Input
+        value={officeRoom}
+        onChange={(e) => setOfficeRoom(e.target.value)}
+      />
+    </div>
+  </>
+)}
               <Button type="submit" disabled={creating} className="w-full bg-emerald-700 hover:bg-emerald-800">{creating ? 'Creating...' : 'Create User'}</Button>
             </form>
           </DialogContent>
@@ -177,12 +333,26 @@ export default function UserManager() {
                     </TableCell>
                     <TableCell><Badge variant={user.isActive ? 'default' : 'secondary'}>{user.isActive ? 'Active' : 'Inactive'}</Badge></TableCell>
                     <TableCell>
-                      {user.isActive && (
-                        <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deactivateUser(user.id)}>
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      )}
-                    </TableCell>
+  {user.isActive ? (
+    <Button
+      size="sm"
+      variant="ghost"
+      className="text-destructive"
+      onClick={() => deactivateUser(user.id)}
+    >
+      <Trash2 className="w-3 h-3" />
+    </Button>
+  ) : (
+    <Button
+      size="sm"
+      variant="outline"
+      className="text-emerald-600"
+      onClick={() => reactivateUser(user.id)}
+    >
+      Reactivate
+    </Button>
+  )}
+</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
