@@ -38,6 +38,11 @@ const CAREER_RECOMMENDATIONS_CS = [
  * @returns Array of newly created recommendations
  */
 export async function generateRecommendations(studentUserId: string) {
+  await prisma.recommendation.deleteMany({
+  where: {
+    studentId: studentUserId
+  }
+});
   // Find the student profile with their academic details
   const student = await prisma.student.findUnique({
     where: { userId: studentUserId },

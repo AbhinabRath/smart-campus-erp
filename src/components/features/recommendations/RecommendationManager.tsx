@@ -86,7 +86,24 @@ export default function RecommendationManager() {
       setGenerating(false);
     }
   };
+const handleClear = async () => {
+  try {
+    await api.delete('/recommendations/clear');
 
+    toast({
+      title: 'Success',
+      description: 'Recommendations cleared'
+    });
+
+    loadRecommendations();
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Failed to clear recommendations',
+      variant: 'destructive'
+    });
+  }
+};
   // Mark a recommendation as read
   const markAsRead = async (id: string) => {
     try {
@@ -132,13 +149,23 @@ export default function RecommendationManager() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Recommendations</h2>
-          <p className="text-muted-foreground">Personalized suggestions based on your academic performance</p>
+          <h2 className="text-2xl font-bold tracking-tight">AI Study Assistant</h2>
+          <div className="mt-2">
+  <Badge variant="outline">
+    Rule-Based AI
+  </Badge>
+</div>
+          <p className="text-muted-foreground">Rule-based academic guidance generated from academic performance data</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm" onClick={loadRecommendations}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
-          </Button>
+          <Button
+  variant="outline"
+  size="sm"
+  onClick={handleClear}
+>
+  <RefreshCw className="w-4 h-4 mr-2" />
+  Clear
+</Button>
           {unread.length > 0 && (
             <Button variant="outline" size="sm" onClick={markAllAsRead} className="gap-1.5">
               <CheckCheck className="w-4 h-4" />

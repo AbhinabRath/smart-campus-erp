@@ -77,7 +77,7 @@ const navItems: NavItem[] = [
   { id: 'leaves', label: 'Leave Management', icon: Plane, roles: ['admin', 'teacher', 'student'], section: 'communication' },
   // Insights section
   { id: 'analytics', label: 'Analytics', icon: BarChart3, roles: ['admin', 'teacher', 'student'], section: 'insights' },
-  { id: 'recommendations', label: 'Recommendations', icon: Lightbulb, roles: ['student'], section: 'insights' },
+  { id: 'recommendations', label: 'AI Study Assistant', icon: Lightbulb, roles: ['student'], section: 'insights' },
   // Account section
   { id: 'profile', label: 'Profile', icon: UserCircle, roles: ['admin', 'teacher', 'student'], section: 'account' },
   { id: 'settings', label: 'Settings', icon: Settings, roles: ['admin', 'teacher', 'student'], section: 'account' },

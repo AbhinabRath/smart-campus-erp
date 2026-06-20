@@ -45,7 +45,7 @@ const viewTitles: Record<ViewId, string> = {
   notices: 'Notices',
   leaves: 'Leave Management',
   analytics: 'Analytics',
-  recommendations: 'Recommendations',
+  recommendations: 'AI Study Assistant',
   profile: 'Profile',
   settings: 'Settings',
 };

@@ -35,6 +35,7 @@ import * as userCtrl from '../controllers/userController';
 import * as deptCtrl from '../controllers/departmentController';
 import * as subjectCtrl from '../controllers/subjectController';
 
+
 const router = Router();
 
 // =============================================================================
@@ -194,9 +195,30 @@ router.get('/analytics/department/:id', requireAuth, analyticsCtrl.getDepartment
 // =============================================================================
 // RECOMMENDATION ROUTES - Rule-Based Recommendations
 // =============================================================================
-router.get('/recommendations', requireAuth, requireRole('student'), recommendationCtrl.getRecommendations);
-router.post('/recommendations/generate', requireAuth, recommendationCtrl.generateStudentRecommendations);
-router.put('/recommendations/:id/read', requireAuth, recommendationCtrl.markRecommendationRead);
+router.get(
+  '/recommendations',
+  requireAuth,
+  requireRole('student'),
+  recommendationCtrl.getRecommendations
+);
+
+router.post(
+  '/recommendations/generate',
+  requireAuth,
+  recommendationCtrl.generateStudentRecommendations
+);
+
+router.delete(
+  '/recommendations/clear',
+  requireAuth,
+  recommendationCtrl.clearRecommendations
+);
+
+router.put(
+  '/recommendations/:id/read',
+  requireAuth,
+  recommendationCtrl.markRecommendationRead
+);
 
 // =============================================================================
 // DASHBOARD ROUTES - Aggregated Dashboard Data

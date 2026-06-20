@@ -65,7 +65,32 @@ export async function generateStudentRecommendations(req: Request, res: Response
     next(err);
   }
 }
+/**
+ * DELETE /api/recommendations/clear
+ * Delete all recommendations for current student.
+ */
+export async function clearRecommendations(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.id;
 
+    await prisma.recommendation.deleteMany({
+      where: {
+        studentId: userId
+      }
+    });
+
+    successResponse(
+      res,
+      'Recommendations cleared.'
+    );
+  } catch (err) {
+    next(err);
+  }
+}
 /**
  * PUT /api/recommendations/:id/read
  * Mark a recommendation as read so it no longer appears as a notification.
