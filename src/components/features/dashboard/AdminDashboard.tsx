@@ -189,9 +189,29 @@ export default function AdminDashboard() {
   const [data, setData] = useState<AdminData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get('/dashboard/admin').then((res) => setData(res.data.data)).finally(() => setLoading(false));
-  }, []);
+  const loadDashboard = async () => {
+  try {
+    const res = await api.get('/dashboard/admin');
+    setData(res.data.data);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useEffect(() => {
+  loadDashboard();
+}, []);
+useEffect(() => {
+  const refreshDashboard = () => {
+    loadDashboard();
+  };
+
+  window.addEventListener('users-updated', refreshDashboard);
+
+  return () => {
+    window.removeEventListener('users-updated', refreshDashboard);
+  };
+}, []);
 
   // Prepare chart data from API data
   const deptChartData = useMemo(() => {

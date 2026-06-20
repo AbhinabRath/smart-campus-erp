@@ -100,6 +100,7 @@ const [officeRoom, setOfficeRoom] = useState('');
   officeRoom,
 });
       toast({ title: 'Success', description: 'User created' });
+      window.dispatchEvent(new Event('users-updated'));
       setCreateOpen(false);
       setName('');
 setEmail('');
@@ -131,8 +132,14 @@ loadUsers();
     
     try {
       await api.delete(`/users/${id}`);
-      toast({ title: 'Deactivated', description: 'User has been deactivated' });
-      loadUsers();
+      toast({
+  title: 'Deactivated',
+  description: 'User has been deactivated'
+});
+
+window.dispatchEvent(new Event('users-updated'));
+
+loadUsers();
     } catch {
       toast({ title: 'Error', description: 'Failed to deactivate user', variant: 'destructive' });
     }
@@ -145,7 +152,7 @@ const reactivateUser = async (id: string) => {
       title: 'Reactivated',
       description: 'User has been reactivated',
     });
-
+window.dispatchEvent(new Event('users-updated'));
     loadUsers();
   } catch {
     toast({
