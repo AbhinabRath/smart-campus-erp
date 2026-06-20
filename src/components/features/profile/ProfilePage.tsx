@@ -177,17 +177,50 @@ setSaving(true);
   };
 
   // Handle avatar file selection (UI only - just updates preview)
-  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const dataUrl = ev.target?.result as string;
-        if (dataUrl) setEditAvatar(dataUrl);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+const handleAvatarUpload = async (
+  e: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = e.target.files?.[0];
+
+  if (!file) return;
+
+  try {
+    const formData = new FormData();
+
+    formData.append('avatar', file);
+
+    const res = await api.post(
+      '/users/avatar',
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    const avatarPath =
+      res.data.data.avatar;
+
+    setEditAvatar(avatarPath);
+
+    login({
+      ...currentUser,
+      avatar: avatarPath,
+    });
+
+    toast({
+      title: 'Success',
+      description: 'Avatar uploaded',
+    });
+  } catch {
+    toast({
+      title: 'Error',
+      description: 'Avatar upload failed',
+      variant: 'destructive',
+    });
+  }
+};
 
   const roleColor = role === 'admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : role === 'teacher' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-sky-100 text-sky-800 dark:bg-sky-900/30 dark:text-sky-400';
   const roleIcon = role === 'admin' ? Shield : role === 'teacher' ? GraduationCap : BookOpen;
@@ -222,7 +255,23 @@ setSaving(true);
                   onMouseLeave={() => setAvatarHover(false)}
                 >
                   <Avatar className="w-24 h-24 border-4 border-background shadow-lg ring-2 ring-emerald-500/20">
-                    {(currentUser.avatar || editAvatar) ? <AvatarImage src={(editAvatar || currentUser.avatar) as string} alt={currentUser.name} /> : null}
+                    {(currentUser.avatar || editAvatar) ? <AvatarImage
+  src={
+    editAvatar
+      ? (
+          editAvatar.startsWith('/uploads')
+            ? `http://localhost:3001${editAvatar}`
+            : editAvatar
+        )
+      : currentUser.avatar
+        ? (
+            currentUser.avatar.startsWith('/uploads')
+              ? `http://localhost:3001${currentUser.avatar}`
+              : currentUser.avatar
+          )
+        : undefined
+  }
+/> : null}
                     <AvatarFallback className="text-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">{initials}</AvatarFallback>
                   </Avatar>
                   {avatarHover && (

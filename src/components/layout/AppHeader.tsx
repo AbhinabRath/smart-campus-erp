@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuGroup,
   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
@@ -285,10 +285,23 @@ const hasUnread = unreadCount > 0;
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-9 gap-2 px-2 hover:bg-emerald-500/10">
               <Avatar className="h-7 w-7 ring-2 ring-emerald-500/30 ring-offset-1 ring-offset-background">
-                <AvatarFallback className="text-xs bg-emerald-600 text-white">
-                  {currentUser?.name?.charAt(0) || 'U'}
-                </AvatarFallback>
-              </Avatar>
+
+  {(currentUser?.avatar) ? (
+    <AvatarImage
+      src={
+        currentUser.avatar.startsWith('/uploads')
+          ? `http://localhost:3001${currentUser.avatar}`
+          : currentUser.avatar
+      }
+      alt={currentUser.name}
+    />
+  ) : null}
+
+  <AvatarFallback className="text-xs bg-emerald-600 text-white">
+    {currentUser?.name?.charAt(0)}
+  </AvatarFallback>
+
+</Avatar>
               <span className="hidden sm:inline text-sm font-medium max-w-[100px] truncate">
                 {currentUser?.name}
               </span>

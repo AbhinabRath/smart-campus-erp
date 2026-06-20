@@ -10,6 +10,8 @@
 // referential integrity with historical data (attendance, marks, etc.).
 // =============================================================================
 
+import fs from 'fs';
+import path from 'path';
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
@@ -376,7 +378,65 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
     next(err);
   }
 }
+//Avatar Upload
+export async function uploadAvatar(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.id;
 
+    if (!req.file) {
+      errorResponse(res, 'No file uploaded.', 400);
+      return;
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      errorResponse(res, 'User not found.', 404);
+      return;
+    }
+
+    if (
+      user.avatar &&
+      user.avatar.startsWith('/uploads/avatars/')
+    ) {
+      const oldPath = path.join(
+        __dirname,
+        '..',
+        user.avatar
+      );
+
+      if (fs.existsSync(oldPath)) {
+        fs.unlinkSync(oldPath);
+      }
+    }
+
+    const avatarPath =
+      `/uploads/avatars/${req.file.filename}`;
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatar: avatarPath,
+      },
+    });
+
+    successResponse(
+      res,
+      'Avatar uploaded successfully.',
+      {
+        avatar: avatarPath,
+      }
+    );
+  } catch (err) {
+    next(err);
+  }
+}
 /**
  * PUT /api/users/:id/password
  * Change password for a user. Must be the user themselves.

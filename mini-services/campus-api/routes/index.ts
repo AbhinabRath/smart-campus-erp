@@ -18,7 +18,7 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { upload } from '../utils/fileUpload';
-
+import { avatarUpload } from '../utils/avatarUpload';
 // Controllers
 import * as authCtrl from '../controllers/authController';
 import * as attendanceCtrl from '../controllers/attendanceController';
@@ -34,6 +34,7 @@ import * as dashboardCtrl from '../controllers/dashboardController';
 import * as userCtrl from '../controllers/userController';
 import * as deptCtrl from '../controllers/departmentController';
 import * as subjectCtrl from '../controllers/subjectController';
+
 
 
 const router = Router();
@@ -238,7 +239,12 @@ router.post('/users', requireAuth, requireRole('admin'), validate([
   { field: 'name', required: true },
   { field: 'role', required: true, isIn: ['admin', 'teacher', 'student'] },
 ]), userCtrl.createUser);
-
+router.post(
+  '/users/avatar',
+  requireAuth,
+  avatarUpload.single('avatar'),
+  userCtrl.uploadAvatar
+);
 router.put('/users/:id', requireAuth, userCtrl.updateUser);
 router.put('/users/:id/password', requireAuth, userCtrl.changePassword);
 router.delete('/users/:id', requireAuth, requireRole('admin'), userCtrl.deactivateUser);
