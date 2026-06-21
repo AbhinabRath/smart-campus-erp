@@ -107,7 +107,114 @@ export async function getUserById(req: Request, res: Response, next: NextFunctio
     next(err);
   }
 }
+export async function getPublicProfiles(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const search = String(req.query.search || '');
 
+    const users = await prisma.user.findMany({
+      where: {
+        role: {
+          in: ['student', 'teacher']
+        },
+        isActive: true,
+        OR: [
+          {
+            name: {
+              contains: search
+            }
+          }
+        ]
+      },
+
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        avatar: true,
+
+        student: {
+          include: {
+            department: true
+          }
+        },
+
+        teacher: {
+          include: {
+            department: true
+          }
+        }
+      }
+    });
+
+    successResponse(
+      res,
+      'Public profiles retrieved',
+      users
+    );
+  } catch (err) {
+    next(err);
+  }
+}
+export async function getPublicProfileById(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.params.id
+      },
+
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        avatar: true,
+
+        student: {
+          include: {
+            department: true
+          }
+        },
+
+        teacher: {
+          include: {
+            department: true
+          }
+        }
+      }
+    });
+
+    if (!user) {
+      return errorResponse(
+        res,
+        'User not found',
+        404
+      );
+    }
+
+    if (user.role === 'admin') {
+      return errorResponse(
+        res,
+        'Profile not available',
+        403
+      );
+    }
+
+    successResponse(
+      res,
+      'Profile retrieved',
+      user
+    );
+  } catch (err) {
+    next(err);
+  }
+}
 /**
  * POST /api/users
  * Admin creates a new user with role-specific profile in a single transaction.

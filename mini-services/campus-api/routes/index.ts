@@ -231,6 +231,17 @@ router.get('/dashboard/admin', requireAuth, requireRole('admin'), dashboardCtrl.
 // =============================================================================
 // USER MANAGEMENT ROUTES (Admin Only)
 // =============================================================================
+router.get(
+  '/public-profiles',
+  requireAuth,
+  userCtrl.getPublicProfiles
+);
+
+router.get(
+  '/public-profiles/:id',
+  requireAuth,
+  userCtrl.getPublicProfileById
+);
 router.get('/users', requireAuth, requireRole('admin', 'teacher'), userCtrl.getUsers);
 router.get('/users/:id', requireAuth, requireRole('admin'), userCtrl.getUserById);
 router.post('/users', requireAuth, requireRole('admin'), validate([

@@ -46,6 +46,11 @@ import SubjectManager from '@/components/features/admin/SubjectManager';
 
 // Profile
 import ProfilePage from '@/components/features/profile/ProfilePage';
+import DirectoryPage from
+'@/components/features/directory/DirectoryPage';
+
+import PublicProfilePage from
+'@/components/features/directory/PublicProfilePage';
 
 // Settings
 import SettingsPage from '@/components/features/settings/SettingsPage';
@@ -82,6 +87,11 @@ function renderView(view: ViewId, role: string) {
     case 'users': return <UserManager />;
     case 'departments': return <DepartmentManager />;
     case 'subjects': return <SubjectManager />;
+    case 'directory':
+  return <DirectoryPage />;
+
+case 'public-profile':
+  return <PublicProfilePage />;
     case 'profile': return <ProfilePage />;
     case 'settings': return <SettingsPage />;
     default: return <AdminDashboard />;
@@ -105,6 +115,8 @@ const viewTitles: Record<ViewId, string> = {
   recommendations: 'Recommendations',
   profile: 'Profile',
   settings: 'Settings',
+  directory: 'Directory',
+  'public-profile': 'Profile',
 };
 
 export default function Home() {

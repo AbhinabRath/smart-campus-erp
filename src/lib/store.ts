@@ -74,8 +74,9 @@ export type ViewId =
   | 'analytics'
   | 'recommendations'
   | 'profile'
-  | 'settings';
-
+  | 'settings'
+  | 'directory'
+  | 'public-profile';
 interface AppState {
   // Auth state
   currentUser: User | null;
@@ -98,6 +99,8 @@ interface AppState {
   setLoadingAuth: (loading: boolean) => void;
   toggleCommandPalette: () => void;
   setCommandPaletteOpen: (open: boolean) => void;
+  selectedProfileId: string | null;
+setSelectedProfileId: (id: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -107,6 +110,7 @@ export const useAppStore = create<AppState>((set) => ({
   isLoadingAuth: true,
   sessionToken: typeof window !== 'undefined' ? localStorage.getItem('campus_session_token') : null,
   currentView: 'dashboard',
+  selectedProfileId: null,
   sidebarOpen: typeof window !== 'undefined' && window.innerWidth >= 1024,
   commandPaletteOpen: false,
 
@@ -136,6 +140,10 @@ export const useAppStore = create<AppState>((set) => ({
 
   // Switch the active module/view
   setView: (view: ViewId) => set({ currentView: view }),
+  setSelectedProfileId: (id) =>
+  set({
+    selectedProfileId: id
+  }),
 
   // Toggle sidebar visibility (used for mobile)
   setSidebarOpen: (open: boolean) => set({ sidebarOpen: open }),

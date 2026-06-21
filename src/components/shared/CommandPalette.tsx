@@ -44,8 +44,16 @@ const navItems: NavItem[] = [
   { id: 'leaves', label: 'Leave Management', icon: Plane, keywords: ['absence', 'time-off', 'vacation', 'sick'], roles: ['admin', 'teacher', 'student'] },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, keywords: ['insights', 'reports', 'data', 'charts'], roles: ['admin', 'teacher', 'student'] },
   { id: 'recommendations', label: 'Recommendations', icon: Lightbulb, keywords: ['suggestions', 'tips', 'ai'], roles: ['student'] },
+  {
+  id: 'directory',
+  label: 'Directory',
+  icon: Users,
+  keywords: ['people', 'teacher', 'student', 'search'],
+  roles: ['teacher', 'student']
+},
   { id: 'profile', label: 'Profile', icon: UserCircle, keywords: ['account', 'personal'], roles: ['admin', 'teacher', 'student'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['preferences', 'config', 'theme'], roles: ['admin', 'teacher', 'student'] },
+  
 ];
 
 const STORAGE_KEY = 'campus-erp-recent-views';
