@@ -105,7 +105,10 @@ export default function AttendanceManager() {
   const [adminFilterDept, setAdminFilterDept] = useState('all');
   const [adminFilterSemester, setAdminFilterSemester] = useState('all');
   const [adminLoading, setAdminLoading] = useState(true);
-
+  const [prcRollNumber, setPrcRollNumber] = useState('');
+  const [prcSubject, setPrcSubject] = useState('');
+  const [prcDate, setPrcDate] = useState('');
+  const [prcReason, setPrcReason] = useState('');
   // Load dropdown data for teachers
   const loadTeacherData = useCallback(async () => {
     try {
@@ -146,13 +149,15 @@ export default function AttendanceManager() {
   const loadAdminData = useCallback(async () => {
     setAdminLoading(true);
     try {
-      const [sessRes, deptRes] = await Promise.all([
-        api.get('/attendance/sessions'),
-        api.get('/departments'),
-      ]);
+      const [sessRes, deptRes, subRes] = await Promise.all([
+  api.get('/attendance/sessions'),
+  api.get('/departments'),
+  api.get('/subjects'),
+]);
       const allSessions = sessRes.data.data || [];
       setSessions(allSessions);
       setDepartments(deptRes.data.data || []);
+      setSubjects(subRes.data.data || []);
     } catch { /* ignore */ }
     setAdminLoading(false);
   }, []);
@@ -245,7 +250,47 @@ export default function AttendanceManager() {
       setMarking(false);
     }
   };
+const applyPRC = async () => {
+  try {
 
+    const res = await api.post(
+      '/attendance/prc',
+      {
+        rollNumber: prcRollNumber,
+        subjectId: prcSubject,
+        date: prcDate,
+        reason: prcReason
+      }
+    );
+
+    const confirmApply = window.confirm(
+      `Apply Corrected Present to ${res.data.data.studentName}?`
+    );
+
+    if (!confirmApply) return;
+
+    await api.post(
+      '/attendance/prc/confirm',
+      res.data.data
+    );
+
+    toast({
+      title: 'Success',
+      description: 'PRC Applied Successfully'
+    });
+
+  } catch (err:any) {
+
+    toast({
+      title: 'Error',
+      description:
+        err.response?.data?.message ||
+        'Failed to apply PRC',
+      variant: 'destructive'
+    });
+
+  }
+};
   // =========================================================================
   // Teacher View
   // =========================================================================
@@ -633,7 +678,58 @@ more classes to reach 75% attendance
           </SelectContent>
         </Select>
       </div>
+{/* Apply PRC */}
+<Card>
+  <CardHeader>
+    <CardTitle>Apply Corrected Present (PRC)</CardTitle>
+  </CardHeader>
 
+  <CardContent className="space-y-4">
+
+    <Input
+      placeholder="Student Roll Number"
+      value={prcRollNumber}
+      onChange={(e) => setPrcRollNumber(e.target.value)}
+    />
+
+    <Select
+      value={prcSubject}
+      onValueChange={setPrcSubject}
+    >
+      <SelectTrigger>
+        <SelectValue placeholder="Select Subject" />
+      </SelectTrigger>
+
+      <SelectContent>
+        {subjects.map((s) => (
+          <SelectItem key={s.id} value={s.id}>
+            {s.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+
+    <Input
+      type="date"
+      value={prcDate}
+      onChange={(e) => setPrcDate(e.target.value)}
+    />
+
+    <Input
+      placeholder="Reason"
+      value={prcReason}
+      onChange={(e) => setPrcReason(e.target.value)}
+    />
+
+    <Button
+      onClick={applyPRC}
+      className="w-full"
+    >
+      Apply PRC
+    </Button>
+
+  </CardContent>
+</Card>
       {/* Sessions Table */}
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
         <Card className="overflow-hidden">

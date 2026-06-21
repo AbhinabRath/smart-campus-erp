@@ -72,7 +72,19 @@ router.post('/attendance/mark', requireAuth, requireRole('student'), validate([
 router.get('/attendance/my-attendance', requireAuth, requireRole('student'), attendanceCtrl.getMyAttendance);
 router.get('/attendance/reports/:sessionId', requireAuth, requireRole('teacher', 'admin'), attendanceCtrl.getAttendanceReport);
 router.get('/attendance/percentage', requireAuth, requireRole('student'), attendanceCtrl.getAttendancePercentage);
+router.post(
+  '/attendance/prc',
+  requireAuth,
+  requireRole('admin'),
+  attendanceCtrl.validatePRC
+);
 
+router.post(
+  '/attendance/prc/confirm',
+  requireAuth,
+  requireRole('admin'),
+  attendanceCtrl.confirmPRC
+);
 // =============================================================================
 // MARKS ROUTES - Student Marks/Grades Management
 // =============================================================================

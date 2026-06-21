@@ -480,3 +480,201 @@ export async function getAttendancePercentage(req: Request, res: Response, next:
     next(err);
   }
 }
+export async function validatePRC(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const {
+      rollNumber,
+      subjectId,
+      date,
+      reason
+    } = req.body;
+
+    const student =
+      await prisma.student.findUnique({
+        where: {
+          rollNumber
+        },
+        include: {
+          user: true
+        }
+      });
+
+    if (!student) {
+
+      errorResponse(
+        res,
+        'Student not found.',
+        404
+      );
+
+      return;
+    }
+
+    const subject =
+      await prisma.subject.findUnique({
+        where: {
+          id: subjectId
+        }
+      });
+
+    if (!subject) {
+
+      errorResponse(
+        res,
+        'Subject not found.',
+        404
+      );
+
+      return;
+    }
+
+    if (
+      subject.departmentId !==
+        student.departmentId ||
+
+      subject.semester !==
+        student.semester
+    ) {
+
+      errorResponse(
+        res,
+        'This subject does not belong to this student.',
+        400
+      );
+
+      return;
+    }
+
+    const session =
+      await prisma.attendanceSession.findFirst({
+
+        where: {
+
+          subjectId,
+
+          departmentId:
+            student.departmentId,
+
+          semester:
+            student.semester,
+
+          section:
+            student.section,
+
+          startedAt: {
+
+            gte: new Date(
+              `${date}T00:00:00`
+            ),
+
+            lte: new Date(
+              `${date}T23:59:59`
+            )
+          }
+        }
+      });
+
+    if (!session) {
+
+      errorResponse(
+        res,
+        'No attendance session found on that date.',
+        404
+      );
+
+      return;
+    }
+
+    const existing =
+      await prisma.attendanceRecord.findUnique({
+
+        where: {
+
+          studentId_attendanceSessionId: {
+
+            studentId:
+              student.id,
+
+            attendanceSessionId:
+              session.id
+          }
+        }
+      });
+
+    if (existing) {
+
+      errorResponse(
+        res,
+        'Attendance already exists.',
+        400
+      );
+
+      return;
+    }
+
+    successResponse(
+      res,
+      'Validation successful.',
+      {
+        studentId: student.id,
+        sessionId: session.id,
+        studentName:
+          student.user.name,
+        reason
+      }
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+}
+
+export async function confirmPRC(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const {
+      studentId,
+      sessionId
+    } = req.body;
+
+    const record =
+      await prisma.attendanceRecord.create({
+
+        data: {
+
+          studentId,
+
+          attendanceSessionId:
+            sessionId,
+
+          ipAddress:
+            'PRC_BY_ADMIN'
+        }
+      });
+
+    successResponse(
+      res,
+      'PRC Applied Successfully.',
+      record,
+      201
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+}
