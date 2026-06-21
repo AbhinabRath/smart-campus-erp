@@ -187,21 +187,59 @@ export default function StudentDashboard() {
   useEffect(() => {
     api.get('/dashboard/student').then((res) => setData(res.data.data)).finally(() => setLoading(false));
   }, []);
-
+console.log(
+  'RECENT MARKS',
+  data?.marks?.recentMarks
+);
   // Simulated subject-wise marks data for the bar chart
-  const marksChartData = useMemo(() => {
-  if (!data?.marks?.recentMarks) return [];
+ const marksChartData = useMemo(() => {
+  if (!data?.marks?.recentMarks) {
+    return [];
+  }
 
-  return data.marks.recentMarks.map((m) => ({
-    subject:
-      m.subject?.name?.length > 8
-        ? m.subject.name.substring(0, 8) + '.'
-        : m.subject?.name || 'Unknown',
+  const subjectMap: Record<
+    string,
+    {
+      totalPercentage: number;
+      count: number;
+      subjectName: string;
+    }
+  > = {};
 
-    marks: Math.round(
-      (m.marksObtained / m.totalMarks) * 100
-    ),
-  }));
+  data.marks.recentMarks.forEach((m) => {
+    const subjectName =
+      m.subject?.name || 'Unknown';
+
+    const percentage =
+      (m.marksObtained / m.totalMarks) * 100;
+
+    if (!subjectMap[subjectName]) {
+      subjectMap[subjectName] = {
+        totalPercentage: 0,
+        count: 0,
+        subjectName,
+      };
+    }
+
+    subjectMap[subjectName].totalPercentage +=
+      percentage;
+
+    subjectMap[subjectName].count += 1;
+  });
+
+  return Object.values(subjectMap).map(
+    (subject) => ({
+      subject:
+        subject.subjectName.length > 20
+          ? subject.subjectName.substring(0, 20) + '...'
+          : subject.subjectName,
+
+      marks: Math.round(
+        subject.totalPercentage /
+          subject.count
+      ),
+    })
+  );
 }, [data]);
 
   // GPA Calculation

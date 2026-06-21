@@ -472,18 +472,64 @@ export default function AnalyticsManager() {
     const { attendance, marks } = studentProgress;
 
     // Build chart data from marks records
-    const marksBySubject = (marks.records || []).reduce<Record<string, { name: string; percentage: number }>>((acc, m) => {
-      const key = m.subject?.code || m.subject?.name || 'Unknown';
-      if (!acc[key] || m.marksObtained / m.totalMarks > acc[key].percentage / 100) {
-        acc[key] = {
-          name: m.subject?.name || 'Unknown',
-          percentage: Math.round((m.marksObtained / m.totalMarks) * 100),
-        };
-      }
-      return acc;
-    }, {});
+    const marksBySubject = (
+  marks.records || []
+).reduce<
+  Record<
+    string,
+    {
+      name: string;
+      totalPercentage: number;
+      count: number;
+    }
+  >
+>((acc, m) => {
 
-    const subjectChart = Object.values(marksBySubject);
+  const key =
+    m.subject?.code ||
+    m.subject?.name ||
+    'Unknown';
+
+  const percentage =
+    (m.marksObtained /
+      m.totalMarks) *
+    100;
+
+  if (!acc[key]) {
+
+    acc[key] = {
+      name:
+        m.subject?.name ||
+        'Unknown',
+
+      totalPercentage: 0,
+
+      count: 0,
+    };
+  }
+
+  acc[key].totalPercentage +=
+    percentage;
+
+  acc[key].count += 1;
+
+  return acc;
+
+}, {});
+
+    const subjectChart =
+  Object.values(
+    marksBySubject
+  ).map((subject) => ({
+
+    name: subject.name,
+
+    percentage: Math.round(
+      subject.totalPercentage /
+        subject.count
+    ),
+
+  }));
 
     // Exam type chart data
     const examTypeData = Object.entries(marks.byExamType || {}).map(([type, data]) => ({

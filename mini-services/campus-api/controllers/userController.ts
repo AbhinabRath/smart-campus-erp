@@ -118,8 +118,11 @@ export async function getPublicProfiles(
     const users = await prisma.user.findMany({
       where: {
         role: {
-          in: ['student', 'teacher']
-        },
+  in:
+    req.user?.role === 'admin'
+      ? ['student', 'teacher', 'admin']
+      : ['student', 'teacher']
+},
         isActive: true,
         OR: [
           {
@@ -197,20 +200,85 @@ export async function getPublicProfileById(
         404
       );
     }
+let performanceRadar: {
+  name: string;
+  percentage: number;
+}[] = [];
 
-    if (user.role === 'admin') {
-      return errorResponse(
-        res,
-        'Profile not available',
-        403
-      );
+let marksAverage = 0;
+
+if (user.student) {
+
+  const marks = await prisma.mark.findMany({
+    where: {
+      studentId: user.student.id
+    },
+
+    include: {
+      subject: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    }
+  });
+
+  const subjectMap = new Map();
+
+  for (const mark of marks) {
+
+    const subjectName =
+      mark.subject?.name || 'Unknown';
+
+    if (!subjectMap.has(subjectName)) {
+
+      subjectMap.set(subjectName, {
+        name: subjectName,
+        total: 0,
+        maxTotal: 0
+      });
     }
 
+    const existing =
+      subjectMap.get(subjectName);
+
+    existing.total += mark.marksObtained;
+    existing.maxTotal += mark.totalMarks;
+  }
+
+  performanceRadar =
+    Array.from(subjectMap.values())
+      .map((item: any) => ({
+        name: item.name,
+
+        percentage: Math.round(
+          (item.total / item.maxTotal) * 100
+        )
+      }));
+
+  marksAverage =
+    performanceRadar.length > 0
+      ? Math.round(
+          performanceRadar.reduce(
+            (sum: number, item: any) =>
+              sum + item.percentage,
+            0
+          ) /
+            performanceRadar.length
+        )
+      : 0;
+}
+
     successResponse(
-      res,
-      'Profile retrieved',
-      user
-    );
+  res,
+  'Profile retrieved',
+  {
+    ...user,
+    performanceRadar,
+    marksAverage
+  }
+);
   } catch (err) {
     next(err);
   }

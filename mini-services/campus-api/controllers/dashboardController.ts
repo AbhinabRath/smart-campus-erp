@@ -272,8 +272,13 @@ subjectMap.forEach((item) => {
       },
       marks: {
         percentage: marksPercentage,
-        totalSubjects: marks.length,
-        recentMarks: marks.slice(0, 5),
+        totalSubjects:
+new Set(
+  marks.map(
+    (m) => m.subjectId
+  )
+).size,
+        recentMarks: marks,
       },
       assignments,
       notices,

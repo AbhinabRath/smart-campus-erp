@@ -5,6 +5,15 @@ import api from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import { ArrowLeft } from 'lucide-react';
 
+import {
+  RadarChart,
+  Radar,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  ResponsiveContainer
+} from 'recharts';
+
 export default function PublicProfilePage() {
 
   const {
@@ -28,7 +37,8 @@ export default function PublicProfilePage() {
 
   const student = profile.student;
   const teacher = profile.teacher;
-
+const radarData =
+  profile.performanceRadar || [];
   return (
     <div className="space-y-6">
 
@@ -70,7 +80,62 @@ export default function PublicProfilePage() {
         </div>
 
       </div>
+{student && radarData.length > 0 && (
 
+  <div className="border rounded-xl p-6">
+
+    <h3 className="font-semibold mb-4">
+      Academic Performance
+    </h3>
+
+    <div className="h-[350px]">
+
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+      >
+
+        <RadarChart
+          data={radarData}
+        >
+
+          <PolarGrid />
+
+          <PolarAngleAxis
+            dataKey="name"
+          />
+
+          <PolarRadiusAxis
+            domain={[0, 100]}
+          />
+
+          <Radar
+            dataKey="percentage"
+            fill="#10b981"
+            fillOpacity={0.5}
+          />
+
+        </RadarChart>
+
+      </ResponsiveContainer>
+
+    </div>
+
+    <div className="mt-4 text-center">
+
+      <div className="text-3xl font-bold">
+        {profile.marksAverage}%
+      </div>
+
+      <div className="text-sm text-muted-foreground">
+        Overall Subject Average
+      </div>
+
+    </div>
+
+  </div>
+
+)}
       {student && (
         <div className="border rounded-xl p-6 space-y-2">
 

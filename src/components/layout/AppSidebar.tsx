@@ -83,7 +83,7 @@ const navItems: NavItem[] = [
   id: 'directory',
   label: 'Directory',
   icon: Users,
-  roles: ['teacher', 'student'],
+  roles: ['admin', 'teacher', 'student'],
   section: 'account'
 },
   { id: 'profile', label: 'Profile', icon: UserCircle, roles: ['admin', 'teacher', 'student'], section: 'account' },
