@@ -292,12 +292,22 @@ export default function AnalyticsManager() {
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis domain={[0, 'auto']} tick={{ fontSize: 12 }} />
                     <Tooltip
-                      contentStyle={{ borderRadius: 8, border: '1px solid var(--border)' }}
-                      formatter={(value: number, name: string) => {
-                        if (name === 'avgAttendance') return [`${value} avg`, 'Avg Attendance'];
-                        return [value, name];
-                      }}
-                    />
+  content={({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+
+    return (
+      <div className="bg-background border rounded-lg shadow-md p-3">
+        <p className="font-semibold text-foreground mb-2">
+          {label}
+        </p>
+
+        <p className="text-emerald-500">
+          Avg Attendance: {payload[0].value} avg
+        </p>
+      </div>
+    );
+  }}
+/>
                     <Bar dataKey="avgAttendance" fill="#059669" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -417,7 +427,23 @@ export default function AnalyticsManager() {
                     <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-20} textAnchor="end" height={60} />
                     <YAxis domain={[0, 100]} tick={{ fontSize: 12 }} />
-                    <Tooltip contentStyle={{ borderRadius: 8, border: '1px solid var(--border)' }} formatter={(value: number) => [`${value}%`, 'Completion Rate']} />
+                    <Tooltip
+  content={({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+
+    return (
+      <div className="bg-background border rounded-lg shadow-md p-3">
+        <p className="font-semibold text-foreground mb-2">
+          {label}
+        </p>
+
+        <p className="text-emerald-500">
+          Completion Rate: {payload[0].value}%
+        </p>
+      </div>
+    );
+  }}
+/>
                     <Bar dataKey="completionRate" fill="#059669" radius={[6, 6, 0, 0]}>
                       {chartData.map((entry, index) => (
                         <Cell key={index} fill={entry.completionRate >= 70 ? '#10b981' : entry.completionRate >= 40 ? '#f59e0b' : '#ef4444'} />
