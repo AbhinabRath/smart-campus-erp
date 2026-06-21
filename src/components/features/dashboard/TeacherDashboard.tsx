@@ -44,12 +44,21 @@ interface TeacherData {
     _count: { records: number };
   }>;
   assignments: Array<{
-    id: string;
-    title: string;
-    deadline: string;
-    subject: { name: string; code: string };
-    _count: { submissions: number };
-  }>;
+  id: string;
+  title: string;
+  deadline: string;
+
+  subject: {
+    name: string;
+    code: string;
+  };
+
+  _count: {
+    submissions: number;
+  };
+
+  eligibleStudents: number;
+}>;
   materials: Array<{
     id: string;
     title: string;
@@ -266,9 +275,15 @@ export default function TeacherDashboard() {
                 <p className="text-muted-foreground text-sm text-center py-6">No assignments created yet</p>
               ) : (
                 data.assignments.map((assignment) => {
-                  const submissionRate = data.totalStudents > 0
-                    ? Math.round((assignment._count.submissions / data.totalStudents) * 100)
-                    : 0;
+                  const submissionRate =
+  assignment.eligibleStudents > 0
+    ? Math.round(
+        (
+          assignment._count.submissions /
+          assignment.eligibleStudents
+        ) * 100
+      )
+    : 0;
                   const isPastDeadline = new Date(assignment.deadline) < new Date();
                   return (
                     <div key={assignment.id} className="space-y-2">
@@ -280,7 +295,7 @@ export default function TeacherDashboard() {
                           </p>
                         </div>
                         <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <span className="text-sm font-semibold">{assignment._count.submissions}/{data.totalStudents}</span>
+                          <span className="text-sm font-semibold">{assignment._count.submissions}/{assignment.eligibleStudents}</span>
                           <Badge variant={isPastDeadline ? 'destructive' : 'secondary'} className="text-[10px]">
                             {isPastDeadline ? 'Closed' : 'Open'}
                           </Badge>

@@ -80,21 +80,64 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
       }),
 
       // Upcoming assignments (deadline in the future)
-      prisma.assignment.findMany({
-        where: {
-          subject: {
-            departmentId: student.departmentId,
-            semester: student.semester,
-          },
-          deadline: { gte: new Date() },
+     (async () => {
+  const submittedAssignments =
+    await prisma.assignmentSubmission.findMany({
+      where: {
+        studentId: student.id,
+      },
+      select: {
+        assignmentId: true,
+      },
+    });
+
+  const submittedIds =
+    submittedAssignments.map(
+      (s) => s.assignmentId
+    );
+
+  return prisma.assignment.findMany({
+    where: {
+      subject: {
+        departmentId: student.departmentId,
+        semester: student.semester,
+      },
+
+      deadline: {
+        gte: new Date(),
+      },
+
+      id: {
+        notIn: submittedIds,
+      },
+    },
+
+    include: {
+      subject: {
+        select: {
+          name: true,
+          code: true,
         },
+      },
+
+      teacher: {
         include: {
-          subject: { select: { name: true, code: true } },
-          teacher: { include: { user: { select: { name: true } } } },
+          user: {
+            select: {
+              name: true,
+            },
+          },
         },
-        orderBy: { deadline: 'asc' },
-        take: 5,
-      }),
+      },
+    },
+
+    orderBy: {
+      deadline: 'asc',
+    },
+
+    take: 5,
+  });
+})(),
 
       // Latest notices for students
       prisma.notice.findMany({
@@ -266,7 +309,6 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
   recentMaterials,
   marksCount,
   recentNotices,
-  totalStudents,
   todaySchedule,
   teacherAttendanceSessions,
   teacherAttendanceRecords,
@@ -284,14 +326,34 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
 
       // Recent assignments created by this teacher
       prisma.assignment.findMany({
-        where: { teacherId: teacher.id },
-        include: {
-          subject: { select: { name: true, code: true } },
-          _count: { select: { submissions: true } },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      }),
+  where: {
+    teacherId: teacher.id,
+  },
+
+  include: {
+    subject: {
+      select: {
+        id: true,
+        name: true,
+        code: true,
+        departmentId: true,
+        semester: true,
+      },
+    },
+
+    _count: {
+      select: {
+        submissions: true,
+      },
+    },
+  },
+
+  orderBy: {
+    createdAt: 'desc',
+  },
+
+  take: 5,
+}),
 
       // Recent materials uploaded
       prisma.studyMaterial.findMany({
@@ -299,7 +361,7 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
         orderBy: { createdAt: 'desc' },
         take: 5,
       }),
-
+ 
       // Total marks entries by this teacher
       prisma.mark.count({ where: { teacherId: teacher.id } }),
 
@@ -311,9 +373,7 @@ export async function getTeacherDashboard(req: Request, res: Response, next: Nex
       }),
 
       // Count of students in teacher's department
-      prisma.student.count({
-        where: { departmentId: teacher.departmentId },
-      }),
+    
       prisma.timetable.findMany({
   where: {
     teacherId: teacher.id,
@@ -378,14 +438,8 @@ prisma.student.findMany({
   },
 }),
     ]);
-    console.log(
-  'SEMESTER DISTRIBUTION',
-  allStudents.reduce((acc, s) => {
-    const key = `${s.semester}-${s.section}`;
-    acc[key] = (acc[key] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>)
-);
+
+    
 const attendanceTrendData = (() => {
   const today = new Date();
 
@@ -443,6 +497,39 @@ return {
 };
   });
 })();
+const assignmentsWithEligibility = await Promise.all(
+  recentAssignments.map(async (assignment) => {
+
+    const eligibleStudents = await prisma.student.count({
+      where: {
+        departmentId: assignment.subject.departmentId,
+        semester: assignment.subject.semester,
+      },
+    });
+
+    const submissionRate =
+      eligibleStudents > 0
+        ? Math.round(
+            (assignment._count.submissions / eligibleStudents) * 100
+          )
+        : 0;
+
+    return {
+      id: assignment.id,
+      title: assignment.title,
+      deadline: assignment.deadline,
+      subject: {
+        name: assignment.subject.name,
+        code: assignment.subject.code,
+      },
+      _count: {
+        submissions: assignment._count.submissions,
+      },
+      eligibleStudents,
+      submissionRate,
+    };
+  })
+);
     successResponse(res, 'Teacher dashboard data loaded.', {
       teacher: {
         name: req.user!.name,
@@ -451,18 +538,18 @@ return {
         department: teacher.department,
       },
       activeSessions,
-      assignments: recentAssignments,
-      materials: recentMaterials,
-      marksCount,
-      notices: recentNotices,
-      totalStudents,
-      attendanceTrendData,
-      todaySchedule,
+      assignments: assignmentsWithEligibility,
+materials: recentMaterials,
+marksCount,
+notices: recentNotices,
+attendanceTrendData,
+todaySchedule,
     });
   } catch (err) {
     next(err);
   }
 }
+
 
 /**
  * GET /api/dashboard/admin

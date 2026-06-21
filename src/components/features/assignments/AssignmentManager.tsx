@@ -593,6 +593,32 @@ export default function AssignmentManager() {
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{a.description}</p>
+                      {a.filePath && (
+  <div className="mb-3 p-3 rounded-lg border bg-muted/30">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0">
+        <FileText className="w-4 h-4 shrink-0" />
+        <span className="text-sm truncate">
+          {a.fileName || 'Assignment Attachment'}
+        </span>
+      </div>
+
+      <Button
+        size="sm"
+        variant="outline"
+        asChild
+      >
+        <a
+          href={`http://localhost:3001/uploads/${a.filePath.split('\\').pop()}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View File
+        </a>
+      </Button>
+    </div>
+  </div>
+)}
                       <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 flex-wrap">
                         <span className="flex items-center gap-1">
                           <Users className="w-3 h-3" />
@@ -748,6 +774,32 @@ export default function AssignmentManager() {
                       )}
                     </div>
                     <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{a.description}</p>
+                    {a.filePath && (
+  <div className="mb-3 p-3 rounded-lg border bg-muted/30">
+    <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center gap-2 min-w-0">
+        <FileText className="w-4 h-4 shrink-0" />
+        <span className="text-sm truncate">
+          {a.fileName || 'Assignment Attachment'}
+        </span>
+      </div>
+
+      <Button
+        size="sm"
+        variant="outline"
+        asChild
+      >
+        <a
+          href={`http://localhost:3001/uploads/${a.filePath.split('\\').pop()}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View File
+        </a>
+      </Button>
+    </div>
+  </div>
+)}
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />

@@ -167,7 +167,7 @@ export async function getAssignmentAnalytics(req: Request, res: Response, next: 
         const completionRate = studentCount > 0
           ? (a._count.submissions / studentCount) * 100
           : 0;
-
+         
         return {
           assignmentId: a.id,
           title: a.title,

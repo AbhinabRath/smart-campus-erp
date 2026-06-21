@@ -145,15 +145,63 @@ export async function getAssignments(req: Request, res: Response, next: NextFunc
     const userId = req.user!.id;
 
     const where: any = {};
-    if (subjectId) where.subjectId = String(subjectId);
 
-    // Teachers only see their own assignments
-    if (userRole === 'teacher') {
-      const teacher = await prisma.teacher.findUnique({ where: { userId } });
-      if (teacher) where.teacherId = teacher.id;
-    } else if (teacherId) {
-      where.teacherId = String(teacherId);
-    }
+if (subjectId) {
+  where.subjectId = String(subjectId);
+}
+
+/*
+|--------------------------------------------------------------------------
+| Teacher View
+|--------------------------------------------------------------------------
+*/
+if (userRole === 'teacher') {
+
+  const teacher = await prisma.teacher.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (teacher) {
+    where.teacherId = teacher.id;
+  }
+}
+
+/*
+|--------------------------------------------------------------------------
+| Student View
+|--------------------------------------------------------------------------
+*/
+else if (userRole === 'student') {
+
+  const student = await prisma.student.findUnique({
+    where: {
+      userId,
+    },
+  });
+
+  if (!student) {
+    errorResponse(res, 'Student profile not found.', 404);
+    return;
+  }
+
+  where.subject = {
+    departmentId: student.departmentId,
+    semester: student.semester,
+  };
+}
+
+/*
+|--------------------------------------------------------------------------
+| Admin Filters
+|--------------------------------------------------------------------------
+*/
+else if (teacherId) {
+
+  where.teacherId = String(teacherId);
+
+}
 
     const assignments = await prisma.assignment.findMany({
       where,
@@ -243,11 +291,36 @@ export async function submitAssignment(req: Request, res: Response, next: NextFu
     }
 
     // Verify the assignment exists
-    const assignment = await prisma.assignment.findUnique({ where: { id } });
+   const assignment =
+  await prisma.assignment.findUnique({
+    where: {
+      id,
+    },
+
+    include: {
+      subject: {
+        select: {
+          departmentId: true,
+          semester: true,
+        },
+      },
+    },
+  });
     if (!assignment) {
       errorResponse(res, 'Assignment not found.', 404);
       return;
     }
+    if (
+  assignment.subject.departmentId !== student.departmentId ||
+  assignment.subject.semester !== student.semester
+) {
+  errorResponse(
+    res,
+    'You are not eligible to submit this assignment.',
+    403
+  );
+  return;
+}
 
     // Check if student already submitted (unique constraint: assignmentId + studentId)
     const existingSubmission = await prisma.assignmentSubmission.findUnique({
