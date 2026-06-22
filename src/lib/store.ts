@@ -72,6 +72,7 @@ export type ViewId =
   | 'notices'
   | 'leaves'
   | 'analytics'
+  | 'academics'
   | 'recommendations'
   | 'profile'
   | 'settings'

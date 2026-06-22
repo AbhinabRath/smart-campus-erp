@@ -29,7 +29,12 @@ import prisma from './config/database';
 
 const app = express();
 const PORT = 3001;
-
+app.use(
+  '/uploads',
+  express.static(
+    path.join(__dirname, 'uploads')
+  )
+);
 // =============================================================================
 // MIDDLEWARE SETUP
 // =============================================================================
@@ -106,3 +111,4 @@ process.on('beforeExit', async () => {
 });
 
 startServer();
+

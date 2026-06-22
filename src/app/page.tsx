@@ -15,6 +15,7 @@ import React, { useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore, type ViewId } from '@/lib/store';
 import api from '@/lib/api';
+import AcademicsPage from '@/components/features/academics/AcademicsPage';
 
 // Layout components
 import AppSidebar from '@/components/layout/AppSidebar';
@@ -83,6 +84,7 @@ function renderView(view: ViewId, role: string) {
     case 'notices': return <NoticeManager />;
     case 'leaves': return <LeaveManager />;
     case 'analytics': return <AnalyticsManager />;
+    case 'academics':return <AcademicsPage />;
     case 'recommendations': return <RecommendationManager />;
     case 'users': return <UserManager />;
     case 'departments': return <DepartmentManager />;
@@ -112,6 +114,7 @@ const viewTitles: Record<ViewId, string> = {
   notices: 'Notices',
   leaves: 'Leave Management',
   analytics: 'Analytics',
+  academics: 'Academics',
   recommendations: 'Recommendations',
   profile: 'Profile',
   settings: 'Settings',

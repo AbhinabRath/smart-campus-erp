@@ -352,6 +352,57 @@ model Recommendation {
   @@index([isRead])
   @@map("recommendations")
 }
+model AcademicDocument {
+
+  id          String   @id @default(cuid())
+
+  year        Int
+
+  type        String
+
+  fileName    String
+
+  filePath    String
+
+  uploadedBy  String
+
+  createdAt   DateTime @default(now())
+
+  @@index([year])
+  @@index([type])
+
+  @@map("academic_documents")
+}
+
+model AcademicCalendar {
+
+  id          String   @id @default(cuid())
+
+  fileName    String
+
+  filePath    String
+
+  uploadedBy  String
+
+  createdAt   DateTime @default(now())
+
+  @@map("academic_calendars")
+}
+
+model RegulationDocument {
+
+  id          String   @id @default(cuid())
+
+  fileName    String
+
+  filePath    String
+
+  uploadedBy  String
+
+  createdAt   DateTime @default(now())
+
+  @@map("regulation_documents")
+}
 
 model Session {
   id        String   @id @default(cuid())

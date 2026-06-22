@@ -17,8 +17,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: '/api',
-  withCredentials: true, // Send httpOnly cookies (campus_session)
-  headers: { 'Content-Type': 'application/json' },
+  withCredentials: true,
 });
 
 // Request interceptor: attach Authorization header with session token.

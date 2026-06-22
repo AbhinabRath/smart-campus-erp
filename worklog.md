@@ -2,5 +2,8 @@
 
 ## To Do list:
 
-1. Add PRC system here too
+1. Academics Section
 
+2. Fees Section
+
+3. set login page bg

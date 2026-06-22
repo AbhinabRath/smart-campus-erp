@@ -19,6 +19,8 @@ import { requireAuth, requireRole } from '../middleware/auth';
 import { validate } from '../middleware/validate';
 import { upload } from '../utils/fileUpload';
 import { avatarUpload } from '../utils/avatarUpload';
+import path from 'path';
+import express from 'express';
 // Controllers
 import * as authCtrl from '../controllers/authController';
 import * as attendanceCtrl from '../controllers/attendanceController';
@@ -34,7 +36,7 @@ import * as dashboardCtrl from '../controllers/dashboardController';
 import * as userCtrl from '../controllers/userController';
 import * as deptCtrl from '../controllers/departmentController';
 import * as subjectCtrl from '../controllers/subjectController';
-
+import * as academicCtrl from '../controllers/academicController';
 
 
 const router = Router();
@@ -205,6 +207,100 @@ router.get('/analytics/assignments', requireAuth, analyticsCtrl.getAssignmentAna
 router.get('/analytics/students/:id/progress', requireAuth, analyticsCtrl.getStudentProgress);
 router.get('/analytics/department/:id', requireAuth, analyticsCtrl.getDepartmentAnalytics);
 
+// =============================================================================
+// ACADEMICS ROUTES
+// =============================================================================
+
+router.get(
+  '/academics/documents',
+  requireAuth,
+  academicCtrl.getAcademicDocuments
+);
+
+router.get(
+  '/academics/calendar',
+  requireAuth,
+  academicCtrl.getAcademicCalendar
+);
+
+router.get(
+  '/academics/regulation',
+  requireAuth,
+  academicCtrl.getRegulation
+);
+router.post(
+  '/academics/documents',
+  requireAuth,
+  requireRole('admin'),
+  upload.single('file'),
+  academicCtrl.uploadAcademicDocument
+);
+
+router.delete(
+  '/academics/documents/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicCtrl.deleteAcademicDocument
+);
+
+router.post(
+  '/academics/calendar',
+  requireAuth,
+  requireRole('admin'),
+  upload.single('file'),
+  academicCtrl.uploadCalendar
+);
+
+router.delete(
+  '/academics/calendar/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicCtrl.deleteCalendar
+);
+
+router.post(
+  '/academics/regulation',
+  requireAuth,
+  requireRole('admin'),
+  upload.single('file'),
+  academicCtrl.uploadRegulation
+);
+
+router.delete(
+  '/academics/regulation/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicCtrl.deleteRegulation
+);
+
+router.get(
+  '/academics/download/:id',
+  requireAuth,
+  academicCtrl.downloadAcademicDocument
+);
+router.get(
+  '/academics/calendar/download/:id',
+  requireAuth,
+  academicCtrl.downloadCalendar
+);
+
+router.get(
+  '/academics/regulation/download/:id',
+  requireAuth,
+  academicCtrl.downloadRegulation
+);
+
+router.get(
+  '/academics/document/download/:id',
+  requireAuth,
+  academicCtrl.downloadAcademicDocument
+);
+router.delete(
+  '/academics/documents/:id',
+  requireAuth,
+  requireRole('admin'),
+  academicCtrl.deleteAcademicDocument
+);
 // =============================================================================
 // RECOMMENDATION ROUTES - Rule-Based Recommendations
 // =============================================================================

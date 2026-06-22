@@ -25,6 +25,7 @@ import {
   BarChart3,
   Lightbulb,
   GraduationCap,
+  BookMarked,
   X,
   ChevronLeft,
   ChevronRight,
@@ -71,6 +72,13 @@ const navItems: NavItem[] = [
   { id: 'marks', label: 'Marks', icon: FileText, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   { id: 'assignments', label: 'Assignments', icon: FileUp, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   { id: 'materials', label: 'Study Materials', icon: FolderOpen, roles: ['admin', 'teacher', 'student'], section: 'academic' },
+  {
+  id: 'academics',
+  label: 'Academics',
+  icon: BookMarked,
+  roles: ['admin', 'teacher', 'student'],
+  section: 'academic'
+},
   { id: 'timetable', label: 'Timetable', icon: Calendar, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   // Communication section
   { id: 'notices', label: 'Notices', icon: Bell, roles: ['admin', 'teacher', 'student'], section: 'communication' },
