@@ -301,6 +301,14 @@ router.delete(
   requireRole('admin'),
   academicCtrl.deleteAcademicDocument
 );
+
+router.use('/admit-card', (req, _res, next) => {
+  console.log('ADMIT ROUTE HIT');
+  console.log('URL =', req.originalUrl);
+  console.log('PARAMS =', req.params);
+  console.log('QUERY =', req.query);
+  next();
+});
 router.get(
   '/admit-card/my',
   requireAuth,

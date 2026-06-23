@@ -592,6 +592,8 @@ const deleteRegulation = async () => {
   </div>
 
 </div>
+{currentUser?.role === 'student' && (
+
 <div className="rounded-3xl border border-border p-8">
 
   <div className="flex items-center gap-4 mb-6">
@@ -615,46 +617,48 @@ const deleteRegulation = async () => {
   <div className="flex flex-wrap gap-4 items-center mt-6">
 
     <Select
-  value={examType}
-  onValueChange={setExamType}
->
-  <SelectTrigger
-  className="
-    w-[260px]
-    h-12
-    border-2
-    border-orange-500/30
-    bg-background
-  "
->
-    <SelectValue />
-  </SelectTrigger>
+      value={examType}
+      onValueChange={setExamType}
+    >
+      <SelectTrigger
+        className="
+          w-[260px]
+          h-12
+          border-2
+          border-orange-500/30
+          bg-background
+        "
+      >
+        <SelectValue />
+      </SelectTrigger>
 
-  <SelectContent className="bg-background border border-border z-50">
-    <SelectItem value="internal1">
-      Internal 1 Examination
-    </SelectItem>
+      <SelectContent className="bg-background border border-border z-50">
 
-    <SelectItem value="internal2">
-      Internal 2 Examination
-    </SelectItem>
-  </SelectContent>
-</Select>
+        <SelectItem value="internal1">
+          Internal 1 Examination
+        </SelectItem>
+
+        <SelectItem value="internal2">
+          Internal 2 Examination
+        </SelectItem>
+
+      </SelectContent>
+
+    </Select>
 
     <a
       href={`http://localhost:3001/api/admit-card/my?examType=${examType}`}
       target="_blank"
       className="
-  h-12
-  px-6
-  flex items-center
-  rounded-xl
-  bg-orange-500
-  text-white
-  font-semibold
-  hover:opacity-90
-"
-      
+        h-12
+        px-6
+        flex items-center
+        rounded-xl
+        bg-orange-500
+        text-white
+        font-semibold
+        hover:opacity-90
+      "
     >
       Generate PDF
     </a>
@@ -662,6 +666,8 @@ const deleteRegulation = async () => {
   </div>
 
 </div>
+
+)}
       {/* CALENDAR */}
 
       <div className="rounded-3xl border border-border p-8">
