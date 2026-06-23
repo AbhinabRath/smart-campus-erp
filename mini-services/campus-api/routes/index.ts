@@ -21,6 +21,7 @@ import { upload } from '../utils/fileUpload';
 import { avatarUpload } from '../utils/avatarUpload';
 import path from 'path';
 import express from 'express';
+import idCardRoutes from './idCardRoutes';
 // Controllers
 import * as authCtrl from '../controllers/authController';
 import * as attendanceCtrl from '../controllers/attendanceController';
@@ -323,7 +324,7 @@ router.get(
   admitCardCtrl.generateStudentAdmitCard
 );
 
-
+router.use('/id-card', idCardRoutes);
 
 
 

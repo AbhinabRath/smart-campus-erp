@@ -4,7 +4,7 @@
 
 1. Academics Section -> Done
 
-2. Make Download Admitcard option for academic page (also icard option)
+2. Make Download Admitcard option for academic page (also icard option) -> Done
 
 3. Fees Section
 

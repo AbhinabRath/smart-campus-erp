@@ -668,6 +668,48 @@ const deleteRegulation = async () => {
 </div>
 
 )}
+
+{/* Identity Card */}
+  <div className="rounded-3xl border border-border p-8">
+
+  <div className="flex items-center gap-4 mb-6">
+
+    <div className="w-14 h-14 rounded-2xl bg-cyan-500/10 flex items-center justify-center">
+      <FileBadge2 className="w-7 h-7 text-cyan-400" />
+    </div>
+
+    <div>
+      <h3 className="text-xl font-bold">
+        Generate ID Card
+      </h3>
+
+      <p className="text-muted-foreground">
+        Download student identity card
+      </p>
+    </div>
+
+  </div>
+
+  <a
+    href="http://localhost:3001/api/id-card/my"
+    target="_blank"
+    className="
+      h-12
+      px-6
+      inline-flex
+      items-center
+      rounded-xl
+      bg-cyan-500
+      text-white
+      font-semibold
+      hover:opacity-90
+    "
+  >
+    Generate ID Card
+  </a>
+
+</div>
+
       {/* CALENDAR */}
 
       <div className="rounded-3xl border border-border p-8">
