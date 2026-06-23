@@ -11,28 +11,72 @@ export async function generateMyIdCard(
 ) {
   try {
 
-    const student =
-      await prisma.student.findUnique({
-        where: {
-          userId: req.user!.id
-        },
-        include: {
-          user: true,
-          department: true
-        }
-      });
+    if (req.user?.role === 'student') {
 
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: 'Student not found'
-      });
+      const student =
+        await prisma.student.findUnique({
+          where: {
+            userId: req.user.id
+          },
+          include: {
+            user: true,
+            department: true
+          }
+        });
+
+      if (!student) {
+        return res.status(404).json({
+          success: false,
+          message: 'Student not found'
+        });
+      }
+
+      generateCard(
+        {
+          ...student,
+          cardType: 'student'
+        },
+        res
+      );
+
+      return;
     }
 
-    generateCard(
-      student,
-      res
-    );
+    if (req.user?.role === 'teacher') {
+
+      const teacher =
+        await prisma.teacher.findUnique({
+          where: {
+            userId: req.user.id
+          },
+          include: {
+            user: true,
+            department: true
+          }
+        });
+
+      if (!teacher) {
+        return res.status(404).json({
+          success: false,
+          message: 'Teacher not found'
+        });
+      }
+
+      generateCard(
+        {
+          ...teacher,
+          cardType: 'teacher'
+        },
+        res
+      );
+
+      return;
+    }
+
+    return res.status(403).json({
+      success: false,
+      message: 'Access denied'
+    });
 
   } catch (err) {
     next(err);
@@ -40,7 +84,7 @@ export async function generateMyIdCard(
 }
 
 function generateCard(
-  student: any,
+  user: any,
   res: Response
 ) {
 
@@ -56,9 +100,13 @@ function generateCard(
   );
 
   res.setHeader(
-    'Content-Disposition',
-    'attachment; filename=StudentIDCard.pdf'
-  );
+  'Content-Disposition',
+  `attachment; filename=${
+    user.cardType === 'teacher'
+      ? 'FacultyIDCard.pdf'
+      : 'StudentIDCard.pdf'
+  }`
+);
 
   doc.pipe(res);
 
@@ -94,7 +142,9 @@ function generateCard(
     .fillColor('white')
     .fontSize(16)
     .text(
-      'STUDENT ID CARD',
+  user.cardType === 'teacher'
+    ? 'FACULTY ID CARD'
+    : 'STUDENT ID CARD',
       0,
       88,
       {
@@ -105,10 +155,10 @@ function generateCard(
   doc.fillColor('black');
 
   const avatarPath =
-    student.user.avatar
+    user.user.avatar
       ? path.join(
           process.cwd(),
-          student.user.avatar.replace(/^\/+/, '')
+          user.user.avatar.replace(/^\/+/, '')
         )
       : null;
 
@@ -153,10 +203,12 @@ function generateCard(
   );
 
   doc.text(
-    'ROLL NO',
-    30,
-    345
-  );
+  user.cardType === 'teacher'
+    ? 'EMPLOYEE ID'
+    : 'ROLL NO',
+  30,
+  345
+);
 
   doc.text(
     'DEPARTMENT',
@@ -165,36 +217,46 @@ function generateCard(
   );
 
   doc.text(
-    'SEMESTER',
-    30,
-    395
-  );
+  user.cardType === 'teacher'
+    ? 'DESIGNATION'
+    : 'SEMESTER',
+  30,
+  395
+);
 
   doc.font('Helvetica');
 
   doc.text(
-    `: ${student.user.name}`,
+    `: ${user.user.name}`,
     120,
     320
   );
 
   doc.text(
-    `: ${student.rollNumber}`,
-    120,
-    345
-  );
+  `: ${
+    user.cardType === 'teacher'
+      ? user.employeeId || user.id
+      : user.rollNumber
+  }`,
+  120,
+  345
+);
 
   doc.text(
-    `: ${student.department.name}`,
+    `: ${user.department.name}`,
     120,
     370
   );
 
   doc.text(
-    `: ${student.semester}`,
-    120,
-    395
-  );
+  `: ${
+    user.cardType === 'teacher'
+      ? (user.designation || 'Faculty')
+      : user.semester
+  }`,
+  120,
+  395
+);
 
   doc
     .rect(
@@ -215,10 +277,12 @@ function generateCard(
     );
 
   doc.text(
-    'Student Signature',
-    180,
-    470
-  );
+  user.cardType === 'teacher'
+    ? 'Faculty Signature'
+    : 'Student Signature',
+  180,
+  470
+);
 
   doc.end();
 }

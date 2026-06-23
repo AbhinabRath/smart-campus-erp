@@ -418,3 +418,11 @@ model Session {
   @@index([userId])
   @@map("sessions")
 }
+
+model BrandingSettings {
+  id              String   @id @default(cuid())
+  loginBackground String?
+  updatedAt       DateTime @updatedAt
+
+  @@map("branding_settings")
+}

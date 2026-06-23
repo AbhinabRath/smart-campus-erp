@@ -22,6 +22,7 @@ import { avatarUpload } from '../utils/avatarUpload';
 import path from 'path';
 import express from 'express';
 import idCardRoutes from './idCardRoutes';
+import brandingRoutes from './brandingRoutes';
 // Controllers
 import * as authCtrl from '../controllers/authController';
 import * as attendanceCtrl from '../controllers/attendanceController';
@@ -162,6 +163,10 @@ router.get('/timetables', requireAuth, timetableCtrl.getTimetables);
 // =============================================================================
 // NOTICE ROUTES - Announcement Management
 // =============================================================================
+router.get(
+  '/notices/public',
+  noticeCtrl.getPublicNotices
+);
 router.post('/notices', requireAuth, requireRole('admin', 'teacher'), validate([
   { field: 'title', required: true },
   { field: 'content', required: true },
@@ -362,6 +367,10 @@ router.put(
 router.get('/dashboard/student', requireAuth, requireRole('student'), dashboardCtrl.getStudentDashboard);
 router.get('/dashboard/teacher', requireAuth, requireRole('teacher'), dashboardCtrl.getTeacherDashboard);
 router.get('/dashboard/admin', requireAuth, requireRole('admin'), dashboardCtrl.getAdminDashboard);
+router.use(
+  '/branding',
+  brandingRoutes
+);
 
 // =============================================================================
 // USER MANAGEMENT ROUTES (Admin Only)

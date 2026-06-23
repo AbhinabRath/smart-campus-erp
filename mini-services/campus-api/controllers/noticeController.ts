@@ -268,3 +268,34 @@ export async function markAllNoticesRead(req: Request, res: Response, next: Next
     next(err);
   }
 }
+
+export async function getPublicNotices(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const notices =
+      await prisma.notice.findMany({
+        where: {
+          targetRole: 'all'
+        },
+        orderBy: [
+          { isPinned: 'desc' },
+          { createdAt: 'desc' }
+        ],
+        take: 20
+      });
+
+    successResponse(
+      res,
+      'Public notices retrieved.',
+      notices
+    );
+
+  } catch (err) {
+    next(err);
+  }
+}

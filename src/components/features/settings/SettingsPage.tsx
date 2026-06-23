@@ -35,6 +35,7 @@ import {
 import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { Upload, ImageIcon } from 'lucide-react';
 
 // ---------------------------------------------------------------------------
 // localStorage helpers with campus-erp- prefix
@@ -113,6 +114,13 @@ export default function SettingsPage() {
   const { currentUser } = useAppStore();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const isAdmin = currentUser?.role === 'admin';
+
+const [branding, setBranding] =
+  useState<any>(null);
+
+const [uploadingBg, setUploadingBg] =
+  useState(false);
 
   // ---- General Tab State ----
   const [sidebarCompact, setSidebarCompact] = useState(false);
@@ -147,6 +155,13 @@ useEffect(() => {
   }
 
   setNotifPrefs(loadNotificationPrefs());
+  if (isAdmin) {
+  api.get('/branding')
+    .then(res =>
+      setBranding(res.data.data)
+    )
+    .catch(console.error);
+}
 }, []);
   // ---- Handlers ----
 
@@ -228,7 +243,59 @@ useEffect(() => {
       setChangingPassword(false);
     }
   };
+  const uploadCollegeBackground =
+async (file: File) => {
 
+  try {
+
+    setUploadingBg(true);
+
+    const formData =
+      new FormData();
+
+    formData.append(
+  'file',
+  file
+);
+
+    const res =
+      await api.post(
+        '/branding/background',
+        formData,
+        {
+          headers: {
+            'Content-Type':
+              'multipart/form-data'
+          }
+        }
+      );
+
+    setBranding(
+      res.data.data
+    );
+
+    toast({
+      title: 'Success',
+      description:
+        'College background updated'
+    });
+
+  } catch {
+
+    toast({
+      title: 'Error',
+      description:
+        'Upload failed',
+      variant:
+        'destructive'
+    });
+
+  } finally {
+
+    setUploadingBg(false);
+
+  }
+};
   const navigateToProfile = () => {
     useAppStore.getState().setView('profile');
   };
@@ -376,6 +443,102 @@ useEffect(() => {
               </CardContent>
             </Card>
           </motion.div>
+          {isAdmin && (
+
+<Card>
+
+  <CardHeader>
+
+    <CardTitle
+      className="
+      flex items-center gap-2"
+    >
+
+      <ImageIcon
+        className="
+        w-5 h-5
+        text-emerald-500"
+      />
+
+      Login Branding
+
+    </CardTitle>
+
+    <CardDescription>
+
+      Upload the college image
+      shown on the login page
+
+    </CardDescription>
+
+  </CardHeader>
+
+  <CardContent
+    className="space-y-4"
+  >
+
+    {branding?.loginBackground && (
+
+      <img
+        src={branding.loginBackground}
+        className="
+        w-full
+        max-h-64
+        object-cover
+        rounded-xl
+        border"
+      />
+
+    )}
+
+    <label
+      className="
+      inline-flex
+      items-center
+      gap-2
+      px-4
+      py-2
+      rounded-lg
+      bg-emerald-600
+      text-white
+      cursor-pointer
+      hover:bg-emerald-700
+      "
+    >
+
+      <Upload size={16} />
+
+      {
+        uploadingBg
+          ? 'Uploading...'
+          : 'Upload Background'
+      }
+
+      <input
+        hidden
+        type="file"
+        accept="image/*"
+        onChange={(e)=>{
+
+          const file =
+            e.target.files?.[0];
+
+          if(file){
+            uploadCollegeBackground(
+              file
+            );
+          }
+
+        }}
+      />
+
+    </label>
+
+  </CardContent>
+
+</Card>
+
+)}
         </TabsContent>
 
         {/* ================================================================= */}

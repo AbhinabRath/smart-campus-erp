@@ -8,7 +8,11 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, {
+  useState,
+  useMemo,
+  useEffect
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   GraduationCap, Mail, Lock, Loader2, AlertCircle,
@@ -24,6 +28,7 @@ import {
 } from '@/components/ui/tooltip';
 import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
+
 
 // Floating particles for background animation — enhanced with glow
 function FloatingParticles() {
@@ -107,6 +112,10 @@ const roleDemos = [
 ];
 
 export default function LoginPage() {
+  const [branding, setBranding] = useState<any>(null);
+
+const [publicNotices, setPublicNotices] =
+  useState<any[]>([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -115,10 +124,27 @@ export default function LoginPage() {
   const [touched, setTouched] = useState({ email: false, password: false });
   const [focused, setFocused] = useState({ email: false, password: false });
   const login = useAppStore((s) => s.login);
-
+  
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 6;
+useEffect(() => {
 
+  api.get('/branding')
+    .then((res) => {
+      setBranding(res.data.data);
+    })
+    .catch(() => {});
+
+  api.get('/notices/public')
+    .then((res) => {
+      setPublicNotices(
+        res.data.data || []
+      );
+    })
+    .catch(() => {});
+
+}, []);
+useEffect(() => {}, []);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true });
@@ -158,9 +184,17 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="relative min-h-screen lg:flex overflow-hidden">
       {/* Left Panel - Info & Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-emerald-900">
+      <div className="hidden lg:flex lg:w-[55%] h-screen relative overflow-hidden">
+        {branding?.loginBackground && (
+  <img
+    src={`http://localhost:3001${branding.loginBackground}`}
+    alt="College Background"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
+)}
+<div className="absolute inset-0 bg-black/50" />
         <FloatingParticles />
         <GeometricShapes />
 
@@ -183,7 +217,15 @@ export default function LoginPage() {
         </div>
 
         {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-12 xl:px-20 py-12">
+        <div className="
+  relative
+  z-10
+  h-screen
+  overflow-y-auto
+  px-12
+  xl:px-20
+  py-12
+">
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -252,6 +294,41 @@ export default function LoginPage() {
               </div>
             </motion.div>
           </motion.div>
+          {publicNotices.length > 0 && (
+  <div className="mt-8 max-w-md">
+
+    <h3 className="text-white font-semibold mb-3">
+      Latest Notices
+    </h3>
+
+    <div className="space-y-3">
+
+      {publicNotices.slice(0, 3).map((notice) => (
+        <div
+          key={notice.id}
+          className="
+            bg-white/10
+            backdrop-blur-sm
+            rounded-lg
+            p-3
+            border
+            border-white/10
+          "
+        >
+          <p className="text-white text-sm font-medium">
+            {notice.title}
+          </p>
+
+          <p className="text-emerald-100 text-xs mt-1 line-clamp-2">
+            {notice.content}
+          </p>
+        </div>
+      ))}
+
+    </div>
+
+  </div>
+)}
         </div>
       </div>
 
@@ -454,12 +531,12 @@ export default function LoginPage() {
       </div>
 
       {/* Shimmer keyframes */}
-      <style jsx>{`
+      {/* <style jsx>{`
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
         }
-      `}</style>
+      `}</style> */}
     </div>
   );
 }

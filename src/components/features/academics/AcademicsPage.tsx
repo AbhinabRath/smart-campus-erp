@@ -592,7 +592,10 @@ const deleteRegulation = async () => {
   </div>
 
 </div>
-{currentUser?.role === 'student' && (
+{(
+  currentUser?.role === 'student' ||
+  currentUser?.role === 'teacher'
+) && (
 
 <div className="rounded-3xl border border-border p-8">
 
@@ -670,6 +673,10 @@ const deleteRegulation = async () => {
 )}
 
 {/* Identity Card */}
+{(
+  currentUser?.role === 'student' ||
+  currentUser?.role === 'teacher'
+) && (
   <div className="rounded-3xl border border-border p-8">
 
   <div className="flex items-center gap-4 mb-6">
@@ -684,7 +691,7 @@ const deleteRegulation = async () => {
       </h3>
 
       <p className="text-muted-foreground">
-        Download student identity card
+        Download identity card
       </p>
     </div>
 
@@ -709,6 +716,8 @@ const deleteRegulation = async () => {
   </a>
 
 </div>
+
+)}
 
       {/* CALENDAR */}
 
