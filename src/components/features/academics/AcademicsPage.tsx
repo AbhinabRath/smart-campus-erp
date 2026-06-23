@@ -16,8 +16,10 @@ import {
   Eye,
   Download,
   Trash2,
+  FileBadge2,
   Scale
 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 export default function AcademicsPage() {
   const { currentUser } =
   useAppStore();
@@ -33,6 +35,9 @@ const isAdmin =
 
   const [regulation, setRegulation] =
     useState<any>(null);
+  
+  const [examType, setExamType] =
+  useState('internal1');
 
   useEffect(() => {
 
@@ -587,7 +592,76 @@ const deleteRegulation = async () => {
   </div>
 
 </div>
+<div className="rounded-3xl border border-border p-8">
 
+  <div className="flex items-center gap-4 mb-6">
+
+    <div className="w-14 h-14 rounded-2xl bg-orange-500/10 flex items-center justify-center">
+      <FileBadge2 className="w-7 h-7 text-orange-400" />
+    </div>
+
+    <div>
+      <h3 className="text-xl font-bold">
+        Generate Admit Card
+      </h3>
+
+      <p className="text-muted-foreground">
+        Download examination admit card
+      </p>
+    </div>
+
+  </div>
+
+  <div className="flex flex-wrap gap-4 items-center mt-6">
+
+    <Select
+  value={examType}
+  onValueChange={setExamType}
+>
+  <SelectTrigger
+  className="
+    w-[260px]
+    h-12
+    border-2
+    border-orange-500/30
+    bg-background
+  "
+>
+    <SelectValue />
+  </SelectTrigger>
+
+  <SelectContent className="bg-background border border-border z-50">
+    <SelectItem value="internal1">
+      Internal 1 Examination
+    </SelectItem>
+
+    <SelectItem value="internal2">
+      Internal 2 Examination
+    </SelectItem>
+  </SelectContent>
+</Select>
+
+    <a
+      href={`http://localhost:3001/api/admit-card/my?examType=${examType}`}
+      target="_blank"
+      className="
+  h-12
+  px-6
+  flex items-center
+  rounded-xl
+  bg-orange-500
+  text-white
+  font-semibold
+  hover:opacity-90
+"
+      
+    >
+      Generate PDF
+    </a>
+
+  </div>
+
+</div>
       {/* CALENDAR */}
 
       <div className="rounded-3xl border border-border p-8">

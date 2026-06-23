@@ -2,8 +2,12 @@
 
 ## To Do list:
 
-1. Academics Section
+1. Academics Section -> Done
 
-2. Fees Section
+2. Make Download Admitcard option for academic page (also icard option)
 
-3. set login page bg
+3. Fees Section
+
+4. set login page bg
+
+

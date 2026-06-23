@@ -37,7 +37,7 @@ import * as userCtrl from '../controllers/userController';
 import * as deptCtrl from '../controllers/departmentController';
 import * as subjectCtrl from '../controllers/subjectController';
 import * as academicCtrl from '../controllers/academicController';
-
+import * as admitCardCtrl from '../controllers/admitCardController';
 
 const router = Router();
 
@@ -301,6 +301,24 @@ router.delete(
   requireRole('admin'),
   academicCtrl.deleteAcademicDocument
 );
+router.get(
+  '/admit-card/my',
+  requireAuth,
+  requireRole('student'),
+  admitCardCtrl.generateMyAdmitCard
+);
+
+router.get(
+  '/admit-card/admin/:studentId',
+  requireAuth,
+  requireRole('admin'),
+  admitCardCtrl.generateStudentAdmitCard
+);
+
+
+
+
+
 // =============================================================================
 // RECOMMENDATION ROUTES - Rule-Based Recommendations
 // =============================================================================
