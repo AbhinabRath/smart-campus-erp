@@ -188,3 +188,26 @@ body {
 html {
   font-size: calc(16px * var(--app-font-scale));
 }
+/* ================================================= */
+/* Notice Board Marquee */
+/* ================================================= */
+
+@keyframes notice-marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.notice-marquee {
+  display: flex;
+  width: max-content;
+  animation: notice-marquee 25s linear infinite;
+}
+
+.notice-marquee:hover {
+  animation-play-state: paused;
+}

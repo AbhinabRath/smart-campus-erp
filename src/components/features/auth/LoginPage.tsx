@@ -1,22 +1,24 @@
-// =============================================================================
-// Smart Campus ERP - Login Page Component (Enhanced)
-// =============================================================================
-// Two-column layout with animated left info panel and right login form.
-// Features: animated particles, shimmer branding, validation states, remember me,
-// grid background pattern, focus ring animations, role demo buttons with icons.
+﻿// =============================================================================
+// Smart Campus ERP - Login Page Component
 // =============================================================================
 
 'use client';
 
-import React, {
-  useState,
-  useMemo,
-  useEffect
-} from 'react';
+import React, { type FormEvent, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  GraduationCap, Mail, Lock, Loader2, AlertCircle,
-  BookOpen, ClipboardCheck, BarChart3, Users, Shield, Sparkles,
+  GraduationCap,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  BarChart3,
+  ClipboardCheck,
+  Shield,
+  Sparkles,
   Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -24,128 +26,93 @@ import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
 
-
-// Floating particles for background animation — enhanced with glow
-function FloatingParticles() {
-  const particles = useMemo(() =>
-    Array.from({ length: 40 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      size: Math.random() * 6 + 2,
-      duration: Math.random() * 20 + 15,
-      delay: Math.random() * 10,
-      glow: i % 5 === 0, // every 5th particle glows
-    })), []);
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className={`absolute rounded-full ${p.glow ? 'bg-emerald-300/20 shadow-[0_0_8px_rgba(52,211,153,0.4)]' : 'bg-white/10'}`}
-          style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
-          animate={{
-            y: [0, -30, 0, 20, 0],
-            x: [0, 15, -10, 5, 0],
-            opacity: [0.3, 0.7, 0.4, 0.8, 0.3],
-          }}
-          transition={{
-            duration: p.duration,
-            delay: p.delay,
-            repeat: Infinity,
-            ease: 'easeInOut',
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// Geometric shapes for background decoration — enhanced with glow
-function GeometricShapes() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      <motion.div
-        className="absolute top-[10%] right-[10%] w-24 h-24 border border-white/15 rounded-xl shadow-[0_0_16px_rgba(52,211,153,0.08)]"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute bottom-[20%] left-[10%] w-16 h-16 border border-white/15 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.06)]"
-        animate={{ rotate: -360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute top-[60%] right-[25%] w-20 h-20 border border-white/15 rotate-45"
-        animate={{ rotate: [45, 135, 225, 315, 405] }}
-        transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
-      />
-      <motion.div
-        className="absolute top-[30%] left-[20%] w-12 h-12 border border-white/15 rounded-lg"
-        animate={{ rotate: 360, scale: [1, 1.2, 1] }}
-        transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }}
-      />
-    </div>
-  );
-}
-
 const features = [
-  { icon: ClipboardCheck, label: 'Smart Attendance', desc: 'QR-based attendance tracking' },
-  { icon: BarChart3, label: 'Real-time Analytics', desc: 'Data-driven insights' },
-  { icon: Users, label: 'Role Management', desc: 'Admin, Teacher, Student portals' },
-  { icon: BookOpen, label: 'Academic Tools', desc: 'Marks, assignments & materials' },
-  { icon: Shield, label: 'Secure Platform', desc: 'Enterprise-grade security' },
-  { icon: Sparkles, label: 'AI Recommendations', desc: 'Personalized learning paths' },
+  { icon: ClipboardCheck, label: 'Smart Attendance' },
+  { icon: BarChart3, label: 'Real-time Analytics' },
+  { icon: Shield, label: 'Secure Platform' },
+  { icon: Sparkles, label: 'Academic Excellence' },
 ];
 
-// Role demo config with distinct colors/icons
-const roleDemos = [
-  { label: 'Admin', email: 'admin@campus.edu', password: 'admin123', icon: Shield, color: 'from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700' },
-  { label: 'Teacher', email: 'sarah.j@campus.edu', password: 'teacher123', icon: BookOpen, color: 'from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700' },
-  { label: 'Student', email: 'alice.w@campus.edu', password: 'student123', icon: GraduationCap, color: 'from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700' },
-];
+function NoticeTicker({ notices }: { notices: Array<{ id: string; title: string; content?: string }> }) {
+  return (
+    <div className="relative bg-slate-950/95 text-slate-100">
+      <div className="
+absolute
+bottom-0
+left-0
+h-[3px]
+w-full
+bg-gradient-to-r
+from-emerald-400
+via-cyan-400
+via-purple-500
+to-pink-500
+" />
+      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 text-sm text-slate-100 sm:px-6">
+        <div className="flex shrink-0 items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-500/15 px-3 py-1.5 font-semibold uppercase tracking-[0.25em] text-emerald-200">
+          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+          NOTICE BOARD
+        </div>
+        <div className="relative flex-1 overflow-hidden">
+          <div className="notice-marquee flex items-center gap-6 whitespace-nowrap">
+            {notices.length > 0
+              ? [...notices.slice(0, 6), ...notices.slice(0, 6)].map((notice, index) => (
+                  <span
+                    key={`${notice.id}-${index}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/75 px-3 py-1.5 text-slate-200/90"
+                  >
+                    <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                    {notice.title}
+                  </span>
+                ))
+              : (
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-slate-950/75 px-3 py-1.5 text-slate-300">
+                  <span className="h-2 w-2 rounded-full bg-slate-400" />
+                  No active notices
+                </span>
+              )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   const [branding, setBranding] = useState<any>(null);
-
-const [publicNotices, setPublicNotices] =
-  useState<any[]>([]);
+  const [publicNotices, setPublicNotices] = useState<any[]>([]);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [focused, setFocused] = useState({ email: false, password: false });
   const login = useAppStore((s) => s.login);
-  
+
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const isPasswordValid = password.length >= 6;
-useEffect(() => {
 
-  api.get('/branding')
-    .then((res) => {
-      setBranding(res.data.data);
-    })
-    .catch(() => {});
+  useEffect(() => {
+    api.get('/branding')
+      .then((res) => setBranding(res.data.data))
+      .catch(() => {});
 
-  api.get('/notices/public')
-    .then((res) => {
-      setPublicNotices(
-        res.data.data || []
-      );
-    })
-    .catch(() => {});
+    api.get('/notices/public')
+      .then((res) => setPublicNotices(res.data.data || []))
+      .catch(() => setPublicNotices([]));
+  }, []);
 
-}, []);
-useEffect(() => {}, []);
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true });
     if (!isEmailValid || !isPasswordValid) return;
@@ -165,378 +132,310 @@ useEffect(() => {}, []);
     }
   };
 
-  const quickLogin = async (quickEmail: string, quickPassword: string) => {
-    setEmail(quickEmail);
-    setPassword(quickPassword);
-    setTouched({ email: true, password: true });
-    setError('');
-    setLoading(true);
-    try {
-      const loginRes = await api.post('/auth/login', { email: quickEmail, password: quickPassword });
-      const sessionToken = loginRes.data?.data?.sessionToken;
-      const meRes = await api.get('/auth/me');
-      login(meRes.data.data, sessionToken);
-    } catch {
-      setError('Quick login failed.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="relative min-h-screen lg:flex overflow-hidden">
-      {/* Left Panel - Info & Branding (hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-[55%] h-screen relative overflow-hidden">
-        {branding?.loginBackground && (
-  <img
-    src={`http://localhost:3001${branding.loginBackground}`}
-    alt="College Background"
-    className="absolute inset-0 w-full h-full object-cover"
-  />
-)}
-<div className="absolute inset-0 bg-black/50" />
-        <FloatingParticles />
-        <GeometricShapes />
-
-        {/* Grid background pattern */}
-        <div className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
+    <div className="relative h-screen w-full overflow-hidden bg-slate-950 text-white">
+      {branding?.loginBackground && (
+        <img
+          src={`http://localhost:3001${branding.loginBackground}`}
+          alt="Campus background"
+          className="absolute inset-0 h-full w-full object-cover"
         />
+      )}
 
-        {/* Shimmer overlay */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_3s_ease-in-out_infinite]"
-            style={{
-              backgroundSize: '200% 100%',
-              animation: 'shimmer 3s ease-in-out infinite',
-            }}
-          />
-        </div>
+      <div className="absolute inset-0 bg-slate-950/45" />
 
-        {/* Content */}
-        <div className="
-  relative
-  z-10
-  h-screen
-  overflow-y-auto
-  px-12
-  xl:px-20
-  py-12
-">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            {/* Logo & Title */}
-            <div className="flex items-center gap-4 mb-8">
-              <motion.div
-                className="w-14 h-14 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(52,211,153,0.3)]"
-                whileHover={{ scale: 1.1, rotate: 5 }}
-                transition={{ type: 'spring', stiffness: 300 }}
-              >
-                <GraduationCap className="w-8 h-8 text-white" />
-              </motion.div>
-              <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">Smart Campus ERP</h1>
-                <p className="text-emerald-200 text-sm">Academic Management Platform</p>
-              </div>
-            </div>
+<div className="absolute left-[-200px] top-[20%] h-[500px] w-[500px] rounded-full bg-cyan-500/20 blur-[180px]" />
 
-            {/* Tagline */}
-            <p className="text-emerald-100 text-lg mb-10 max-w-md leading-relaxed">
-              Empowering education with intelligent tools for attendance, analytics, and personalized learning experiences.
-            </p>
+<div className="absolute right-[-200px] bottom-[10%] h-[500px] w-[500px] rounded-full bg-purple-500/20 blur-[180px]" />
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-10">
-              {features.map((feat, i) => (
-                <motion.div
-                  key={feat.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                  whileHover={{ scale: 1.03, y: -2 }}
-                  className="flex items-start gap-3 bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/10 transition-shadow hover:shadow-[0_0_12px_rgba(52,211,153,0.15)]"
-                >
-                  <div className="w-8 h-8 rounded-lg bg-emerald-500/30 flex items-center justify-center shrink-0 mt-0.5">
-                    <feat.icon className="w-4 h-4 text-emerald-200" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-white">{feat.label}</p>
-                    <p className="text-xs text-emerald-200/70">{feat.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
+<div className="absolute left-[40%] top-[10%] h-[250px] w-[250px] rounded-full bg-emerald-500/10 blur-[120px]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.16),transparent_20%),radial-gradient(circle_at_bottom_right,_rgba(56,189,248,0.14),transparent_22%)] pointer-events-none" />
 
-            {/* Testimonial */}
+      <div className="relative z-10 flex h-screen w-full flex-col">
+        <NoticeTicker notices={publicNotices} />
+
+        <main className="flex flex-1 flex-col items-center justify-center px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex w-full max-w-5xl flex-col items-center gap-0">
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
-              className="bg-white/5 backdrop-blur-sm rounded-xl p-5 border border-white/10 max-w-md"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: 'easeOut' }}
+             className="
+relative
+w-full
+max-w-[520px]
+rounded-[36px]
+border
+border-cyan-400/40
+bg-slate-950/30
+backdrop-blur-3xl
+overflow-hidden
+shadow-[0_0_80px_rgba(34,211,238,0.25)]
+"
             >
-              <p className="text-emerald-100 text-sm italic mb-3">
-                &ldquo;Smart Campus ERP has transformed how we manage our institution. Real-time insights and streamlined workflows have saved us countless hours.&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500/40 flex items-center justify-center text-xs font-bold text-white">
-                  DR
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-white">Dr. Rebecca Thompson</p>
-                  <p className="text-xs text-emerald-200/60">Dean of Academic Affairs</p>
-                </div>
+              <div className="relative z-10 px-6 py-2">
+                <div
+className="
+absolute
+left-1/2
+top-[120px]
+-translate-x-1/2
+w-[450px]
+h-[180px]
+bg-white/10
+blur-[120px]
+pointer-events-none
+"
+/>
+              <div
+  className="
+  absolute
+  inset-0
+  bg-gradient-to-br
+  from-cyan-500/10
+  via-transparent
+  to-purple-500/10
+  pointer-events-none
+  "
+/>
+
+<div className="
+absolute
+inset-0
+rounded-[36px]
+border
+border-cyan-400/20
+shadow-[0_0_40px_rgba(34,211,238,0.15)]
+pointer-events-none
+" />
+              <div className="text-center">
+              <div
+className="
+mx-auto
+mb-1
+flex
+h-14
+w-14
+items-center
+justify-center
+rounded-[24px]
+bg-gradient-to-br
+from-cyan-500/20
+to-emerald-500/20
+border
+border-cyan-400/30
+shadow-[0_0_50px_rgba(34,211,238,0.3)]
+"
+>
+                <GraduationCap className="h-7 w-7" />
               </div>
-            </motion.div>
-          </motion.div>
-          {publicNotices.length > 0 && (
-  <div className="mt-8 max-w-md">
-
-    <h3 className="text-white font-semibold mb-3">
-      Latest Notices
-    </h3>
-
-    <div className="space-y-3">
-
-      {publicNotices.slice(0, 3).map((notice) => (
-        <div
-          key={notice.id}
-          className="
-            bg-white/10
-            backdrop-blur-sm
-            rounded-lg
-            p-3
-            border
-            border-white/10
-          "
-        >
-          <p className="text-white text-sm font-medium">
-            {notice.title}
-          </p>
-
-          <p className="text-emerald-100 text-xs mt-1 line-clamp-2">
-            {notice.content}
-          </p>
-        </div>
-      ))}
-
-    </div>
-
-  </div>
-)}
-        </div>
-      </div>
-
-      {/* Right Panel - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 relative">
-        {/* Subtle background pattern for right panel */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)',
-            backgroundSize: '32px 32px',
-          }}
-        />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="w-full max-w-md relative z-10"
-        >
-          {/* Mobile-only logo */}
-          <div className="flex items-center gap-3 mb-8 lg:hidden justify-center">
-            <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-              <GraduationCap className="w-7 h-7 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">Smart Campus ERP</h1>
-              <p className="text-xs text-muted-foreground">Academic Management Platform</p>
-            </div>
-          </div>
-
-          {/* Form Card */}
-          <div className="bg-card rounded-2xl shadow-lg border border-border p-6 sm:p-8">
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold tracking-tight">Welcome back</h2>
-              <p className="text-muted-foreground text-sm mt-1">Sign in to your account to continue</p>
+              <h1
+className="
+text-4xl
+font-bold
+tracking-tight
+text-white
+drop-shadow-[0_0_18px_rgba(255,255,255,0.35)]
+sm:text-[52px]
+"
+>Smart Campus ERP</h1>
+              <p className="mt-2 text-sm text-emerald-300">Academic Management Platform</p>
+              <div className="mx-auto mt-6 h-px w-24 rounded-full bg-gradient-to-r from-emerald-400/80 via-white/40 to-sky-400/70" />
+              <p className="mt-3 text-xl font-medium text-slate-100">Welcome back</p>
+              <p className="mt-2 text-sm text-slate-400">Sign in to your account to continue</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Error message */}
+            <form onSubmit={handleSubmit} className="mt-5 space-y-3">
               <AnimatePresence>
-                {error && (
+                {error ? (
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="flex items-center gap-2 text-destructive bg-destructive/10 p-3 rounded-lg text-sm"
+                    className="overflow-hidden rounded-2xl border border-destructive/20 bg-destructive/10 p-3 text-sm text-destructive"
                   >
-                    <AlertCircle className="w-4 h-4 shrink-0" />
-                    {error}
+                    <div className="flex items-center gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <span>{error}</span>
+                    </div>
                   </motion.div>
-                )}
+                ) : null}
               </AnimatePresence>
 
-              {/* Email field */}
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+              <div className="space-y-3">
+                <Label htmlFor="email" className="text-sm text-slate-200">Email Address</Label>
                 <div className="relative">
-                  <Mail className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused.email ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                  <Mail className={`pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 ${focused.email ? 'text-emerald-300' : ''}`} />
                   <Input
                     id="email"
                     type="email"
                     placeholder="you@campus.edu"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    onBlur={() => { setTouched((t) => ({ ...t, email: true })); setFocused((f) => ({ ...f, email: false })); }}
-                    onFocus={() => setFocused((f) => ({ ...f, email: true }))}
-                    className={`pl-10 transition-all duration-200 ${
-                      focused.email ? 'ring-2 ring-emerald-500/20 border-emerald-500' : ''
-                    } ${
-                      touched.email && !focused.email
-                        ? isEmailValid
-                          ? 'border-emerald-500 focus-visible:ring-emerald-500/30'
-                          : 'border-destructive focus-visible:ring-destructive/30'
-                        : ''
-                    }`}
-                    required
+                    onFocus={() => setFocused((prev) => ({ ...prev, email: true }))}
+                    onBlur={() => { setTouched((prev) => ({ ...prev, email: true })); setFocused((prev) => ({ ...prev, email: false })); }}
+                    className={`w-full rounded-2xl border px-4 py-4 pl-12 text-sm text-white transition-all duration-200 ${focused.email ? 'border-emerald-400 bg-slate-900/90 ring-2 ring-emerald-500/20' : 'border-slate-500/30 bg-slate-950/40 '} ${touched.email && !isEmailValid ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                     disabled={loading}
+                    required
                   />
-                  {touched.email && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {isEmailValid ? (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          <AlertCircle className="w-4 h-4 text-destructive" />
-                        </motion.div>
-                      )}
-                    </div>
-                  )}
                 </div>
                 {touched.email && !isEmailValid && email.length > 0 && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-destructive">
-                    Please enter a valid email address
-                  </motion.p>
+                  <p className="text-xs text-destructive">Please enter a valid email address</p>
                 )}
               </div>
 
-              {/* Password field */}
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+              <div className="space-y-3">
+                <Label htmlFor="password" className="text-sm text-slate-200">Password</Label>
                 <div className="relative">
-                  <Lock className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 ${focused.password ? 'text-emerald-500' : 'text-muted-foreground'}`} />
+                  <Lock className={`pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 ${focused.password ? 'text-emerald-300' : ''}`} />
                   <Input
                     id="password"
-                    type="password"
-                    placeholder="••••••••"
+                    type={showPassword ? 'text' : 'password'}
                     value={password}
+                    placeholder="••••••••"
                     onChange={(e) => setPassword(e.target.value)}
-                    onBlur={() => { setTouched((t) => ({ ...t, password: true })); setFocused((f) => ({ ...f, password: false })); }}
-                    onFocus={() => setFocused((f) => ({ ...f, password: true }))}
-                    className={`pl-10 transition-all duration-200 ${
-                      focused.password ? 'ring-2 ring-emerald-500/20 border-emerald-500' : ''
-                    } ${
-                      touched.password && !focused.password
-                        ? isPasswordValid
-                          ? 'border-emerald-500 focus-visible:ring-emerald-500/30'
-                          : 'border-destructive focus-visible:ring-destructive/30'
-                        : ''
-                    }`}
-                    required
+                    onFocus={() => setFocused((prev) => ({ ...prev, password: true }))}
+                    onBlur={() => { setTouched((prev) => ({ ...prev, password: true })); setFocused((prev) => ({ ...prev, password: false })); }}
+                    className={`w-full rounded-2xl border px-4 py-4 pl-12 text-sm text-white transition-all duration-200 ${focused.password ? 'border-emerald-400 bg-slate-900/90 ring-2 ring-emerald-500/20' : 'border-slate-500/30 bg-slate-950/40 backdrop-blur-md'} ${touched.password && !isPasswordValid ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                     disabled={loading}
+                    required
                   />
-                  {touched.password && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      {isPasswordValid ? (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
-                            <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                          <AlertCircle className="w-4 h-4 text-destructive" />
-                        </motion.div>
-                      )}
-                    </div>
-                  )}
+                  <button
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  className="
+    absolute
+    right-4
+    top-1/2
+    -translate-y-1/2
+    text-slate-400
+    hover:text-emerald-300
+    transition-colors
+  "
+>
+  {showPassword ? (
+    <EyeOff className="h-4 w-4" />
+  ) : (
+    <Eye className="h-4 w-4" />
+  )}
+</button>
                 </div>
                 {touched.password && !isPasswordValid && password.length > 0 && (
-                  <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs text-destructive">
-                    Password must be at least 6 characters
-                  </motion.p>
+                  <p className="text-xs text-destructive">Password must be at least 6 characters</p>
                 )}
               </div>
 
-              {/* Remember me with tooltip */}
-              <div className="flex items-center gap-2">
-                <Checkbox
-                  id="remember"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(checked === true)}
-                  disabled={loading}
-                  className="data-[state=checked]:bg-emerald-600 data-[state=checked]:border-emerald-600"
-                />
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Label htmlFor="remember" className="text-sm text-muted-foreground cursor-pointer flex items-center gap-1.5">
-                        Remember me for 30 days
-                        <Info className="w-3 h-3 text-muted-foreground/50" />
-                      </Label>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="text-xs">
-                      Your session will stay active for 30 days on this device
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+              <div className="flex items-center justify-between gap-2 text-sm text-slate-300">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
+                    disabled={loading}
+                    className="data-[state=checked]:border-emerald-400 data-[state=checked]:bg-emerald-400"
+                  />
+                  <Label htmlFor="remember" className="flex cursor-pointer items-center gap-2 text-sm text-slate-200">
+                    Remember me for 30 days
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/5 text-slate-300 transition hover:bg-white/10">
+                            <Info className="h-3 w-3" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="text-xs">
+                          Your session will stay active for 30 days on this device
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                </div>
               </div>
 
-              {/* Submit button */}
               <Button
                 type="submit"
-                className="w-full bg-emerald-700 hover:bg-emerald-800 text-white h-11 shadow-md hover:shadow-lg transition-shadow"
+                className="flex w-full items-center justify-center gap-3 rounded-2xl bg-emerald-500 px-6 py-4 text-base font-semibold text-white shadow-2xl shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-70"
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                     Signing in...
                   </>
                 ) : (
-                  'Sign In'
+                  <>
+                    Sign In
+                    <ArrowRight className="h-5 w-5" />
+                  </>
                 )}
               </Button>
             </form>
-          </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-6">
-            Smart Campus ERP &copy; {new Date().getFullYear()} &middot; Academic Management Platform
-          </p>
-        </motion.div>
+<p className="mt-4 text-center text-xs text-slate-400">
+                Smart Campus ERP · {new Date().getFullYear()} · Academic Management Platform
+              </p>
+              </div>
+            </motion.div>
+
+            <div
+className="
+w-full
+max-w-[900px]
+mt-4
+z-0
+"
+>
+              <div
+className="
+grid
+w-full
+md:grid-cols-4
+overflow-hidden
+rounded-[28px]
+border
+border-white/10
+bg-slate-950/45
+backdrop-blur-xl
+shadow-[0_0_40px_rgba(34,211,238,0.12)]
+pointer-events-none
+"
+>
+                {features.map((feature) => (
+                  <div
+key={feature.label}
+className="
+flex
+items-center
+gap-3
+px-5
+py-5
+border-r
+border-white/10
+last:border-r-0
+"
+>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-slate-900/70 text-emerald-300 shadow-[0_10px_30px_rgba(16,185,129,0.12)]">
+                      <feature.icon className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm font-semibold text-white">{feature.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
 
-      {/* Shimmer keyframes */}
-      {/* <style jsx>{`
-        @keyframes shimmer {
-          0% { background-position: -200% 0; }
-          100% { background-position: 200% 0; }
+     {/* <style jsx global>{`
+        @keyframes notice-marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
-      `}</style> */}
+        .notice-marquee {
+          animation: notice-marquee 35s linear infinite;
+        }
+      `}</style>*/}
     </div>
   );
 }
+
