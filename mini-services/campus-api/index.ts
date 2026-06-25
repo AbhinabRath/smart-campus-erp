@@ -87,7 +87,7 @@ async function startServer() {
   try {
     // Verify database connection before starting the server
     await prisma.$connect();
-    console.log('[Database] Connected to SQLite database successfully.');
+    console.log('[Database] Connected to MySQL database successfully.');
 
     app.listen(PORT, () => {
       console.log(`[Server] Smart Campus ERP API running on port ${PORT}`);

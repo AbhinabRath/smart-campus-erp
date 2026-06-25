@@ -40,6 +40,7 @@ import * as deptCtrl from '../controllers/departmentController';
 import * as subjectCtrl from '../controllers/subjectController';
 import * as academicCtrl from '../controllers/academicController';
 import * as admitCardCtrl from '../controllers/admitCardController';
+import * as feeCtrl from '../controllers/feeController';
 
 const router = Router();
 
@@ -370,6 +371,38 @@ router.get('/dashboard/admin', requireAuth, requireRole('admin'), dashboardCtrl.
 router.use(
   '/branding',
   brandingRoutes
+);
+
+// =============================================================================
+// FEES ROUTES
+// =============================================================================
+
+router.get(
+  '/fees/my',
+  requireAuth,
+  requireRole('student'),
+  feeCtrl.getMyFees
+);
+
+router.get(
+  '/fees/student/:studentId',
+  requireAuth,
+  requireRole('admin'),
+  feeCtrl.getStudentFees
+);
+
+router.get(
+  '/fees/admin/list',
+  requireAuth,
+  requireRole('admin'),
+  feeCtrl.getFeeAdminList
+);
+
+router.post(
+  '/fees/payment',
+  requireAuth,
+  requireRole('admin'),
+  feeCtrl.addPayment
 );
 
 // =============================================================================

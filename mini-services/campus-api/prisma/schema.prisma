@@ -34,8 +34,8 @@ model User {
   updatedAt        DateTime         @updatedAt
   approvedLeaves   LeaveRequest[]   @relation("LeaveApprover")
   leaveRequests    LeaveRequest[]
+  noticeReads      NoticeRead[]
   publishedNotices Notice[]
-  noticeReads NoticeRead[]
   recommendations  Recommendation[]
   sessions         Session[]
   student          Student?
@@ -64,6 +64,7 @@ model Student {
   updatedAt             DateTime               @updatedAt
   assignmentSubmissions AssignmentSubmission[]
   attendanceRecords     AttendanceRecord[]
+  fee_payments          fee_payments[]
   marks                 Mark[]
   department            Department             @relation(fields: [departmentId], references: [id])
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -147,6 +148,7 @@ model AttendanceSession {
   @@index([isActive])
   @@index([teacherId])
   @@index([subjectId])
+  @@index([departmentId], map: "attendance_sessions_departmentId_fkey")
   @@map("attendance_sessions")
 }
 
@@ -158,8 +160,8 @@ model AttendanceRecord {
   ipAddress           String?
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
-  student             Student           @relation(fields: [studentId], references: [id])
   session             AttendanceSession @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
+  student             Student           @relation(fields: [studentId], references: [id])
 
   @@unique([studentId, attendanceSessionId])
   @@index([studentId])
@@ -178,14 +180,15 @@ model Mark {
   remarks       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  teacher       Teacher  @relation(fields: [teacherId], references: [id])
-  subject       Subject  @relation(fields: [subjectId], references: [id])
   student       Student  @relation(fields: [studentId], references: [id])
+  subject       Subject  @relation(fields: [subjectId], references: [id])
+  teacher       Teacher  @relation(fields: [teacherId], references: [id])
 
   @@unique([studentId, subjectId, teacherId, examType])
   @@index([studentId])
   @@index([subjectId])
   @@index([examType])
+  @@index([teacherId], map: "marks_teacherId_fkey")
   @@map("marks")
 }
 
@@ -224,8 +227,8 @@ model AssignmentSubmission {
   feedback      String?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
-  student       Student    @relation(fields: [studentId], references: [id])
   assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student       Student    @relation(fields: [studentId], references: [id])
 
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
@@ -269,48 +272,48 @@ model Timetable {
   endTime      String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  teacher      Teacher    @relation(fields: [teacherId], references: [id])
-  subject      Subject    @relation(fields: [subjectId], references: [id])
   department   Department @relation(fields: [departmentId], references: [id])
+  subject      Subject    @relation(fields: [subjectId], references: [id])
+  teacher      Teacher    @relation(fields: [teacherId], references: [id])
 
   @@unique([departmentId, semester, section, dayOfWeek, periodNumber])
   @@index([departmentId])
   @@index([teacherId])
+  @@index([subjectId], map: "timetables_subjectId_fkey")
   @@map("timetables")
 }
 
 model Notice {
-  id         String   @id @default(cuid())
+  id         String       @id @default(cuid())
   authorId   String
   title      String
   content    String
-  targetRole String   @default("all")
-  priority   String   @default("normal")
-  isPinned   Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  author     User     @relation(fields: [authorId], references: [id])
+  targetRole String       @default("all")
+  priority   String       @default("normal")
+  isPinned   Boolean      @default(false)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
   reads      NoticeRead[]
+  author     User         @relation(fields: [authorId], references: [id])
 
   @@index([targetRole])
   @@index([priority])
   @@index([createdAt])
+  @@index([authorId], map: "notices_authorId_fkey")
   @@map("notices")
 }
 
 model NoticeRead {
-  id        String   @id @default(cuid())
-  userId    String
-  noticeId  String
-  readAt    DateTime @default(now())
-
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  notice Notice @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  id       String   @id @default(cuid())
+  userId   String
+  noticeId String
+  readAt   DateTime @default(now())
+  notice   Notice   @relation(fields: [noticeId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, noticeId])
   @@index([userId])
   @@index([noticeId])
-
   @@map("notice_reads")
 }
 
@@ -331,6 +334,7 @@ model LeaveRequest {
 
   @@index([userId])
   @@index([status])
+  @@index([approvedBy], map: "leave_requests_approvedBy_fkey")
   @@map("leave_requests")
 }
 
@@ -352,54 +356,37 @@ model Recommendation {
   @@index([isRead])
   @@map("recommendations")
 }
+
 model AcademicDocument {
-
-  id          String   @id @default(cuid())
-
-  year        Int
-
-  type        String
-
-  fileName    String
-
-  filePath    String
-
-  uploadedBy  String
-
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  year       Int
+  type       String
+  fileName   String
+  filePath   String
+  uploadedBy String
+  createdAt  DateTime @default(now())
 
   @@index([year])
   @@index([type])
-
   @@map("academic_documents")
 }
 
 model AcademicCalendar {
-
-  id          String   @id @default(cuid())
-
-  fileName    String
-
-  filePath    String
-
-  uploadedBy  String
-
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  fileName   String
+  filePath   String
+  uploadedBy String
+  createdAt  DateTime @default(now())
 
   @@map("academic_calendars")
 }
 
 model RegulationDocument {
-
-  id          String   @id @default(cuid())
-
-  fileName    String
-
-  filePath    String
-
-  uploadedBy  String
-
-  createdAt   DateTime @default(now())
+  id         String   @id @default(cuid())
+  fileName   String
+  filePath   String
+  uploadedBy String
+  createdAt  DateTime @default(now())
 
   @@map("regulation_documents")
 }
@@ -425,4 +412,30 @@ model BrandingSettings {
   updatedAt       DateTime @updatedAt
 
   @@map("branding_settings")
+}
+
+model fee_payments {
+  id          String    @id
+  studentId   String
+  semester    Int
+  amountPaid  Decimal   @default(0.00) @db.Decimal(10, 2)
+  remarks     String?   @db.VarChar(255)
+  paymentDate DateTime? @default(now())
+  createdAt   DateTime? @default(now())
+  students    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_fee_student")
+
+  @@index([studentId], map: "idx_student")
+}
+
+model fee_structure {
+  id         String    @id
+  semester   Int       @unique(map: "semester")
+  tuitionFee Decimal   @default(0.00) @db.Decimal(10, 2)
+  hostelFee  Decimal   @default(0.00) @db.Decimal(10, 2)
+  examFee    Decimal   @default(0.00) @db.Decimal(10, 2)
+  libraryFee Decimal   @default(0.00) @db.Decimal(10, 2)
+  miscFee    Decimal   @default(0.00) @db.Decimal(10, 2)
+  totalFee   Decimal   @db.Decimal(10, 2)
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @default(now())
 }
