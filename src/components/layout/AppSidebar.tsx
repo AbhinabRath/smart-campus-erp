@@ -70,6 +70,13 @@ const navItems: NavItem[] = [
   // Academic section
   { id: 'attendance', label: 'Attendance', icon: ClipboardCheck, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   { id: 'marks', label: 'Marks', icon: FileText, roles: ['admin', 'teacher', 'student'], section: 'academic' },
+  {
+  id: 'fees',
+  label: 'Fees',
+  icon: FileText,
+  roles: ['admin', 'student'],
+  section: 'academic'
+},
   { id: 'assignments', label: 'Assignments', icon: FileUp, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   { id: 'materials', label: 'Study Materials', icon: FolderOpen, roles: ['admin', 'teacher', 'student'], section: 'academic' },
   {

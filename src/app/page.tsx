@@ -16,7 +16,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore, type ViewId } from '@/lib/store';
 import api from '@/lib/api';
 import AcademicsPage from '@/components/features/academics/AcademicsPage';
-
+import FeesPage from '@/components/features/dashboard/fees/page';
 // Layout components
 import AppSidebar from '@/components/layout/AppSidebar';
 import AppHeader from '@/components/layout/AppHeader';
@@ -78,6 +78,7 @@ function renderView(view: ViewId, role: string) {
       return <StudentDashboard />;
     case 'attendance': return <AttendanceManager />;
     case 'marks': return <MarksManager />;
+    case 'fees': return <FeesPage />;
     case 'assignments': return <AssignmentManager />;
     case 'materials': return <MaterialManager />;
     case 'timetable': return <TimetableManager />;
@@ -108,6 +109,7 @@ const viewTitles: Record<ViewId, string> = {
   subjects: 'Subject Management',
   attendance: 'Attendance',
   marks: 'Marks',
+  fees: 'Fees',
   assignments: 'Assignments',
   materials: 'Study Materials',
   timetable: 'Timetable',

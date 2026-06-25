@@ -66,6 +66,7 @@ export type ViewId =
   | 'subjects'
   | 'attendance'
   | 'marks'
+  | 'fees'
   | 'assignments'
   | 'materials'
   | 'timetable'
