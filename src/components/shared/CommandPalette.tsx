@@ -10,7 +10,7 @@
 
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import {
-  Dialog, DialogContent,
+  Dialog, DialogContent, DialogTitle
 } from '@/components/ui/dialog';
 import { useAppStore, type ViewId } from '@/lib/store';
 import {
@@ -36,6 +36,21 @@ const navItems: NavItem[] = [
   { id: 'departments', label: 'Departments', icon: Building2, keywords: ['branches', 'divisions'], roles: ['admin'] },
   { id: 'subjects', label: 'Subjects', icon: BookOpen, keywords: ['courses', 'classes', 'curriculum'], roles: ['admin'] },
   { id: 'attendance', label: 'Attendance', icon: ClipboardCheck, keywords: ['qr', 'presence', 'check-in'], roles: ['admin', 'teacher', 'student'] },
+  {
+  id: 'fees',
+  label: 'Fees',
+  icon: FileText,
+  keywords: [
+    'fee',
+    'payment',
+    'finance',
+    'tuition'
+  ],
+  roles: [
+    'admin',
+    'student'
+  ]
+},
   { id: 'marks', label: 'Marks', icon: FileText, keywords: ['grades', 'scores', 'results', 'exams'], roles: ['admin', 'teacher', 'student'] },
   { id: 'assignments', label: 'Assignments', icon: FileUp, keywords: ['homework', 'tasks', 'submissions'], roles: ['admin', 'teacher', 'student'] },
   { id: 'materials', label: 'Study Materials', icon: FolderOpen, keywords: ['resources', 'documents', 'files', 'notes'], roles: ['admin', 'teacher', 'student'] },
@@ -43,13 +58,29 @@ const navItems: NavItem[] = [
   { id: 'notices', label: 'Notices', icon: Bell, keywords: ['announcements', 'alerts', 'news'], roles: ['admin', 'teacher', 'student'] },
   { id: 'leaves', label: 'Leave Management', icon: Plane, keywords: ['absence', 'time-off', 'vacation', 'sick'], roles: ['admin', 'teacher', 'student'] },
   { id: 'analytics', label: 'Analytics', icon: BarChart3, keywords: ['insights', 'reports', 'data', 'charts'], roles: ['admin', 'teacher', 'student'] },
+  {
+  id: 'academics',
+  label: 'Academics',
+  icon: BookOpen,
+  keywords: [
+    'academic',
+    'cgpa',
+    'semester',
+    'performance'
+  ],
+  roles: [
+    'admin',
+    'teacher',
+    'student'
+  ]
+},
   { id: 'recommendations', label: 'Recommendations', icon: Lightbulb, keywords: ['suggestions', 'tips', 'ai'], roles: ['student'] },
   {
   id: 'directory',
   label: 'Directory',
   icon: Users,
   keywords: ['people', 'teacher', 'student', 'search'],
-  roles: ['teacher', 'student']
+  roles: ['admin', 'teacher', 'student']
 },
   { id: 'profile', label: 'Profile', icon: UserCircle, keywords: ['account', 'personal'], roles: ['admin', 'teacher', 'student'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['preferences', 'config', 'theme'], roles: ['admin', 'teacher', 'student'] },
@@ -255,8 +286,10 @@ export default function CommandPalette() {
   return (
     <Dialog open={commandPaletteOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 shadow-2xl overflow-hidden">
-        {/* Hidden but accessible title for screen readers */}
-        <div className="sr-only">Command Palette - Search and navigate</div>
+
+  <DialogTitle className="sr-only">
+    Command Palette - Search and Navigate
+  </DialogTitle>
 
         {/* Search Input */}
         <div className="flex items-center border-b px-3 h-12">

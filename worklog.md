@@ -2,8 +2,8 @@
 
 ## To Do list:
 
-1. Fees Section
+1. Fully implement the Student attendance system with working qr
 
-2. add newly added sections to search
+2. Add teacher attendance
 
 
