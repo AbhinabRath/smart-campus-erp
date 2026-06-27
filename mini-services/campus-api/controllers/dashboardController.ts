@@ -406,17 +406,26 @@ prisma.attendanceSession.findMany({
   where: {
     teacherId: teacher.id,
   },
-  include: {
+
+  select: {
+    id: true,
+    startedAt: true,
+    departmentId: true,
+    semester: true,
+    section: true,
+
     _count: {
       select: {
         records: true,
       },
     },
   },
+
   orderBy: {
     startedAt: 'asc',
   },
 }),
+  
 
 prisma.attendanceRecord.findMany({
   where: {
@@ -443,6 +452,19 @@ prisma.student.findMany({
   },
 }),
     ]);
+    const sectionStudentCount = new Map<string, number>();
+
+allStudents.forEach((student) => {
+
+  const key =
+    `${student.departmentId}-${student.semester}-${student.section}`;
+
+  sectionStudentCount.set(
+    key,
+    (sectionStudentCount.get(key) || 0) + 1
+  );
+
+});
 
     
 const attendanceTrendData = (() => {
@@ -469,17 +491,24 @@ const attendanceTrendData = (() => {
         s.startedAt >= day &&
         s.startedAt < nextDay
     );
+   let possibleAttendances = 0;
 
+sessions.forEach((session) => {
+
+  const key =
+    `${session.departmentId}-${session.semester}-${session.section}`;
+
+  possibleAttendances +=
+    sectionStudentCount.get(key) || 0;
+
+});
     const presentCount = teacherAttendanceRecords.filter(
   (r) =>
     r.session.startedAt >= day &&
     r.session.startedAt < nextDay
 ).length;
 
-const possibleAttendances = sessions.reduce(
-  (sum, session) => sum + session._count.records,
-  0
-);
+
 const attendance =
   possibleAttendances > 0
     ? Math.min(
@@ -535,6 +564,10 @@ const assignmentsWithEligibility = await Promise.all(
     };
   })
 );
+
+const totalStudents = allStudents.filter(
+  (s) => s.departmentId === teacher.departmentId
+).length;
     successResponse(res, 'Teacher dashboard data loaded.', {
       teacher: {
         name: req.user!.name,
@@ -549,6 +582,7 @@ marksCount,
 notices: recentNotices,
 attendanceTrendData,
 todaySchedule,
+totalStudents,
     });
   } catch (err) {
     next(err);

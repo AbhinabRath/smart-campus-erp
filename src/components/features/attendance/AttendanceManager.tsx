@@ -25,6 +25,7 @@ import { useAppStore } from '@/lib/store';
 import api from '@/lib/api';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { Scanner } from '@yudiel/react-qr-scanner';
 function CircularProgress({ value, size = 140, strokeWidth = 10 }: { value: number; size?: number; strokeWidth?: number }) {
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -84,6 +85,7 @@ export default function AttendanceManager() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
+  const [refreshCountdown, setRefreshCountdown] = useState(10);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('3');
@@ -92,8 +94,8 @@ export default function AttendanceManager() {
   const [filterDate, setFilterDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
   // Student state
-  const [qrInput, setQrInput] = useState('');
-  const [marking, setMarking] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+const [marking, setMarking] = useState(false);
   const [myRecords, setMyRecords] = useState<Record[]>([]);
  const [attendancePercent, setAttendancePercent] = useState<any>({
   overallPercentage: 0,
@@ -167,6 +169,31 @@ export default function AttendanceManager() {
     if (role === 'admin') loadAdminData();
     if (role === 'student') loadStudentData();
   }, [role, loadTeacherData, loadStudentData, loadAdminData]);
+  useEffect(() => {
+
+  if (!activeSession) return;
+
+  const countdown = setInterval(() => {
+
+    setRefreshCountdown(v => {
+
+      if (v <= 1) {
+
+        refreshQR();
+
+        return 10;
+
+      }
+
+      return v - 1;
+
+    });
+
+  }, 1000);
+
+  return () => clearInterval(countdown);
+
+}, [activeSession]);
 
   // Teacher: Create attendance session
   const createSession = async () => {
@@ -182,9 +209,15 @@ export default function AttendanceManager() {
         semester: parseInt(selectedSemester),
         section: selectedSection,
       });
-      const newSession = res.data.data;
-      setActiveSession(newSession);
-      setSessions((prev) => [newSession, ...prev]);
+      const response = res.data.data;
+
+const newSession = {
+  ...response.session,
+  qrDataUrl: response.qrCode,
+};
+
+setActiveSession(newSession);
+setSessions((prev) => [newSession, ...prev]);
       toast({ title: 'Session Created', description: 'Attendance session is now active' });
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
@@ -205,6 +238,28 @@ export default function AttendanceManager() {
       toast({ title: 'Error', description: 'Failed to end session', variant: 'destructive' });
     }
   };
+  const refreshQR = async () => {
+
+  if (!activeSession) return;
+
+  try {
+
+    const res = await api.post(
+      `/attendance/sessions/${activeSession.id}/refresh`
+    );
+
+    setActiveSession(prev => prev ? {
+      ...prev,
+      qrDataUrl: res.data.data.qrCode
+    } : prev);
+
+    setRefreshCountdown(10);
+
+  } catch (e) {
+    console.error(e);
+  }
+
+};
 
   // Export CSV helper
   const exportSessionsCSV = (sessionsData: Session[], filename: string) => {
@@ -235,21 +290,55 @@ export default function AttendanceManager() {
   };
 
   // Student: Mark attendance via QR code
-  const markAttendance = async () => {
-    if (!qrInput.trim()) return;
+ const markAttendance = async (value: string) => {
+
+  try {
+
+    const qr = JSON.parse(value);
+
     setMarking(true);
-    try {
-      await api.post('/attendance/mark', { qrCode: qrInput.trim() });
-      toast({ title: 'Success', description: 'Attendance marked successfully!' });
-      setQrInput('');
-      loadStudentData();
-    } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string } } };
-      toast({ title: 'Error', description: axiosErr.response?.data?.message || 'Failed to mark attendance', variant: 'destructive' });
-    } finally {
-      setMarking(false);
-    }
-  };
+
+    await api.post('/attendance/mark', {
+
+      sessionId: qr.sessionId,
+
+      token: qr.token
+
+    });
+
+    toast({
+
+      title: 'Attendance Marked',
+
+      description: 'Attendance marked successfully.'
+
+    });
+
+    setScannerOpen(false);
+
+    loadStudentData();
+
+  } catch (err: any) {
+
+    toast({
+
+      title: 'Error',
+
+      description:
+        err.response?.data?.message ||
+        'Invalid QR Code',
+
+      variant: 'destructive'
+
+    });
+
+  } finally {
+
+    setMarking(false);
+
+  }
+
+};
 const applyPRC = async () => {
   try {
 
@@ -384,10 +473,12 @@ const applyPRC = async () => {
                           <div className="absolute bottom-1 left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-500 rounded-bl" />
                           <div className="absolute bottom-1 right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-500 rounded-br" />
                           <img src={activeSession.qrDataUrl} alt="QR Code" className="w-44 h-44 rounded-lg" />
+                          <p className="text-sm font-medium text-emerald-600 mt-3">
+Refreshing QR in {refreshCountdown}s
+</p>
                         </div>
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">QR Token: {activeSession.qrCode}</p>
                     <Button variant="destructive" onClick={() => endSession(activeSession.id)} className="w-full">
                       <StopCircle className="w-4 h-4 mr-2" /> End Session
                     </Button>
@@ -437,7 +528,9 @@ const applyPRC = async () => {
                       <TableRow key={s.id}>
                         <TableCell className="font-medium">{s.subject?.name || 'N/A'}</TableCell>
                         <TableCell>{s.semester}/{s.section}</TableCell>
-                        <TableCell>{format(new Date(s.startedAt), 'MMM d, h:mm a')}</TableCell>
+                        <TableCell>{s.startedAt
+  ? format(new Date(s.startedAt), 'MMM d, h:mm a')
+  : '-'}</TableCell>
                         <TableCell>{s._count?.records || 0}</TableCell>
                         <TableCell>
                           <Badge variant={s.isActive ? 'default' : 'secondary'} className={s.isActive ? 'bg-emerald-600 flex items-center gap-1.5' : ''}>
@@ -545,28 +638,72 @@ more classes to reach 75% attendance
             </CardContent>
           </Card> 
 
-        {/* QR Code Input */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
-          <Card className="overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-            <CardHeader><CardTitle className="text-lg flex items-center gap-2"><QrCode className="w-5 h-5 text-emerald-600" /> Mark Attendance</CardTitle></CardHeader>
-            <CardContent>
-              <div className="flex gap-3">
-                <Input
-                  placeholder="Enter QR code token..."
-                  value={qrInput}
-                  onChange={(e) => setQrInput(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && markAttendance()}
-                  className="flex-1"
-                />
-                <Button onClick={markAttendance} disabled={marking || !qrInput.trim()} className="bg-emerald-700 hover:bg-emerald-800">
-                  {marking ? 'Marking...' : <><CheckCircle className="w-4 h-4 mr-2" /> Mark</>}
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">Enter the QR code token provided by your teacher to mark attendance</p>
-            </CardContent>
-          </Card>
-        </motion.div>
+        <Card>
+
+  <CardHeader>
+
+    <CardTitle>
+
+      Scan Attendance QR
+
+    </CardTitle>
+
+  </CardHeader>
+
+  <CardContent>
+
+    {!scannerOpen ? (
+
+      <Button
+        className="w-full"
+        onClick={() => setScannerOpen(true)}
+      >
+
+        <QrCode className="w-4 h-4 mr-2"/>
+
+        Scan QR
+
+      </Button>
+
+    ) : (
+
+      <div className="space-y-4">
+
+        <Scanner
+
+          onScan={(result) => {
+
+            if (!result.length) return;
+
+            markAttendance(result[0].rawValue);
+
+          }}
+
+          onError={(e) => console.log(e)}
+
+        />
+
+        <Button
+
+          variant="outline"
+
+          className="w-full"
+
+          onClick={() => setScannerOpen(false)}
+
+        >
+
+          Cancel
+
+        </Button>
+
+      </div>
+
+    )}
+
+  </CardContent>
+
+</Card>
 
         {/* Attendance History */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
@@ -784,7 +921,9 @@ more classes to reach 75% attendance
                       <TableCell>{s.teacher?.user?.name || 'N/A'}</TableCell>
                       <TableCell>{s.department?.name || 'N/A'}</TableCell>
                       <TableCell>{s.semester} / {s.section}</TableCell>
-                      <TableCell>{format(new Date(s.startedAt), 'MMM d, h:mm a')}</TableCell>
+                      <TableCell>{s.startedAt
+  ? format(new Date(s.startedAt), 'MMM d, h:mm a')
+  : '-'}</TableCell>
                       <TableCell>{s._count?.records || 0}</TableCell>
                       <TableCell>
                         <Badge variant={s.isActive ? 'default' : 'secondary'} className={s.isActive ? 'bg-emerald-600 flex items-center gap-1.5' : ''}>

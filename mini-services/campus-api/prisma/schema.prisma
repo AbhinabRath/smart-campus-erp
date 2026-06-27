@@ -133,6 +133,10 @@ model AttendanceSession {
   semester     Int
   section      String             @default("A")
   qrCode       String             @unique
+  currentQrToken        String?   @db.VarChar(255)
+  tokenExpiresAt        DateTime?
+  tokenRotationSec      Int       @default(10)
+  allowedNetworkPrefix  String?   @db.VarChar(50)
   isActive     Boolean            @default(true)
   duration     Int                @default(15)
   startedAt    DateTime           @default(now())
@@ -158,6 +162,8 @@ model AttendanceRecord {
   attendanceSessionId String
   markedAt            DateTime          @default(now())
   ipAddress           String?
+  tokenUsed     String? @db.VarChar(255)
+  deviceInfo    String? @db.Text
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   session             AttendanceSession @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)

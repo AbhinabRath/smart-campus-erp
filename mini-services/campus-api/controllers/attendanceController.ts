@@ -39,7 +39,7 @@ export async function createAttendanceSession(req: Request, res: Response, next:
 
     // Generate a unique QR token. UUID v4 provides sufficient randomness
     // to prevent students from guessing tokens for other sessions.
-    const qrCode = uuidv4();
+    const currentQrToken = uuidv4();
 
     // Create the attendance session in the database
     const session = await prisma.attendanceSession.create({
@@ -49,7 +49,15 @@ export async function createAttendanceSession(req: Request, res: Response, next:
         departmentId,
         semester,
         section: section || 'A',
-        qrCode,
+        qrCode: currentQrToken,
+
+currentQrToken,
+
+tokenExpiresAt: new Date(Date.now() + 10000),
+
+tokenRotationSec: 10,
+
+allowedNetworkPrefix: req.body.allowedNetworkPrefix ?? null,
         duration: duration || 15,
         isActive: true,
       },
@@ -62,10 +70,16 @@ export async function createAttendanceSession(req: Request, res: Response, next:
     // Generate QR code image as a base64 data URL.
     // The QR encodes the token string; when scanned, the student's app
     // sends this token to the mark-attendance endpoint.
-    const qrCodeDataUrl = await QRCode.toDataURL(qrCode, {
-      width: 300,
-      margin: 2,
-    });
+   const qrCodeDataUrl = await QRCode.toDataURL(
+  JSON.stringify({
+    sessionId: session.id,
+    token: session.currentQrToken,
+  }),
+  {
+    width: 300,
+    margin: 2,
+  }
+);
 
     successResponse(res, 'Attendance session created.', { session, qrCode: qrCodeDataUrl }, 201);
   } catch (err) {
@@ -202,7 +216,7 @@ export async function endAttendanceSession(req: Request, res: Response, next: Ne
  */
 export async function markAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { qrCode } = req.body;
+    const { sessionId, token } = req.body;
     const userId = req.user!.id;
 
     // Layer 1: Find student profile for this user
@@ -218,14 +232,35 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
 
     // Layer 2: Find the attendance session by QR token
     const session = await prisma.attendanceSession.findUnique({
-      where: { qrCode },
-    });
+  where: {
+    id: sessionId,
+  },
+});
 
     if (!session) {
       errorResponse(res, 'Invalid QR code. Session not found.', 404);
       return;
     }
+if (session.currentQrToken !== token) {
+  errorResponse(
+    res,
+    'This QR Code has expired. Please scan the latest QR.',
+    400
+  );
+  return;
+}
 
+if (
+  session.tokenExpiresAt &&
+  new Date() > session.tokenExpiresAt
+) {
+  errorResponse(
+    res,
+    'This QR Code has expired. Please scan the latest QR.',
+    400
+  );
+  return;
+}
     // Layer 3: Session must be active (not ended by teacher or expired)
     if (!session.isActive) {
       errorResponse(res, 'This attendance session has ended.', 400);
@@ -253,7 +288,27 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
       errorResponse(res, 'You are not eligible for this attendance session.', 403);
       return;
     }
+if (session.allowedNetworkPrefix) {
 
+  const clientIp =
+    (req.ip ||
+      req.socket.remoteAddress ||
+      '')
+      .replace('::ffff:', '');
+
+  if (!clientIp.startsWith(session.allowedNetworkPrefix)) {
+
+    errorResponse(
+      res,
+      'You are not connected to the classroom network.',
+      403
+    );
+
+    return;
+
+  }
+
+}
     // Layer 6: Duplicate prevention - check if student already marked attendance
     const existingRecord = await prisma.attendanceRecord.findUnique({
       where: {
@@ -272,10 +327,18 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
     // All validations passed — create the attendance record
     const record = await prisma.attendanceRecord.create({
       data: {
-        studentId: student.id,
-        attendanceSessionId: session.id,
-        ipAddress: req.ip || req.socket.remoteAddress,
-      },
+  studentId: student.id,
+
+  attendanceSessionId: session.id,
+
+  ipAddress:
+    req.ip || req.socket.remoteAddress || null,
+
+  tokenUsed: token,
+
+  deviceInfo:
+    req.headers['user-agent'] || null,
+},
     });
 
     successResponse(res, 'Attendance marked successfully.', record, 201);
@@ -480,6 +543,98 @@ export async function getAttendancePercentage(req: Request, res: Response, next:
     next(err);
   }
 }
+
+export async function refreshAttendanceQR(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const { id } = req.params;
+
+    const session =
+      await prisma.attendanceSession.findUnique({
+        where: { id }
+      });
+
+    if (!session) {
+      errorResponse(res, 'Attendance session not found.', 404);
+      return;
+    }
+
+    if (!session.isActive) {
+      errorResponse(res, 'Attendance session already ended.', 400);
+      return;
+    }
+
+    const token = uuidv4();
+
+    const updated =
+      await prisma.attendanceSession.update({
+
+        where: { id },
+
+        data: {
+
+          qrCode: token,
+
+          currentQrToken: token,
+
+          tokenExpiresAt: new Date(Date.now() + 10000)
+
+        }
+
+      });
+
+    const qrCodeDataUrl =
+      await QRCode.toDataURL(
+
+        JSON.stringify({
+
+          sessionId: updated.id,
+
+          token
+
+        }),
+
+        {
+
+          width: 300,
+
+          margin: 2
+
+        }
+
+      );
+
+    successResponse(
+
+      res,
+
+      'QR refreshed.',
+
+      {
+
+        qrCode: qrCodeDataUrl,
+
+        tokenExpiresAt: updated.tokenExpiresAt
+
+      }
+
+    );
+
+  }
+
+  catch (err) {
+
+    next(err);
+
+  }
+
+}
+
 export async function validatePRC(
   req: Request,
   res: Response,

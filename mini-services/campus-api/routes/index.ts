@@ -67,7 +67,12 @@ router.post('/attendance/sessions', requireAuth, requireRole('teacher', 'admin')
 
 router.get('/attendance/sessions', requireAuth, attendanceCtrl.getAttendanceSessions);
 router.get('/attendance/sessions/:id', requireAuth, attendanceCtrl.getAttendanceSessionById);
-
+router.post(
+  '/attendance/sessions/:id/refresh',
+  requireAuth,
+  requireRole('teacher', 'admin'),
+  attendanceCtrl.refreshAttendanceQR
+);
 router.post('/attendance/sessions/:id/end', requireAuth, requireRole('teacher', 'admin'), attendanceCtrl.endAttendanceSession);
 
 router.post('/attendance/mark', requireAuth, requireRole('student'), validate([
