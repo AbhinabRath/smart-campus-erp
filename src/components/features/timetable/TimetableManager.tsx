@@ -144,7 +144,7 @@ export default function TimetableManager() {
       setDepartments(deptRes.data.data || []);
       
       setSubjects(subRes.data.data || []);
-      console.log("FIRST SUBJECT", subRes.data.data?.[0]);
+      
 
       // Load teachers for admin
       if (role === 'admin') {
@@ -212,10 +212,7 @@ export default function TimetableManager() {
       setCreating(false);
     }
   };
-console.log('filterDept:', filterDept);
-console.log('filterSemester:', filterSemester);
-console.log('filterSection:', filterSection);
-console.log('entries count:', entries.length);
+
   // Filter timetable entries
  const filtered = entries.filter((e) => {
   return e.departmentId === filterDept &&
@@ -231,10 +228,7 @@ const filteredSubjects = subjects.filter(
 const filteredTeachers = teachers.filter(
   (t) => t.departmentId === filterDept
 );
-console.log("filterDept:", filterDept);
-console.log("first entry department:", entries[0]?.departmentId);
-console.log("departments loaded:", departments.length);
-console.log("filtered count:", filtered.length);
+
   // Dynamic periods from DB
 const periods = [...new Set(
   filtered.map((e) => e.periodNumber)

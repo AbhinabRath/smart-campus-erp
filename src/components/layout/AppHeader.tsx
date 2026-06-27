@@ -48,6 +48,10 @@ const viewTitles: Record<ViewId, string> = {
   recommendations: 'AI Study Assistant',
   profile: 'Profile',
   settings: 'Settings',
+  fees: "Fees",
+academics: "Academics",
+directory: "Directory",
+"public-profile": "Public Profile",
 };
 
 interface NoticeItem {

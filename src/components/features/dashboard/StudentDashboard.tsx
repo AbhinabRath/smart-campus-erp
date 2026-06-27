@@ -56,7 +56,10 @@ interface StudentData {
   notices: Array<{
     id: string; title: string; priority: string; isPinned: boolean; createdAt: string; targetRole: string;
   }>;
-  
+  feeSummary: {
+  pendingAmount: number;
+  hasPendingFees: boolean;
+};
 }
 
 const fadeUp = {
@@ -187,10 +190,7 @@ export default function StudentDashboard() {
   useEffect(() => {
     api.get('/dashboard/student').then((res) => setData(res.data.data)).finally(() => setLoading(false));
   }, []);
-console.log(
-  'RECENT MARKS',
-  data?.marks?.recentMarks
-);
+
   // Simulated subject-wise marks data for the bar chart
  const marksChartData = useMemo(() => {
   if (!data?.marks?.recentMarks) {
@@ -309,6 +309,15 @@ const tips: Array<{
       priority: 'high',
     });
   }
+    
+  // Fee based
+if (data.feeSummary?.hasPendingFees) {
+  tips.push({
+    category: 'Pending Fees',
+    tip: `You currently have ₹${data.feeSummary.pendingAmount.toLocaleString()} pending fees. Please complete the payment as soon as possible.`,
+    priority: 'high',
+  });
+}
 
   // Assignment based
   if (data.assignments.length > 0) {
@@ -382,7 +391,7 @@ const tips: Array<{
   }
 
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
-console.log('SUBJECT ATTENDANCE', data.attendance.subjectAttendance);
+
   const pendingAssignments = data.assignments;
   const attendanceColor = data.attendance.percentage >= 75 ? 'text-emerald-600' : data.attendance.percentage >= 50 ? 'text-amber-600' : 'text-red-600';
 

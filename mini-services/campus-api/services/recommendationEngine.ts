@@ -218,8 +218,49 @@ export async function generateRecommendations(studentUserId: string) {
       }
     }
   }
+// ── RULE 6: Pending semester fees ──
+const feeStructure = await prisma.fee_structure.findFirst({
+  where: {
+    semester: student.semester,
+  },
+});
 
-  // ── RULE 6: Low internal marks → focus on upcoming exams ──
+const feePayments = await prisma.fee_payments.aggregate({
+  where: {
+    studentId: student.id,
+    semester: student.semester,
+  },
+  _sum: {
+    amountPaid: true,
+  },
+});
+
+if (feeStructure) {
+  const totalFee =
+    Number(feeStructure.tuitionFee) +
+    Number(feeStructure.hostelFee) +
+    Number(feeStructure.examFee) +
+    Number(feeStructure.libraryFee) +
+    Number(feeStructure.miscFee);
+
+  const paid = Number(feePayments._sum.amountPaid || 0);
+  const pending = Math.max(0, totalFee - paid);
+
+  if (pending > 0) {
+    const title = 'Pending Semester Fees';
+
+    if (!existingTitles.has(title)) {
+      newRecommendations.push({
+        studentId: studentUserId,
+        type: 'academic',
+        title,
+        description: `You still have ₹${pending.toLocaleString()} pending for Semester ${student.semester}. Please complete the payment at the earliest.`,
+        priority: 'high',
+      });
+    }
+  }
+}
+  // ── RULE 7: Low internal marks → focus on upcoming exams ──
   const internalMarks = marks.filter(m => m.examType.startsWith('internal'));
   const lowInternalSubjects = internalMarks.filter(m => (m.marksObtained / m.totalMarks) * 100 < 50);
 

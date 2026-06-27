@@ -35,8 +35,7 @@ export async function login(req: Request, res: Response, next: NextFunction): Pr
 // Find user by email. We need the password hash for comparison.
 const user = await prisma.user.findUnique({ where: { email } });
 
-console.log("LOGIN EMAIL:", email);
-console.log("USER FOUND:", !!user);
+
 
 if (!user) {
   errorResponse(res, 'Invalid email or password.', 401);
@@ -46,7 +45,7 @@ if (!user) {
 // Compare the plaintext password with the stored bcrypt hash.
 const isPasswordValid = await bcrypt.compare(password, user.password);
 
-console.log("PASSWORD VALID:", isPasswordValid);
+
 
 if (!isPasswordValid) {
   errorResponse(res, 'Invalid email or password.', 401);

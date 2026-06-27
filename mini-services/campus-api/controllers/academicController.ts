@@ -121,8 +121,7 @@ export async function uploadAcademicDocument(
       year,
       type
     } = req.body;
-console.log('BODY:', req.body);
-console.log('FILE:', req.file);
+
 
     if (!req.file) {
       errorResponse(

@@ -45,6 +45,7 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
   todayTimetable,
   recentMaterials,
   subjectAttendanceSessions,
+  pendingFees,
 ] = await Promise.all([
       // Total attendance sessions for this student's class
       prisma.attendanceSession.count({
@@ -193,6 +194,16 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
     },
   },
 }),
+
+prisma.fee_payments.aggregate({
+  where: {
+    studentId: student.id,
+    semester: student.semester,
+  },
+  _sum: {
+    amountPaid: true,
+  },
+}),
     ]);
 
     // Calculate attendance percentage
@@ -227,6 +238,24 @@ subjectAttendanceSessions.forEach((session) => {
     item.attended++;
   }
 });
+const feeStructure = await prisma.fee_structure.findFirst({
+  where: {
+    semester: student.semester,
+  },
+});
+
+const totalFee =
+  Number(feeStructure?.tuitionFee || 0) +
+  Number(feeStructure?.hostelFee || 0) +
+  Number(feeStructure?.examFee || 0) +
+  Number(feeStructure?.libraryFee || 0) +
+  Number(feeStructure?.miscFee || 0);
+
+const pendingAmount = Math.max(
+  0,
+  totalFee - Number(pendingFees._sum.amountPaid || 0)
+);
+
 
 const subjectAttendance: any[] = [];
 
@@ -284,6 +313,10 @@ new Set(
       notices,
       timetable: todayTimetable,
       materials: recentMaterials,
+      feeSummary: {
+  pendingAmount,
+  hasPendingFees: pendingAmount > 0,
+},
     });
   } catch (err) {
     next(err);

@@ -564,7 +564,7 @@ Refreshing QR in {refreshCountdown}s
   // Student View
   // =========================================================================
   if (role === 'student') {
-    console.log("ATTENDANCE DATA:", attendancePercent);
+   
     const attendanceColor =
   attendancePercent.overallPercentage >= 75
     ? 'text-emerald-600'

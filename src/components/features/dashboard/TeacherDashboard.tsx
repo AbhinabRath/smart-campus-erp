@@ -120,7 +120,7 @@ export default function TeacherDashboard() {
   useEffect(() => {
     api.get('/dashboard/teacher')
      .then((res) => {
-  console.log('ATTENDANCE DATA:', res.data.data.attendanceTrendData);
+  
   setData(res.data.data);
 })
       .catch((err) => console.error('Teacher dashboard error:', err))

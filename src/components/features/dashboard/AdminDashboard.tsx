@@ -320,7 +320,7 @@ useEffect(() => {
 
   if (!data) return <p className="text-muted-foreground">Failed to load dashboard data.</p>;
   const attendanceTrendData = data.attendanceTrendData ?? [];
-console.log("ATTENDANCE TREND DATA", attendanceTrendData);
+
   const statCards = [
     {
       label: 'Total Users',

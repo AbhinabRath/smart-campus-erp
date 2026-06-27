@@ -112,7 +112,7 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
       name: session.user.name,
       role: session.user.role,
     };
-    console.log('AUTH USER ROLE:', session.user.role);
+    
     req.sessionToken = sessionToken;
 
     next();
