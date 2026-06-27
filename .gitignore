@@ -55,3 +55,107 @@ server.log
 # Uploaded files
 mini-services/campus-api/uploads/*
 !mini-services/campus-api/uploads/.gitkeep
+# -------------------------
+# Database backups
+# -------------------------
+*.sql
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Local databases
+custom.db
+
+# Prisma generated databases
+prisma/dev.db
+
+# VS Code
+.vscode/
+
+# OS
+Thumbs.db
+
+# Temporary files
+schema.txt
+structure.txt
+worklog.md
+
+# Local uploads
+uploads/
+mini-services/campus-api/uploads/
+
+# Bun cache
+.bun/
+
+# Turbo
+.turbo/
+
+# Temporary
+tmp/
+temp/
+
+# Backup folders
+*_backup/
+backup/
+backups/
+
+# Old XAMPP
+xampp/
+xampp_new/
+old_xampp/
+
+# Examples
+# -------------------------
+# IDE
+# -------------------------
+.idea/
+
+# -------------------------
+# Environment files
+# -------------------------
+.env.local
+.env.development
+.env.production
+
+# -------------------------
+# Prisma
+# -------------------------
+prisma/migrations/
+
+# -------------------------
+# Generated files
+# -------------------------
+*.pid
+
+# -------------------------
+# Archive files
+# -------------------------
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# -------------------------
+# Certificates
+# -------------------------
+*.key
+*.crt
+
+# -------------------------
+# Mac
+# -------------------------
+.AppleDouble
+.LSOverride
+
+# -------------------------
+# Linux
+# -------------------------
+*~
+
+# -------------------------
+# Windows
+# -------------------------
+Desktop.ini
