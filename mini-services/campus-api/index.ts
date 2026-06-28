@@ -26,6 +26,7 @@ import path from 'path';
 import routes from './routes';
 import { errorHandler } from './middleware/errorHandler';
 import prisma from './config/database';
+import fileUrlMiddleware from "./middleware/fileUrlMiddleware";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
@@ -50,6 +51,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Cookie parser — required for req.cookies to work in auth middleware.
 // Without this, req.cookies would be undefined and session token lookup would fail.
 app.use(cookieParser());
+app.use(fileUrlMiddleware);
 
 // Serve uploaded files statically so they can be downloaded directly
 // The uploads/ directory contains assignment attachments and study materials

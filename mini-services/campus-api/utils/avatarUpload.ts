@@ -3,22 +3,33 @@ import path from 'path';
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
+
 const avatarDir = path.join(__dirname, '..', 'uploads', 'avatars');
 
 if (!fs.existsSync(avatarDir)) {
   fs.mkdirSync(avatarDir, { recursive: true });
 }
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, avatarDir);
-  },
+import cloudinary from "../config/cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `avatar-${uuidv4()}${ext}`);
-  },
-});
+const storage =
+process.env.NODE_ENV === "production"
+? new CloudinaryStorage({
+    cloudinary,
+    params: {
+      folder: "uploads/avatars",
+      resource_type: "auto",
+    } as any,
+  })
+: multer.diskStorage({
+    destination: (_req, _file, cb) => {
+      cb(null, avatarDir);
+    },
+    filename: (_req, file, cb) => {
+      cb(null, `${uuidv4()}-${file.originalname}`);
+    },
+  });
 
 export const avatarUpload = multer({
   storage,
