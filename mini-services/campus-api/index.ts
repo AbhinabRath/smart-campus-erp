@@ -28,7 +28,7 @@ import { errorHandler } from './middleware/errorHandler';
 import prisma from './config/database';
 
 const app = express();
-const PORT = 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 // =============================================================================
 // MIDDLEWARE SETUP
@@ -91,7 +91,7 @@ async function startServer() {
 
     app.listen(PORT, () => {
       console.log(`[Server] Smart Campus ERP API running on port ${PORT}`);
-      console.log(`[Server] Health check: http://localhost:${PORT}/api/health`);
+      console.log(`[Server] Health check available on port ${PORT}`);
     });
   } catch (error) {
     console.error('[Database] Failed to connect:', error);
