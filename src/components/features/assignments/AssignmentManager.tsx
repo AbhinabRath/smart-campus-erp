@@ -9,7 +9,7 @@
 // =============================================================================
 
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, { useEffect, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -609,7 +609,7 @@ export default function AssignmentManager() {
         asChild
       >
         <a
-          href={`http://localhost:3001/uploads/${a.filePath.split('\\').pop()}`}
+          href={`${BACKEND_URL}/uploads/${a.filePath.split('\\').pop()}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -790,7 +790,7 @@ export default function AssignmentManager() {
         asChild
       >
         <a
-          href={`http://localhost:3001/uploads/${a.filePath.split('\\').pop()}`}
+          href={`${BACKEND_URL}/uploads/${a.filePath.split('\\').pop()}`}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -910,7 +910,7 @@ export default function AssignmentManager() {
                                                   asChild
                                                 >
                                                   <a
-                                                    href={`http://localhost:3001/uploads/${sub.filePath.split('\\').pop()}`}
+                                                    href={`${BACKEND_URL}/uploads/${sub.filePath.split('\\').pop()}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                   >

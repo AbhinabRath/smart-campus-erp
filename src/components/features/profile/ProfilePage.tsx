@@ -7,7 +7,7 @@
 // =============================================================================
 
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -282,13 +282,13 @@ const handleRemoveAvatar = async () => {
     editAvatar
       ? (
           editAvatar.startsWith('/uploads')
-            ? `http://localhost:3001${editAvatar}`
+            ? `${BACKEND_URL}${editAvatar}`
             : editAvatar
         )
       : currentUser.avatar
         ? (
             currentUser.avatar.startsWith('/uploads')
-              ? `http://localhost:3001${currentUser.avatar}`
+              ? `${BACKEND_URL}${currentUser.avatar}`
               : currentUser.avatar
           )
         : undefined

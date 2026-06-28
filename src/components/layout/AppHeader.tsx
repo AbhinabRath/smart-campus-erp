@@ -7,7 +7,7 @@
 // =============================================================================
 
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, { useEffect, useState, useSyncExternalStore } from 'react';
 import { useTheme } from 'next-themes';
 import {
@@ -294,7 +294,7 @@ const hasUnread = unreadCount > 0;
     <AvatarImage
       src={
         currentUser.avatar.startsWith('/uploads')
-          ? `http://localhost:3001${currentUser.avatar}`
+          ? `${BACKEND_URL}${currentUser.avatar}`
           : currentUser.avatar
       }
       alt={currentUser.name}

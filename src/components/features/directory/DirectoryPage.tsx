@@ -1,5 +1,5 @@
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -69,7 +69,7 @@ export default function DirectoryPage() {
   src={
     user.avatar
       ? user.avatar.startsWith('/uploads')
-        ? `http://localhost:3001${user.avatar}`
+        ? `${BACKEND_URL}${user.avatar}`
         : user.avatar
       : '/default-avatar.png'
   }

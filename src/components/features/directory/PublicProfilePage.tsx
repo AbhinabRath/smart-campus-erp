@@ -1,5 +1,5 @@
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, { useEffect, useState } from 'react';
 import api from '@/lib/api';
 import { useAppStore } from '@/lib/store';
@@ -58,7 +58,7 @@ const radarData =
   src={
     profile.avatar
       ? profile.avatar.startsWith('/uploads')
-        ? `http://localhost:3001${profile.avatar}`
+        ? `${BACKEND_URL}${profile.avatar}`
         : profile.avatar
       : '/default-avatar.png'
   }

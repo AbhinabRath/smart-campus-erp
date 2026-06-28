@@ -1,5 +1,5 @@
 'use client';
-
+import { BACKEND_URL } from "@/lib/config";
 import React, {
   useEffect,
   useState
@@ -210,7 +210,7 @@ const uploadRegulation = async (
     path: string
   ) => {
 
-    return `http://localhost:3001${path}`;
+    return `${BACKEND_URL}${path}`;
 
   };
   const deleteDocument = async (
@@ -392,7 +392,7 @@ const deleteRegulation = async () => {
                     </a>
 
                     <a
-                      href={`http://localhost:3001/api/academics/download/${curriculum.id}`}
+                      href={`${BACKEND_URL}/api/academics/download/${curriculum.id}`}
                       className="
                         px-3 py-2 rounded-lg
                         bg-blue-500/10
@@ -502,7 +502,7 @@ const deleteRegulation = async () => {
                     </a>
 
                     <a
-  href={`http://localhost:3001/api/academics/download/${syllabus.id}`}
+  href={`${BACKEND_URL}/api/academics/download/${syllabus.id}`}
   className="
     px-3 py-2 rounded-lg
     bg-blue-500/10
@@ -650,7 +650,7 @@ const deleteRegulation = async () => {
     </Select>
 
     <a
-      href={`http://localhost:3001/api/admit-card/my?examType=${examType}`}
+      href={`${BACKEND_URL}/api/admit-card/my?examType=${examType}`}
       target="_blank"
       className="
         h-12
@@ -698,7 +698,7 @@ const deleteRegulation = async () => {
   </div>
 
   <a
-    href="http://localhost:3001/api/id-card/my"
+    href="${BACKEND_URL}/api/id-card/my"
     target="_blank"
     className="
       h-12
@@ -770,7 +770,7 @@ const deleteRegulation = async () => {
 </a>
 
 <a
-  href={`http://localhost:3001/api/academics/calendar/download/${calendar.id}`}
+  href={`${BACKEND_URL}/api/academics/calendar/download/${calendar.id}`}
   className="
     px-4 py-2
     rounded-lg
@@ -882,7 +882,7 @@ const deleteRegulation = async () => {
         </a>
 
         <a
-  href={`http://localhost:3001/api/academics/regulation/download/${regulation.id}`}
+  href={`${BACKEND_URL}/api/academics/regulation/download/${regulation.id}`}
   className="
     px-4 py-2
     rounded-lg
