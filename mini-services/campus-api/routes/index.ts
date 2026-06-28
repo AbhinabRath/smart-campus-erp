@@ -76,7 +76,8 @@ router.post(
 router.post('/attendance/sessions/:id/end', requireAuth, requireRole('teacher', 'admin'), attendanceCtrl.endAttendanceSession);
 
 router.post('/attendance/mark', requireAuth, requireRole('student'), validate([
-  { field: 'qrCode', required: true, isString: true },
+  { field: 'sessionId', required: true, isString: true },
+  { field: 'token', required: true, isString: true },
 ]), attendanceCtrl.markAttendance);
 
 router.get('/attendance/my-attendance', requireAuth, requireRole('student'), attendanceCtrl.getMyAttendance);
