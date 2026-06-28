@@ -35,23 +35,23 @@ import cloudinary from "../config/cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 
 const storage =
-process.env.NODE_ENV === "production"
-? new CloudinaryStorage({
-    cloudinary,
-    params: (_req, file) => ({
-  folder: "uploads/branding", 
-  resource_type: "auto",
-  public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-})
-  })
-: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      cb(null, brandingDir);
-    },
-    filename: (_req, file, cb) => {
-      cb(null, `${uuidv4()}-${file.originalname}`);
-    },
-  });
+  process.env.NODE_ENV === "production"
+    ? new CloudinaryStorage({
+        cloudinary,
+        params: async (_req, file) => ({
+          folder: "uploads/branding",
+          public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
+          resource_type: "image",
+        }),
+      })
+    : multer.diskStorage({
+        destination: (_req, _file, cb) => {
+          cb(null, brandingDir);
+        },
+        filename: (_req, file, cb) => {
+          cb(null, `${uuidv4()}-${file.originalname}`);
+        },
+      });
 
 const upload =
   multer({
