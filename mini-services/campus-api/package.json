@@ -4,6 +4,7 @@
   "description": "Smart Campus ERP Backend API Server",
   "scripts": {
     "dev": "bun --hot index.ts",
+    "build": "prisma generate",
     "start": "bun index.ts"
   },
   "dependencies": {
