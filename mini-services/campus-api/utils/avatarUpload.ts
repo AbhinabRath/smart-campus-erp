@@ -18,7 +18,7 @@ process.env.NODE_ENV === "production"
 ? new CloudinaryStorage({
     cloudinary,
     params: {
-      folder: "uploads/branding",
+      folder: "uploads/avatars",
       resource_type: "auto",
     } as any,
   })
