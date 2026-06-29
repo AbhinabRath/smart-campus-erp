@@ -16,7 +16,12 @@ import { errorResponse } from '../utils/response';
  * Express recognizes it as an error handler because it has 4 parameters.
  */
 export function errorHandler(err: any, _req: Request, res: Response, _next: NextFunction): void {
-  console.error('[Error]', err.message || err);
+  console.error("========== FULL ERROR ==========");
+console.error(err);
+console.error("Message:", err?.message);
+console.error("Name:", err?.name);
+console.error("Stack:", err?.stack);
+console.error("================================");
 
   // Handle Multer file upload errors
   // Multer throws a custom error class with a code property for known issues
