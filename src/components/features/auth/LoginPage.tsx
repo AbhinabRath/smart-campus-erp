@@ -3,7 +3,6 @@
 // =============================================================================
 
 'use client';
-import { BACKEND_URL } from "@/lib/config";
 import React, { type FormEvent, useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -136,10 +135,7 @@ export default function LoginPage() {
     <div className="relative h-screen w-full overflow-hidden bg-slate-950 text-white">
       {branding?.loginBackground && (
   <img
-    src={branding.loginBackground.replace(
-      /^https?:\/\/[^/]+(https?:\/\/)/,
-      "$1"
-    )}
+    src={branding.loginBackground}
     alt="Campus background"
     className="absolute inset-0 h-full w-full object-cover"
   />
