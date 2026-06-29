@@ -38,11 +38,10 @@ const storage =
   process.env.NODE_ENV === "production"
     ? new CloudinaryStorage({
         cloudinary,
-        params: async (_req, file) => ({
-          folder: "uploads/branding",
-          public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-          resource_type: "auto",
-        }),
+        params: {
+  folder: "uploads/branding",
+  resource_type: "auto",
+} as any,
       })
     : multer.diskStorage({
         destination: (_req, _file, cb) => {
