@@ -130,16 +130,24 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-
+ console.log("branding object:", branding);
+console.log("loginBackground:", branding?.loginBackground);
   return (
     <div className="relative h-screen w-full overflow-hidden bg-slate-950 text-white">
       {branding?.loginBackground && (
   <img
     src={branding.loginBackground}
+    ref={(el) => {
+      if (el) {
+        console.log("IMG src attribute:", el.getAttribute("src"));
+        console.log("IMG src property:", el.src);
+      }
+    }}
     alt="Campus background"
     className="absolute inset-0 h-full w-full object-cover"
   />
 )}
+    
 
       <div className="absolute inset-0 bg-slate-950/45" />
 
