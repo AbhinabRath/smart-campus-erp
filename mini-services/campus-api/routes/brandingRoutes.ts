@@ -41,7 +41,7 @@ const storage =
         params: async (_req, file) => ({
           folder: "uploads/branding",
           public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-          resource_type: "image",
+          resource_type: "auto",
         }),
       })
     : multer.diskStorage({
