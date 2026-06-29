@@ -67,7 +67,15 @@ router.post(
   '/background',
   requireAuth,
   requireRole('admin'),
-  upload.single('file'),
+  (req, res, next) => {
+    upload.single('file')(req, res, (err: any) => {
+      if (err) {
+        console.error("UPLOAD ERROR:", err);
+        return res.status(500).json(err);
+      }
+      next();
+    });
+  },
   uploadBackground
 );
 
