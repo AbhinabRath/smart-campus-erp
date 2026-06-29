@@ -135,12 +135,15 @@ export default function LoginPage() {
   return (
     <div className="relative h-screen w-full overflow-hidden bg-slate-950 text-white">
       {branding?.loginBackground && (
-        <img
-          src={branding.loginBackground}
-          alt="Campus background"
-          className="absolute inset-0 h-full w-full object-cover"
-        />
-      )}
+  <img
+    src={branding.loginBackground.replace(
+      /^https?:\/\/[^/]+(https?:\/\/)/,
+      "$1"
+    )}
+    alt="Campus background"
+    className="absolute inset-0 h-full w-full object-cover"
+  />
+)}
 
       <div className="absolute inset-0 bg-slate-950/45" />
 
