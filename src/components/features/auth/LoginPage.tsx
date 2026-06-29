@@ -139,7 +139,7 @@ export default function LoginPage() {
           src={
   branding.loginBackground.startsWith("http")
     ? branding.loginBackground
-    : `${BACKEND_URL}${branding.loginBackground}`
+    : `${branding.loginBackground}`
 }
           alt="Campus background"
           className="absolute inset-0 h-full w-full object-cover"
