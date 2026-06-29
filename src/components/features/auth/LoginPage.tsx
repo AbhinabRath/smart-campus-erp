@@ -136,7 +136,11 @@ export default function LoginPage() {
     <div className="relative h-screen w-full overflow-hidden bg-slate-950 text-white">
       {branding?.loginBackground && (
         <img
-          src={`${BACKEND_URL}${branding.loginBackground}`}
+          src={
+  branding.loginBackground.startsWith("http")
+    ? branding.loginBackground
+    : `${BACKEND_URL}${branding.loginBackground}`
+}
           alt="Campus background"
           className="absolute inset-0 h-full w-full object-cover"
         />
