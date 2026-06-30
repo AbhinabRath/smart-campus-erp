@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Smart Campus ERP Backend API Server",
   "scripts": {
-    "dev": "bun --hot index.ts",
-    "build": "prisma generate",
-    "start": "bun index.ts"
-  },
+  "dev": "tsx watch index.ts",
+  "build": "prisma generate",
+  "start": "tsx index.ts"
+},
   "dependencies": {
     "@prisma/client": "^6.11.1",
     "@types/cookie-parser": "^1.4.10",
@@ -31,6 +31,7 @@
     "@types/multer": "^1.4.12",
     "@types/qrcode": "^1.5.5",
     "prisma": "^6.11.1",
+    "tsx": "^4.22.4",
     "typescript": "^5"
   }
 }
