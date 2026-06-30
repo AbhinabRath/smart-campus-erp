@@ -14,7 +14,8 @@ import path from 'path';
 import fs from 'fs';
 import prisma from '../config/database';
 import { successResponse, errorResponse } from '../utils/response';
-
+import { Readable } from "stream";
+import cloudinary from "../config/cloudinary";
 /**
  * POST /api/materials
  * Teacher uploads a new study material with file attachment.
@@ -35,7 +36,20 @@ export async function createMaterial(req: Request, res: Response, next: NextFunc
       errorResponse(res, 'File is required for study material.', 400);
       return;
     }
+const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/study-materials",
+      resource_type: "auto",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
 
+  Readable.from(req.file!.buffer).pipe(stream);
+});
     // Determine file type from extension for filtering/search purposes
     const ext = path.extname(req.file.originalname).toLowerCase().replace('.', '');
 

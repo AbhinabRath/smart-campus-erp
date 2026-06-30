@@ -3,6 +3,8 @@ import prisma from '../config/database';
 import { successResponse, errorResponse } from '../utils/response';
 import path from 'path';
 import fs from 'fs';
+import { Readable } from "stream";
+import cloudinary from "../config/cloudinary";
 const getRealFilePath = (storedPath: string) => {
 
   const filename =
@@ -131,6 +133,20 @@ export async function uploadAcademicDocument(
       );
       return;
     }
+    const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/academic",
+      resource_type: "raw",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
+
+  Readable.from(req.file!.buffer).pipe(stream);
+});
 
     const existing =
       await prisma.academicDocument.findFirst({
@@ -264,7 +280,20 @@ export async function uploadCalendar(
 
       return;
     }
+const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/academic",
+      resource_type: "raw",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
 
+  Readable.from(req.file!.buffer).pipe(stream);
+});
     const old =
       await prisma.academicCalendar.findFirst();
 
@@ -390,7 +419,20 @@ export async function uploadRegulation(
 
       return;
     }
+const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/academic",
+      resource_type: "raw",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
 
+  Readable.from(req.file!.buffer).pipe(stream);
+});
     const old =
       await prisma.regulationDocument.findFirst();
 

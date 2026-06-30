@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
+import { Readable } from 'stream';
 import prisma from '../config/database';
+import cloudinary from '../config/cloudinary';
 
 export async function getBranding(
   req: Request,
@@ -24,6 +26,20 @@ export async function uploadBackground(
       message: 'No file uploaded'
     });
   }
+  const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/branding",
+      resource_type: "auto",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
+
+  Readable.from(req.file!.buffer).pipe(stream);
+});
 
   let branding =
     await prisma.brandingSettings.findFirst();

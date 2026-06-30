@@ -16,7 +16,8 @@ import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
 import { successResponse, errorResponse } from '../utils/response';
-
+import { Readable } from "stream";
+import cloudinary from "../config/cloudinary";
 /**
  * GET /api/users
  * List users with optional filters (role, active status, search).
@@ -566,6 +567,20 @@ export async function uploadAvatar(
       errorResponse(res, 'No file uploaded.', 400);
       return;
     }
+    const result: any = await new Promise((resolve, reject) => {
+  const stream = cloudinary.uploader.upload_stream(
+    {
+      folder: "uploads/avatars",
+      resource_type: "auto",
+    },
+    (error, uploadResult) => {
+      if (error) return reject(error);
+      resolve(uploadResult);
+    }
+  );
+
+  Readable.from(req.file!.buffer).pipe(stream);
+});
 
     const user = await prisma.user.findUnique({
       where: { id: userId },

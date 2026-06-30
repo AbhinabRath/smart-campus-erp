@@ -13,7 +13,8 @@
 import { Request, Response, NextFunction } from 'express';
 import prisma from '../config/database';
 import { successResponse, errorResponse } from '../utils/response';
-
+import { Readable } from "stream";
+import cloudinary from "../config/cloudinary";
 /**
  * POST /api/assignments
  * Teacher creates a new assignment with optional file attachment.
@@ -45,9 +46,24 @@ export async function createAssignment(req: Request, res: Response, next: NextFu
     // File attachment is optional (multer stores it in req.file if present)
     const fileData: any = {};
     if (req.file) {
-      fileData.filePath = result.secure_url;
-      fileData.fileName = req.file.originalname;
-    }
+  const result: any = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "uploads/assignments",
+        resource_type: "auto",
+      },
+      (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve(uploadResult);
+      }
+    );
+
+    Readable.from(req.file!.buffer).pipe(stream);
+  });
+
+  fileData.filePath = result.secure_url;
+  fileData.fileName = req.file.originalname;
+}
 
     const assignment = await prisma.assignment.create({
       data: {
@@ -93,10 +109,25 @@ export async function updateAssignment(req: Request, res: Response, next: NextFu
     if (maxMarks) updateData.maxMarks = parseFloat(String(maxMarks));
 
     // If a new file is uploaded, replace the old one
-    if (req.file) {
-      updateData.filePath = result.secure_url;
-      updateData.fileName = req.file.originalname;
-    }
+   if (req.file) {
+  const result: any = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "uploads/assignments",
+        resource_type: "auto",
+      },
+      (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve(uploadResult);
+      }
+    );
+
+    Readable.from(req.file!.buffer).pipe(stream);
+  });
+
+  updateData.filePath = result.secure_url;
+  updateData.fileName = req.file.originalname;
+}
 
     const assignment = await prisma.assignment.update({
       where: { id },
@@ -344,9 +375,24 @@ export async function submitAssignment(req: Request, res: Response, next: NextFu
     // File upload data (optional)
     const fileData: any = {};
     if (req.file) {
-      fileData.filePath = result.secure_url;
-      fileData.fileName = req.file.originalname;
-    }
+  const result: any = await new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "uploads/assignment-submissions",
+        resource_type: "auto",
+      },
+      (error, uploadResult) => {
+        if (error) return reject(error);
+        resolve(uploadResult);
+      }
+    );
+
+    Readable.from(req.file!.buffer).pipe(stream);
+  });
+
+  fileData.filePath = result.secure_url;
+  fileData.fileName = req.file.originalname;
+}
 
     const submission = await prisma.assignmentSubmission.create({
       data: {
