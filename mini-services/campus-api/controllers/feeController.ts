@@ -246,97 +246,90 @@ export async function getStudentFees(
 // Admin Student List
 // GET /fees/admin/list
 // =====================================================
-export async function getFeeAdminList(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
+export async function getFeeAdminList(req: Request, res: Response, next: NextFunction) {
   try {
-    const students =
-      await prisma.student.findMany({
-        include: {
-          user: true
-        }
-      });
+    // Single query: all students with user info
+    const students = await prisma.student.findMany({
+      select: {
+        id: true,
+        rollNumber: true,
+        semester: true,
+        user: { select: { name: true } },
+      },
+    });
 
-    const result: any[] = [];
+    // Single query: ALL fee structures (small table, safe to load entirely)
+    const allFeeStructures = await prisma.fee_structure.findMany({
+      orderBy: { semester: 'asc' },
+    });
 
-    for (const student of students) {
-        const feeStructures =
-  await prisma.fee_structure.findMany({
-    where: {
-      semester: {
-        lte: student.semester
+    // Single query: ALL payments, but only the fields we need
+    const allPayments = await prisma.fee_payments.findMany({
+      select: { studentId: true, semester: true, amountPaid: true },
+    });
+
+    // Build O(1) lookup structures once, outside any per-student loop
+    // Map: semester -> totalFee (number)
+    const feeBySemester = new Map<number, number>();
+    for (const fee of allFeeStructures) {
+      feeBySemester.set(fee.semester, Number(fee.totalFee));
+    }
+
+    // Map: studentId -> Map<semester, paidAmount>
+    const paymentsByStudent = new Map<string, Map<number, number>>();
+    for (const p of allPayments) {
+      let semMap = paymentsByStudent.get(p.studentId);
+      if (!semMap) {
+        semMap = new Map();
+        paymentsByStudent.set(p.studentId, semMap);
       }
-    }
-  });
-
-const payments =
-  await prisma.fee_payments.findMany({
-    where: {
-      studentId: student.id
-    }
-  });
-
-let totalFee = 0;
-let paidAmount = 0;
-
-for (const fee of feeStructures) {
-
-  totalFee += Number(fee.totalFee);
-
-  const semesterPaid =
-    payments
-      .filter(
-        p =>
-          p.semester === fee.semester
-      )
-      .reduce(
-        (sum, p) =>
-          sum +
-          Number(p.amountPaid),
-        0
-      );
-
-  paidAmount += semesterPaid;
-}
-
-const balance =
-  totalFee - paidAmount;
-
-result.push({
-  id: student.id,
-
-  name:
-    student.user.name,
-
-  rollNumber:
-    student.rollNumber,
-
-  semester:
-    student.semester,
-
-  totalFee,
-
-  paidAmount,
-
-  balance,
-
-  status:
-    balance <= 0
-      ? 'GREEN'
-      : 'RED'
-});
+      semMap.set(p.semester, (semMap.get(p.semester) || 0) + Number(p.amountPaid));
     }
 
-    successResponse(
-      res,
-      'Fee list retrieved',
-      result
-    );
-  } catch (err) {
-    next(err);
-  }
+    // Precompute cumulative totalFee for each semester level (1..N)
+    // so we don't re-sum fee structures for every student
+    const semesters = [...feeBySemester.keys()].sort((a, b) => a - b);
+    const cumulativeFeeBySemester = new Map<number, number>();
+    let running = 0;
+    for (const sem of semesters) {
+      running += feeBySemester.get(sem)!;
+      cumulativeFeeBySemester.set(sem, running);
+    }
+
+    const result: any[] = students.map((student) => {
+      // totalFee = sum of fee_structure.totalFee for semester <= student.semester
+      // Use the precomputed cumulative map, finding the largest semester <= student.semester
+      let totalFee = 0;
+      for (const sem of semesters) {
+        if (sem > student.semester) break;
+        totalFee = cumulativeFeeBySemester.get(sem)!;
+      }
+
+      const studentPayments = paymentsByStudent.get(student.id);
+      let paidAmount = 0;
+      if (studentPayments) {
+        for (const sem of semesters) {
+          if (sem > student.semester) break;
+          paidAmount += studentPayments.get(sem) || 0;
+        }
+      }
+
+      const balance = totalFee - paidAmount;
+
+      return {
+        id: student.id,
+        name: student.user.name,
+        rollNumber: student.rollNumber,
+        semester: student.semester,
+        totalFee,
+        paidAmount,
+        balance,
+        status: balance <= 0 ? 'GREEN' : 'RED',
+      };
+    });
+
+    successResponse(res, 'Fee list retrieved', result);
+  } catch (err) { next(err); }
 }
 
 // =====================================================
