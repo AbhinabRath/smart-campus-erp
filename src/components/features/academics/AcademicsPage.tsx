@@ -206,13 +206,15 @@ const uploadRegulation = async (
   }
 };
 
-  const getFileUrl = (
-    path: string
-  ) => {
+  const getFileUrl = (path: string) => {
+  if (!path) return "";
 
-    return `${BACKEND_URL}${path}`;
+  if (path.startsWith("http://") || path.startsWith("https://")) {
+    return path;
+  }
 
-  };
+  return `${BACKEND_URL}${path}`;
+};
   const deleteDocument = async (
   id: string
 ) => {

@@ -609,7 +609,7 @@ export default function AssignmentManager() {
         asChild
       >
         <a
-          href={`${BACKEND_URL}/uploads/${a.filePath.split('\\').pop()}`}
+          href={a.filePath}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -790,7 +790,7 @@ export default function AssignmentManager() {
         asChild
       >
         <a
-          href={`${BACKEND_URL}/uploads/${a.filePath.split('\\').pop()}`}
+          href={a.filePath}
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -910,7 +910,7 @@ export default function AssignmentManager() {
                                                   asChild
                                                 >
                                                   <a
-                                                    href={`${BACKEND_URL}/uploads/${sub.filePath.split('\\').pop()}`}
+                                                    href={sub.filePath}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                   >
