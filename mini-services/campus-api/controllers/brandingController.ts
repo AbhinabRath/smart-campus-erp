@@ -33,7 +33,7 @@ export async function uploadBackground(
       await prisma.brandingSettings.create({
         data: {
           loginBackground:
-            req.file.path
+            result.secure_url
         }
       });
   } else {
@@ -44,7 +44,7 @@ export async function uploadBackground(
         },
         data: {
           loginBackground:
-            req.file.path
+            result.secure_url
         }
       });
   }

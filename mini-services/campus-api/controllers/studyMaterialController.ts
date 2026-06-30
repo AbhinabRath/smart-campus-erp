@@ -45,7 +45,7 @@ export async function createMaterial(req: Request, res: Response, next: NextFunc
         subjectId,
         title,
         description: description || null,
-        filePath: req.file.path,
+        filePath: result.secure_url,
         fileName: req.file.originalname,
         fileType: ext,
         fileSize: req.file.size,

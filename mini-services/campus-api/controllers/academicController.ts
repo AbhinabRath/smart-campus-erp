@@ -166,7 +166,7 @@ export async function uploadAcademicDocument(
           type,
           fileName:
             req.file.originalname,
-          filePath: req.file.path,
+          filePath: result.secure_url,
           
             uploadedBy: req.user!.id
         }
@@ -292,7 +292,7 @@ export async function uploadCalendar(
         data: {
           fileName:
             req.file.originalname,
-          filePath: req.file.path,
+          filePath: result.secure_url,
            
             uploadedBy: req.user!.id
         }
@@ -418,7 +418,7 @@ export async function uploadRegulation(
         data: {
           fileName:
             req.file.originalname,
-          filePath: req.file.path,
+          filePath: result.secure_url,
             
             uploadedBy: req.user!.id
         }

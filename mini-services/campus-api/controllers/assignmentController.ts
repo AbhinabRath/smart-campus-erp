@@ -45,7 +45,7 @@ export async function createAssignment(req: Request, res: Response, next: NextFu
     // File attachment is optional (multer stores it in req.file if present)
     const fileData: any = {};
     if (req.file) {
-      fileData.filePath = req.file.path;
+      fileData.filePath = result.secure_url;
       fileData.fileName = req.file.originalname;
     }
 
@@ -94,7 +94,7 @@ export async function updateAssignment(req: Request, res: Response, next: NextFu
 
     // If a new file is uploaded, replace the old one
     if (req.file) {
-      updateData.filePath = req.file.path;
+      updateData.filePath = result.secure_url;
       updateData.fileName = req.file.originalname;
     }
 
@@ -344,7 +344,7 @@ export async function submitAssignment(req: Request, res: Response, next: NextFu
     // File upload data (optional)
     const fileData: any = {};
     if (req.file) {
-      fileData.filePath = req.file.path;
+      fileData.filePath = result.secure_url;
       fileData.fileName = req.file.originalname;
     }
 

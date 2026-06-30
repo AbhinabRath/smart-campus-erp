@@ -32,25 +32,7 @@ if (!fs.existsSync(brandingDir)) {
 }
 
 import cloudinary from "../config/cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
-
-const storage =
-  process.env.NODE_ENV === "production"
-    ? new CloudinaryStorage({
-        cloudinary,
-        params: {
-  folder: "uploads/branding",
-  resource_type: "auto",
-} as any,
-      })
-    : multer.diskStorage({
-        destination: (_req, _file, cb) => {
-          cb(null, brandingDir);
-        },
-        filename: (_req, file, cb) => {
-          cb(null, `${uuidv4()}-${file.originalname}`);
-        },
-      });
+const storage = multer.memoryStorage();
 
 const upload =
   multer({

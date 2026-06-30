@@ -592,7 +592,7 @@ export async function uploadAvatar(
     }
 
     const avatarPath =
-      req.file.path;
+      result.secure_url;
 
     await prisma.user.update({
       where: { id: userId },

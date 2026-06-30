@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "dev:all": "concurrently \"npm run dev\" \"cd mini-services/campus-api && bun run dev\"",
+    "dev:all": "concurrently \"npm run dev\" \"cd mini-services/campus-api && npm run dev\"",
     "build": "next build",
-    "start": "NODE_ENV=production bun .next/standalone/server.js 2>&1 | tee server.log",
+    "start": "NODE_ENV=production node .next/standalone/server.js",
     "lint": "eslint .",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",

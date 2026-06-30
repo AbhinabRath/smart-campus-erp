@@ -22,26 +22,9 @@ if (!fs.existsSync(uploadDir)) {
 // Storage configuration: files are saved with a unique UUID prefix
 // to prevent name collisions when multiple users upload files with same names.
 import cloudinary from "../config/cloudinary";
-import { CloudinaryStorage } from "multer-storage-cloudinary";
 
-const storage =
-process.env.NODE_ENV === "production"
-? new CloudinaryStorage({
-    cloudinary,
-    params: (_req, file) => ({
-  folder: "uploads",
-  resource_type: "auto",
-  public_id: `${Date.now()}-${path.parse(file.originalname).name}`,
-})
-  })
-: multer.diskStorage({
-    destination: (_req, _file, cb) => {
-      cb(null, uploadDir);
-    },
-    filename: (_req, file, cb) => {
-      cb(null, `${uuidv4()}-${file.originalname}`);
-    },
-  });
+
+const storage = multer.memoryStorage();
 
 // File filter: only allow academic document types.
 // This prevents executable or script files from being uploaded, which could
