@@ -5,6 +5,7 @@ import path from 'path';
 import fs from 'fs';
 import { Readable } from "stream";
 import cloudinary from "../config/cloudinary";
+import doc from 'pdfkit/js/pdfkit.standalone';
 const getRealFilePath = (storedPath: string) => {
 
   const filename =
@@ -570,14 +571,11 @@ export async function downloadAcademicDocument(
       return;
     }
 
-    const filePath =
-  getRealFilePath(
-    doc.filePath
-  );
-
-res.download(
-  filePath,
-  doc.fileName
+    return res.redirect(
+  doc.filePath.replace(
+    "/upload/",
+    "/upload/fl_attachment/"
+  )
 );
 
   } catch (err) {
@@ -613,14 +611,11 @@ export async function downloadCalendar(
       return;
     }
 
-    const filePath =
-  getRealFilePath(
-    calendar.filePath
-  );
-
-res.download(
-  filePath,
-  calendar.fileName
+    return res.redirect(
+  calendar.filePath.replace(
+    "/upload/",
+    "/upload/fl_attachment/"
+  )
 );
 
   } catch (err) {
@@ -656,14 +651,11 @@ export async function downloadRegulation(
       return;
     }
 
-    const filePath =
-  getRealFilePath(
-    regulation.filePath
-  );
-
-res.download(
-    filePath,
-    regulation.fileName
+    return res.redirect(
+  regulation.filePath.replace(
+    "/upload/",
+    "/upload/fl_attachment/"
+  )
 );
 
   } catch (err) {
