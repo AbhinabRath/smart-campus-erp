@@ -367,13 +367,6 @@ useEffect(() => {
                 {/* Online status indicator */}
                 <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[var(--sidebar)] rounded-full" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{currentUser?.name}</p>
-                <p className="text-xs text-[var(--sidebar-foreground)]/60 capitalize flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
-                  {role} · Online
-                </p>
-              </div>
             </div>
           )}
           {collapsed && (
