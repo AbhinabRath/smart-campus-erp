@@ -392,7 +392,7 @@ const deleteRegulation = async () => {
                     </a>
 
                     <a
-                      href={`${BACKEND_URL}/api/academics/download/${curriculum.id}`}
+                      href={`/api/academics/download/${curriculum.id}`}
                       className="
                         px-3 py-2 rounded-lg
                         bg-blue-500/10
@@ -502,7 +502,7 @@ const deleteRegulation = async () => {
                     </a>
 
                     <a
-  href={`${BACKEND_URL}/api/academics/download/${syllabus.id}`}
+  href={`/api/academics/download/${syllabus.id}`}
   className="
     px-3 py-2 rounded-lg
     bg-blue-500/10
@@ -770,7 +770,7 @@ const deleteRegulation = async () => {
 </a>
 
 <a
-  href={`${BACKEND_URL}/api/academics/calendar/download/${calendar.id}`}
+  href={`/api/academics/calendar/download/${calendar.id}`}
   className="
     px-4 py-2
     rounded-lg
@@ -882,7 +882,7 @@ const deleteRegulation = async () => {
         </a>
 
         <a
-  href={`${BACKEND_URL}/api/academics/regulation/download/${regulation.id}`}
+  href={`/api/academics/regulation/download/${regulation.id}`}
   className="
     px-4 py-2
     rounded-lg
