@@ -49,9 +49,12 @@ export async function createAssignment(req: Request, res: Response, next: NextFu
   const result: any = await new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "uploads/assignments",
-        resource_type: "auto",
-      },
+  folder: "uploads/assignments",
+  resource_type: "auto",
+  use_filename: true,
+  unique_filename: true,
+  filename_override: req.file!.originalname,
+},
       (error, uploadResult) => {
         if (error) return reject(error);
         resolve(uploadResult);
@@ -113,9 +116,12 @@ export async function updateAssignment(req: Request, res: Response, next: NextFu
   const result: any = await new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "uploads/assignments",
-        resource_type: "auto",
-      },
+  folder: "uploads/assignments",
+  resource_type: "auto",
+  use_filename: true,
+  unique_filename: true,
+  filename_override: req.file!.originalname,
+},
       (error, uploadResult) => {
         if (error) return reject(error);
         resolve(uploadResult);
@@ -378,9 +384,12 @@ export async function submitAssignment(req: Request, res: Response, next: NextFu
   const result: any = await new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
-        folder: "uploads/assignment-submissions",
-        resource_type: "auto",
-      },
+  folder: "uploads/assignment-submissions",
+  resource_type: "auto",
+  use_filename: true,
+  unique_filename: true,
+  filename_override: req.file!.originalname,
+},
       (error, uploadResult) => {
         if (error) return reject(error);
         resolve(uploadResult);

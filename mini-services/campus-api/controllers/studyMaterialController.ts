@@ -39,9 +39,12 @@ export async function createMaterial(req: Request, res: Response, next: NextFunc
 const result: any = await new Promise((resolve, reject) => {
   const stream = cloudinary.uploader.upload_stream(
     {
-      folder: "uploads/study-materials",
-      resource_type: "auto",
-    },
+  folder: "uploads/study-materials",
+  resource_type: "auto",
+  use_filename: true,
+  unique_filename: true,
+  filename_override: req.file!.originalname,
+},
     (error, uploadResult) => {
       if (error) return reject(error);
       resolve(uploadResult);

@@ -135,10 +135,13 @@ export async function uploadAcademicDocument(
     }
     const result: any = await new Promise((resolve, reject) => {
   const stream = cloudinary.uploader.upload_stream(
-    {
-      folder: "uploads/academic",
-      resource_type: "raw",
-    },
+  {
+    folder: "uploads/academic",
+    resource_type: "raw",
+    use_filename: true,
+    unique_filename: true,
+    filename_override: req.file!.originalname,
+  },
     (error, uploadResult) => {
       if (error) return reject(error);
       resolve(uploadResult);
@@ -282,10 +285,13 @@ export async function uploadCalendar(
     }
 const result: any = await new Promise((resolve, reject) => {
   const stream = cloudinary.uploader.upload_stream(
-    {
-      folder: "uploads/academic",
-      resource_type: "raw",
-    },
+  {
+    folder: "uploads/academic",
+    resource_type: "raw",
+    use_filename: true,
+    unique_filename: true,
+    filename_override: req.file!.originalname,
+  },
     (error, uploadResult) => {
       if (error) return reject(error);
       resolve(uploadResult);
@@ -421,10 +427,13 @@ export async function uploadRegulation(
     }
 const result: any = await new Promise((resolve, reject) => {
   const stream = cloudinary.uploader.upload_stream(
-    {
-      folder: "uploads/academic",
-      resource_type: "raw",
-    },
+  {
+    folder: "uploads/academic",
+    resource_type: "raw",
+    use_filename: true,
+    unique_filename: true,
+    filename_override: req.file!.originalname,
+  },
     (error, uploadResult) => {
       if (error) return reject(error);
       resolve(uploadResult);
