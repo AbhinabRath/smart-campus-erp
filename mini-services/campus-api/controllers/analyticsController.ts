@@ -146,38 +146,34 @@ export async function getAssignmentAnalytics(req: Request, res: Response, next: 
     if (subjectId) where.subjectId = String(subjectId);
 
     const assignments = await prisma.assignment.findMany({
-      where,
-      include: {
-        _count: { select: { submissions: true } },
-        subject: { select: { name: true, code: true, departmentId: true, semester: true } },
-      },
-    });
+  where,
+  include: {
+    _count: { select: { submissions: true } },
+    subject: { select: { name: true, code: true, departmentId: true, semester: true } },
+  },
+});
 
-    // Get total students for computing completion rate
-    const analytics = await Promise.all(
-      assignments.map(async (a) => {
-        // Count students in the subject's target semester/department
-        const studentCount = await prisma.student.count({
-          where: {
-            departmentId: a.subject.departmentId,
-            semester: a.subject.semester,
-          },
-        });
+// Single grouped query: student counts per (departmentId, semester) combination
+const studentCounts = await prisma.student.groupBy({
+  by: ['departmentId', 'semester'],
+  _count: { id: true },
+});
 
-        const completionRate = studentCount > 0
-          ? (a._count.submissions / studentCount) * 100
-          : 0;
-         
-        return {
-          assignmentId: a.id,
-          title: a.title,
-          subject: a.subject.name,
-          totalStudents: studentCount,
-          submissions: a._count.submissions,
-          completionRate: Math.round(completionRate * 100) / 100,
-        };
-      })
-    );
+// O(1) lookup map built once
+const studentCountMap = new Map<string, number>();
+for (const sc of studentCounts) {
+  studentCountMap.set(`${sc.departmentId}-${sc.semester}`, sc._count.id);
+}
+
+const analytics = assignments.map((a) => {
+  const studentCount = studentCountMap.get(`${a.subject.departmentId}-${a.subject.semester}`) || 0;
+  const completionRate = studentCount > 0 ? (a._count.submissions / studentCount) * 100 : 0;
+  return {
+    assignmentId: a.id, title: a.title, subject: a.subject.name,
+    totalStudents: studentCount, submissions: a._count.submissions,
+    completionRate: Math.round(completionRate * 100) / 100,
+  };
+});
 
     const overallCompletionRate = analytics.length > 0
       ? analytics.reduce((sum, a) => sum + a.completionRate, 0) / analytics.length

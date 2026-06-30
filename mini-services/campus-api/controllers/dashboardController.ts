@@ -780,63 +780,69 @@ sessions.forEach((session) => {
     };
   });
 })();
-const sessionDepartmentMap = new Map(
-  attendanceSessions.map((s) => [s.id, s.departmentId])
-);
+// Build all lookup structures in a single pass over each source array
+const sessionDepartmentMap = new Map<string, string>();
+
+for (const session of attendanceSessions) {
+  sessionDepartmentMap.set(
+    session.id,
+    session.departmentId
+  );
+}
+const studentsByDept = new Map<string, typeof students>();
+for (const s of students) {
+  const arr = studentsByDept.get(s.departmentId) || [];
+  arr.push(s);
+  studentsByDept.set(s.departmentId, arr);
+}
+
+const sessionsByDept = new Map<string, typeof attendanceSessions>();
+for (const s of attendanceSessions) {
+  const arr = sessionsByDept.get(s.departmentId) || [];
+  arr.push(s);
+  sessionsByDept.set(s.departmentId, arr);
+}
+
+const recordCountByDept = new Map<string, number>();
+for (const record of attendanceRecords) {
+  const deptId = sessionDepartmentMap.get(record.attendanceSessionId);
+  if (deptId) recordCountByDept.set(deptId, (recordCountByDept.get(deptId) || 0) + 1);
+}
+
+const marksByDept = new Map<string, typeof marks>();
+for (const m of marks) {
+  const deptId = m.student.departmentId;
+  const arr = marksByDept.get(deptId) || [];
+  arr.push(m);
+  marksByDept.set(deptId, arr);
+}
+
 const departmentPerformance = departments.map((dept) => {
-  const deptStudents = students.filter(
-    (s) => s.departmentId === dept.id
-  );
+  const deptStudents = studentsByDept.get(dept.id) || [];
+  const deptAttendanceSessions = sessionsByDept.get(dept.id) || [];
+  const deptRecordCount = recordCountByDept.get(dept.id) || 0;
 
-  const deptAttendanceSessions = attendanceSessions.filter(
-    (s) => s.departmentId === dept.id
-  );
-
- const deptAttendanceRecords = attendanceRecords.filter(
-  (record) =>
-    sessionDepartmentMap.get(record.attendanceSessionId) === dept.id
-);
+  // Build a per-semester student count map for THIS department only (small, O(deptStudents))
+  const semesterCountInDept = new Map<number, number>();
+  for (const s of deptStudents) {
+    semesterCountInDept.set(s.semester, (semesterCountInDept.get(s.semester) || 0) + 1);
+  }
 
   let possibleAttendances = 0;
+  for (const session of deptAttendanceSessions) {
+    possibleAttendances += semesterCountInDept.get(session.semester) || 0;
+  }
 
-  deptAttendanceSessions.forEach((session) => {
-    possibleAttendances += deptStudents.filter(
-      (student) => student.semester === session.semester
-    ).length;
-  });
+  const avgAttendance = possibleAttendances > 0
+    ? Math.round((deptRecordCount / possibleAttendances) * 100)
+    : 0;
 
-  const avgAttendance =
-    possibleAttendances > 0
-      ? Math.round(
-          (deptAttendanceRecords.length /
-            possibleAttendances) *
-            100
-        )
-      : 0;
+  const deptMarks = marksByDept.get(dept.id) || [];
+  const avgMarks = deptMarks.length > 0
+    ? Math.round(deptMarks.reduce((sum, mark) => sum + (mark.marksObtained / mark.totalMarks) * 100, 0) / deptMarks.length)
+    : 0;
 
-  const deptMarks = marks.filter(
-    (m) => m.student.departmentId === dept.id
-  );
-
-  const avgMarks =
-    deptMarks.length > 0
-      ? Math.round(
-          deptMarks.reduce(
-            (sum, mark) =>
-              sum +
-              (mark.marksObtained /
-                mark.totalMarks) *
-                100,
-            0
-          ) / deptMarks.length
-        )
-      : 0;
-
-  return {
-    department: dept.code,
-    avgAttendance,
-    avgMarks,
-  };
+  return { department: dept.code, avgAttendance, avgMarks };
 });
 
 
