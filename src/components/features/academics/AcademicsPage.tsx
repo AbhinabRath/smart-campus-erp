@@ -257,7 +257,29 @@ const deleteRegulation = async () => {
 
   await loadData();
 };
-  return (
+
+const downloadIdCard = async () => {
+  const response = await api.get('/id-card/my', {
+    responseType: 'blob',
+  });
+
+  const url = window.URL.createObjectURL(response.data);
+  window.open(url, '_blank');
+};
+
+const downloadAdmitCard = async () => {
+  const response = await api.get(
+    `/admit-card/my?examType=${examType}`,
+    {
+      responseType: 'blob',
+    }
+  );
+
+  const url = window.URL.createObjectURL(response.data);
+  window.open(url, '_blank');
+};
+
+return (
 
     <div className="space-y-8">
 
@@ -651,9 +673,9 @@ const deleteRegulation = async () => {
 
     </Select>
 
-    <a
-      href={`${BACKEND_URL}/api/admit-card/my?examType=${examType}`}
-      target="_blank"
+    <button
+      onClick={downloadAdmitCard}
+      type="button"
       className="
         h-12
         px-6
@@ -666,7 +688,7 @@ const deleteRegulation = async () => {
       "
     >
       Generate PDF
-    </a>
+    </button>
 
   </div>
 
@@ -699,9 +721,9 @@ const deleteRegulation = async () => {
 
   </div>
 
-  <a
-    href="${BACKEND_URL}/api/id-card/my"
-    target="_blank"
+  <button
+    onClick={downloadIdCard}
+    type="button"
     className="
       h-12
       px-6
@@ -715,7 +737,7 @@ const deleteRegulation = async () => {
     "
   >
     Generate ID Card
-  </a>
+  </button>
 
 </div>
 
