@@ -69,7 +69,19 @@ router.post(
   (req, res, next) => {
     upload.single('file')(req, res, (err: any) => {
       if (err) {
-        console.error("UPLOAD ERROR:", err);
+        console.dir(err, { depth: null });
+
+if ((err as any).storageErrors) {
+  console.dir((err as any).storageErrors, { depth: null });
+}
+
+if ((err as any).cause) {
+  console.dir((err as any).cause, { depth: null });
+}
+
+if ((err as any).error) {
+  console.dir((err as any).error, { depth: null });
+}
         return res.status(500).json(err);
       }
       next();
