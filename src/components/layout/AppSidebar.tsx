@@ -364,8 +364,6 @@ useEffect(() => {
                 <div className="w-9 h-9 rounded-full bg-[var(--sidebar-accent)] flex items-center justify-center text-sm font-bold text-[var(--sidebar-accent-foreground)] shrink-0 ring-2 ring-[var(--sidebar-primary)]/20">
                   {currentUser?.name?.charAt(0) || 'U'}
                 </div>
-                {/* Online status indicator */}
-                <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[var(--sidebar)] rounded-full" />
               </div>
             </div>
           )}
