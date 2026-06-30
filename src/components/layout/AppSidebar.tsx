@@ -357,32 +357,6 @@ useEffect(() => {
 
         {/* Sidebar Footer */}
         <div className="px-3 py-3 border-t border-[var(--sidebar-border)] space-y-2">
-          {/* User info with status indicator */}
-          {!collapsed && (
-            <div className="flex items-center gap-3 px-1">
-              <div className="relative">
-                <div className="w-9 h-9 rounded-full bg-[var(--sidebar-accent)] flex items-center justify-center text-sm font-bold text-[var(--sidebar-accent-foreground)] shrink-0 ring-2 ring-[var(--sidebar-primary)]/20">
-                  {currentUser?.name?.charAt(0) || 'U'}
-                </div>
-              </div>
-            </div>
-          )}
-          {collapsed && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="relative w-9 h-9 mx-auto">
-                  <div className="w-9 h-9 rounded-full bg-[var(--sidebar-accent)] flex items-center justify-center text-sm font-bold text-[var(--sidebar-accent-foreground)] ring-2 ring-[var(--sidebar-primary)]/20">
-                    {currentUser?.name?.charAt(0) || 'U'}
-                  </div>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-[var(--sidebar)] rounded-full" />
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="right" className="text-xs">
-                {currentUser?.name} · {role}
-              </TooltipContent>
-            </Tooltip>
-          )}
-
           {/* Collapse toggle (desktop only) */}
           <Button
             variant="ghost"
