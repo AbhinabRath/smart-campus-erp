@@ -234,6 +234,10 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
   latitude,
   longitude,
 } = req.body;
+console.log("========== STUDENT LOCATION ==========");
+console.log("Latitude :", latitude);
+console.log("Longitude:", longitude);
+console.log("======================================");
     const userId = req.user!.id;
 
     // Layer 1: Find student profile for this user
@@ -253,6 +257,11 @@ export async function markAttendance(req: Request, res: Response, next: NextFunc
     id: sessionId,
   },
 });
+console.log("========== TEACHER LOCATION ==========");
+console.log("Latitude :", session?.latitude);
+console.log("Longitude:", session?.longitude);
+console.log("Radius   :", session?.allowedRadius);
+console.log("======================================");
 
     if (!session) {
       errorResponse(res, 'Invalid QR code. Session not found.', 404);
@@ -381,6 +390,7 @@ if (
     );
 
   const distance = R * c;
+  console.log("Distance:", distance);
 
   if (
     distance >
