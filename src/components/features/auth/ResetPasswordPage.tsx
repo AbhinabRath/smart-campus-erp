@@ -69,6 +69,8 @@ export default function ResetPasswordPage() {
 
       logout();
 
+window.location.reload();
+
     } catch (err: any) {
 
       toast({

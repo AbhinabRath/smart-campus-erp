@@ -155,7 +155,7 @@ export default function LoginPage() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true });
-    if (!isEmailValid || !isPasswordValid) return;
+    if (!isEmailValid) return;
     setError('');
     setLoading(true);
 
@@ -182,13 +182,11 @@ login(
   sessionToken
 );
 
-if (
-  loginRes.data.data.forcePasswordReset
-) {
+if (loginRes.data?.data?.forcePasswordReset) {
 
-  useAppStore
-    .getState()
-    .setView('reset-password');
+  useAppStore.getState().setView('reset-password');
+
+  return;
 
 }
     } catch (err: unknown) {
