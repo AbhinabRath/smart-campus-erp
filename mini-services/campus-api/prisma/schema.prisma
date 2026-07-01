@@ -40,7 +40,7 @@ model User {
   sessions         Session[]
   student          Student?
   teacher          Teacher?
-
+  passwordResetRequests PasswordResetRequest[]
   @@index([email])
   @@index([role])
   @@map("users")
@@ -413,6 +413,36 @@ model Session {
   @@index([token])
   @@index([userId])
   @@map("sessions")
+}
+
+enum PasswordResetStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  USED
+}
+
+model PasswordResetRequest {
+  id            String              @id @default(cuid())
+
+  userId        String
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  status        PasswordResetStatus @default(PENDING)
+
+  requestedAt   DateTime            @default(now())
+  handledAt     DateTime?
+
+  handledById   String?
+  handledByName String?
+
+  oneTimeLogin  Boolean             @default(false)
+  used          Boolean             @default(false)
+
+  @@index([userId])
+  @@index([status])
+
+  @@map("password_reset_requests")
 }
 
 model BrandingSettings {
