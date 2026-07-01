@@ -17,7 +17,7 @@ import {
   Search, LayoutDashboard, Users, Building2, BookOpen,
   ClipboardCheck, FileText, FileUp, FolderOpen, Calendar,
   Bell, Plane, BarChart3, Lightbulb, UserCircle, Settings,
-  ArrowRight, Clock, ChevronRight,
+  ArrowRight, Clock, ChevronRight,KeyRound,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -84,6 +84,20 @@ const navItems: NavItem[] = [
 },
   { id: 'profile', label: 'Profile', icon: UserCircle, keywords: ['account', 'personal'], roles: ['admin', 'teacher', 'student'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['preferences', 'config', 'theme'], roles: ['admin', 'teacher', 'student'] },
+
+  {
+  id: 'password-reset-requests',
+  label: 'Forgot Password Logs',
+  icon: KeyRound,
+  keywords: [
+    'forgot',
+    'password',
+    'reset',
+    'logs',
+    'request'
+  ],
+  roles: ['admin']
+},
   
 ];
 

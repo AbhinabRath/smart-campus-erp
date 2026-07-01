@@ -94,13 +94,17 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [requestingReset, setRequestingReset] = useState(false);
+  const [forgotMode, setForgotMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [focused, setFocused] = useState({ email: false, password: false });
   const login = useAppStore((s) => s.login);
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const isPasswordValid = password.length >= 6;
+  const isPasswordValid =
+  forgotMode
+    ? true
+    : password.length >= 6;
 
   useEffect(() => {
     api.get('/branding')
@@ -123,7 +127,7 @@ export default function LoginPage() {
   }
 
   setError('');
-
+  setForgotMode(true);
   setRequestingReset(true);
 
   try {
@@ -156,6 +160,8 @@ export default function LoginPage() {
     e.preventDefault();
     setTouched({ email: true, password: true });
     if (!isEmailValid) return;
+
+if (!forgotMode && !isPasswordValid) return;
     setError('');
     setLoading(true);
 
@@ -358,7 +364,9 @@ sm:text-[52px]
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="password" className="text-sm text-slate-200">Password</Label>
+                <Label htmlFor="password" className="text-sm text-slate-200">
+  {forgotMode ? 'Password (Optional)' : 'Password'}
+</Label>
                 <div className="relative">
                   <Lock className={`pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400 ${focused.password ? 'text-emerald-300' : ''}`} />
                   <Input
@@ -371,7 +379,7 @@ sm:text-[52px]
                     onBlur={() => { setTouched((prev) => ({ ...prev, password: true })); setFocused((prev) => ({ ...prev, password: false })); }}
                     className={`w-full rounded-2xl border px-4 py-4 pl-12 text-sm text-white transition-all duration-200 ${focused.password ? 'border-emerald-400 bg-slate-900/90 ring-2 ring-emerald-500/20' : 'border-slate-500/30 bg-slate-950/40 backdrop-blur-md'} ${touched.password && !isPasswordValid ? 'border-destructive ring-1 ring-destructive/30' : ''}`}
                     disabled={loading}
-                    required
+                    required={!forgotMode}
                   />
                   <button
   type="button"
@@ -393,7 +401,10 @@ sm:text-[52px]
   )}
 </button>
                 </div>
-                {touched.password && !isPasswordValid && password.length > 0 && (
+                {!forgotMode &&
+  touched.password &&
+  !isPasswordValid &&
+  password.length > 0 && (
                   <p className="text-xs text-destructive">Password must be at least 6 characters</p>
                 )}
               </div>
