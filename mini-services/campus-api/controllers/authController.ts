@@ -42,14 +42,81 @@ if (!user) {
   return;
 }
 
-// Compare the plaintext password with the stored bcrypt hash.
-const isPasswordValid = await bcrypt.compare(password, user.password);
+const resetRequest =
+  await prisma.passwordResetRequest.findFirst({
 
+    where: {
 
+      userId: user.id,
+
+      status: 'APPROVED',
+
+      oneTimeLogin: true,
+
+      used: false
+
+    }
+
+  });
+
+let isPasswordValid = false;
+
+if (resetRequest) {
+
+  isPasswordValid = true;
+
+} else {
+
+  isPasswordValid =
+    await bcrypt.compare(password, user.password);
+
+}
 
 if (!isPasswordValid) {
-  errorResponse(res, 'Invalid email or password.', 401);
+
+  const rejected =
+    await prisma.passwordResetRequest.findFirst({
+
+      where: {
+
+        userId: user.id,
+
+        status: 'REJECTED',
+
+        used: false
+
+      }
+
+    });
+
+  if (rejected) {
+
+    errorResponse(
+
+      res,
+
+      'Your password reset request was rejected by the administrator.',
+
+      403
+
+    );
+
+    return;
+
+  }
+
+  errorResponse(
+
+    res,
+
+    'Invalid email or password.',
+
+    401
+
+  );
+
   return;
+
 }
 
     // Check if user account is active (admin may have deactivated it)
@@ -85,19 +152,46 @@ if (!isPasswordValid) {
       secure: false, // Set to true in production with HTTPS
       path: '/',
     });
+   if (resetRequest) {
 
+  await prisma.passwordResetRequest.update({
+
+    where: {
+
+      id: resetRequest.id
+
+    },
+
+    data: {
+
+      oneTimeLogin: false
+
+    }
+
+  });
+
+}
     // Return user info + session token in response body.
     // The sessionToken is needed by the frontend to send as Authorization header
     // in cross-site iframe contexts where the httpOnly cookie is blocked.
     // The cookie is still set as the primary auth mechanism for same-site access.
     successResponse(res, 'Login successful.', {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      avatar: user.avatar,
-      sessionToken: token,
-    });
+
+  id: user.id,
+
+  email: user.email,
+
+  name: user.name,
+
+  role: user.role,
+
+  avatar: user.avatar,
+
+  sessionToken: token,
+
+  forcePasswordReset: !!resetRequest
+
+});
   } catch (err) {
     next(err);
   }
@@ -179,4 +273,418 @@ export async function getMe(req: Request, res: Response, next: NextFunction): Pr
   } catch (err) {
     next(err);
   }
+}
+export async function requestPasswordReset(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const { email } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+
+      errorResponse(
+        res,
+        'No account exists with this email.',
+        404
+      );
+
+      return;
+
+    }
+
+    if (user.role === 'admin') {
+
+      errorResponse(
+        res,
+        'Administrators cannot request password reset.',
+        403
+      );
+
+      return;
+
+    }
+
+    const pending =
+      await prisma.passwordResetRequest.findFirst({
+
+        where: {
+
+          userId: user.id,
+
+          status: 'PENDING'
+
+        }
+
+      });
+
+    if (pending) {
+
+      errorResponse(
+
+        res,
+
+        'A password reset request is already pending.',
+
+        400
+
+      );
+
+      return;
+
+    }
+
+    await prisma.passwordResetRequest.create({
+
+      data: {
+
+        userId: user.id
+
+      }
+
+    });
+
+    successResponse(
+
+      res,
+
+      'Password reset request has been sent to the administrator.'
+
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+
+}
+
+export async function getPasswordResetRequests(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const requests =
+      await prisma.passwordResetRequest.findMany({
+
+        include: {
+
+          user: {
+
+            select: {
+
+              id: true,
+
+              name: true,
+
+              email: true,
+
+              role: true
+
+            }
+
+          }
+
+        },
+
+        orderBy: {
+
+          requestedAt: 'desc'
+
+        }
+
+      });
+
+    successResponse(
+
+      res,
+
+      'Password reset requests retrieved.',
+
+      requests
+
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+
+}
+export async function approvePasswordResetRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const request =
+      await prisma.passwordResetRequest.findUnique({
+
+        where: {
+
+          id: req.params.id
+
+        },
+
+        include: {
+
+          user: true
+
+        }
+
+      });
+
+    if (!request) {
+
+      errorResponse(
+        res,
+        'Request not found.',
+        404
+      );
+
+      return;
+
+    }
+
+    if (request.status !== 'PENDING') {
+
+      errorResponse(
+        res,
+        'This request has already been processed.',
+        400
+      );
+
+      return;
+
+    }
+
+    await prisma.passwordResetRequest.update({
+
+      where: {
+
+        id: request.id
+
+      },
+
+      data: {
+
+        status: 'APPROVED',
+
+        handledAt: new Date(),
+
+        handledById: req.user!.id,
+
+        handledByName: req.user!.name,
+
+        oneTimeLogin: true
+
+      }
+
+    });
+
+    successResponse(
+      res,
+      'Password reset request approved.'
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+
+}
+export async function rejectPasswordResetRequest(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    const request =
+      await prisma.passwordResetRequest.findUnique({
+
+        where: {
+
+          id: req.params.id
+
+        }
+
+      });
+
+    if (!request) {
+
+      errorResponse(
+        res,
+        'Request not found.',
+        404
+      );
+
+      return;
+
+    }
+
+    if (request.status !== 'PENDING') {
+
+      errorResponse(
+        res,
+        'This request has already been processed.',
+        400
+      );
+
+      return;
+
+    }
+
+    await prisma.passwordResetRequest.update({
+
+      where: {
+
+        id: request.id
+
+      },
+
+      data: {
+
+        status: 'REJECTED',
+
+        handledAt: new Date(),
+
+        handledById: req.user!.id,
+
+        handledByName: req.user!.name
+
+      }
+
+    });
+
+    successResponse(
+      res,
+      'Password reset request rejected.'
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+
+}
+export async function resetPassword(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+
+  try {
+
+    if (!req.user) {
+
+      errorResponse(res, 'Unauthorized.', 401);
+
+      return;
+
+    }
+
+    const { password } = req.body;
+
+    const request =
+      await prisma.passwordResetRequest.findFirst({
+
+        where: {
+
+          userId: req.user.id,
+
+          status: 'APPROVED',
+
+          used: false
+
+        }
+
+      });
+
+    if (!request) {
+
+      errorResponse(
+
+        res,
+
+        'No approved password reset request found.',
+
+        403
+
+      );
+
+      return;
+
+    }
+
+    const hash =
+      await bcrypt.hash(password, 10);
+
+    await prisma.user.update({
+
+      where: {
+
+        id: req.user.id
+
+      },
+
+      data: {
+
+        password: hash
+
+      }
+
+    });
+
+    await prisma.passwordResetRequest.update({
+
+      where: {
+
+        id: request.id
+
+      },
+
+      data: {
+
+        used: true,
+
+        status: 'USED',
+
+        oneTimeLogin: false
+
+      }
+
+    });
+
+    successResponse(
+
+      res,
+
+      'Password changed successfully.'
+
+    );
+
+  } catch (err) {
+
+    next(err);
+
+  }
+
 }

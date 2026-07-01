@@ -53,8 +53,49 @@ router.post('/auth/login', validate([
 ]), authCtrl.login);
 
 router.post('/auth/logout', authCtrl.logout);
-router.get('/auth/me', requireAuth, authCtrl.getMe);
+router.post(
+  '/auth/forgot-password',
+  validate([
+    {
+      field: 'email',
+      required: true,
+      isEmail: true
+    }
+  ]),
+  authCtrl.requestPasswordReset
+);
+router.get(
+  '/auth/password-reset-requests',
+  requireAuth,
+  requireRole('admin'),
+  authCtrl.getPasswordResetRequests
+);
+router.post(
+  '/auth/password-reset-requests/:id/approve',
+  requireAuth,
+  requireRole('admin'),
+  authCtrl.approvePasswordResetRequest
+);
 
+router.post(
+  '/auth/password-reset-requests/:id/reject',
+  requireAuth,
+  requireRole('admin'),
+  authCtrl.rejectPasswordResetRequest
+);
+router.get('/auth/me', requireAuth, authCtrl.getMe);
+router.post(
+  '/auth/reset-password',
+  requireAuth,
+  validate([
+    {
+      field: 'password',
+      required: true,
+      min: 6
+    }
+  ]),
+  authCtrl.resetPassword
+);
 // =============================================================================
 // ATTENDANCE ROUTES - QR-Based Attendance Management
 // =============================================================================
