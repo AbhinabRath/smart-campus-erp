@@ -47,10 +47,17 @@ const router = Router();
 // =============================================================================
 // AUTH ROUTES - Login/Logout/Session Validation
 // =============================================================================
-router.post('/auth/login', validate([
-  { field: 'email', required: true, isEmail: true },
-  { field: 'password', required: true, isString: true, min: 1 },
-]), authCtrl.login);
+router.post(
+  '/auth/login',
+  validate([
+    {
+      field: 'email',
+      required: true,
+      isEmail: true
+    }
+  ]),
+  authCtrl.login
+);
 
 router.post('/auth/logout', authCtrl.logout);
 router.post(
