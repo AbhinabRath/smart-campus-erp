@@ -339,7 +339,7 @@ setSessions((prev) => [newSession, ...prev]);
       );
 
     });
-
+console.log("Student Location:", position.coords);
     const qr = JSON.parse(value);
 
     setMarking(true);
@@ -511,7 +511,7 @@ const applyPRC = async () => {
       navigator.geolocation.getCurrentPosition(
 
         (pos) => {
-
+console.log("Teacher Location:", pos.coords);
           setLatitude(
             pos.coords.latitude.toString()
           );
