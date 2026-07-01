@@ -27,7 +27,16 @@ import { successResponse, errorResponse } from '../utils/response';
  */
 export async function createAttendanceSession(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { subjectId, departmentId, semester, section, duration } = req.body;
+    const {
+  subjectId,
+  departmentId,
+  semester,
+  section,
+  duration,
+  latitude,
+  longitude,
+  allowedRadius,
+} = req.body;
     const teacherId = req.user!.id;
 
     // Verify the teacher profile exists and belongs to this user
@@ -49,6 +58,9 @@ export async function createAttendanceSession(req: Request, res: Response, next:
         departmentId,
         semester,
         section: section || 'A',
+        latitude,
+        longitude,
+        allowedRadius,
         qrCode: currentQrToken,
 
 currentQrToken,
@@ -216,7 +228,12 @@ export async function endAttendanceSession(req: Request, res: Response, next: Ne
  */
 export async function markAttendance(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { sessionId, token } = req.body;
+    const {
+  sessionId,
+  token,
+  latitude,
+  longitude,
+} = req.body;
     const userId = req.user!.id;
 
     // Layer 1: Find student profile for this user
@@ -309,6 +326,83 @@ if (session.allowedNetworkPrefix) {
   }
 
 }
+if (
+  session.latitude !== null &&
+  session.longitude !== null
+) {
+
+  if (
+    latitude == null ||
+    longitude == null
+  ) {
+
+    errorResponse(
+      res,
+      'Please enable your device location to mark attendance.',
+      400
+    );
+
+    return;
+
+  }
+
+  const toRadians = (deg: number) =>
+    deg * Math.PI / 180;
+
+  const R = 6371000;
+
+  const dLat =
+    toRadians(latitude - session.latitude);
+
+  const dLon =
+    toRadians(longitude - session.longitude);
+
+  const lat1 =
+    toRadians(session.latitude);
+
+  const lat2 =
+    toRadians(latitude);
+
+  const a =
+    Math.sin(dLat / 2) *
+      Math.sin(dLat / 2) +
+
+    Math.cos(lat1) *
+      Math.cos(lat2) *
+
+    Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+
+  const c =
+    2 *
+    Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1 - a)
+    );
+
+  const distance = R * c;
+
+  if (
+    distance >
+    session.allowedRadius
+  ) {
+
+    errorResponse(
+
+      res,
+
+      `You are outside the allowed attendance area. Distance: ${Math.round(distance)} m`,
+
+      403
+
+    );
+
+    return;
+
+  }
+
+}
+
     // Layer 6: Duplicate prevention - check if student already marked attendance
     const existingRecord = await prisma.attendanceRecord.findUnique({
       where: {

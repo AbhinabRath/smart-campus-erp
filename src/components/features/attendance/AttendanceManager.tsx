@@ -90,6 +90,10 @@ export default function AttendanceManager() {
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('3');
   const [selectedSection, setSelectedSection] = useState('A');
+
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
+  const [allowedRadius, setAllowedRadius] = useState('25');
   const [creating, setCreating] = useState(false);
   const [filterDate, setFilterDate] = useState(format(new Date(), 'yyyy-MM-dd'));
 
@@ -208,6 +212,10 @@ const [marking, setMarking] = useState(false);
         departmentId: selectedDept,
         semester: parseInt(selectedSemester),
         section: selectedSection,
+
+        latitude: latitude ? parseFloat(latitude) : null,
+        longitude: longitude ? parseFloat(longitude) : null,
+        allowedRadius: parseInt(allowedRadius),
       });
       const response = res.data.data;
 
@@ -294,6 +302,44 @@ setSessions((prev) => [newSession, ...prev]);
 
   try {
 
+    if (!navigator.geolocation) {
+
+      toast({
+
+        title: 'Location Required',
+
+        description: 'Your device does not support GPS.',
+
+        variant: 'destructive'
+
+      });
+
+      return;
+
+    }
+
+    const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+
+      navigator.geolocation.getCurrentPosition(
+
+        resolve,
+
+        reject,
+
+        {
+
+          enableHighAccuracy: true,
+
+          timeout: 10000,
+
+          maximumAge: 0
+
+        }
+
+      );
+
+    });
+
     const qr = JSON.parse(value);
 
     setMarking(true);
@@ -302,7 +348,11 @@ setSessions((prev) => [newSession, ...prev]);
 
       sessionId: qr.sessionId,
 
-      token: qr.token
+      token: qr.token,
+
+      latitude: position.coords.latitude,
+
+      longitude: position.coords.longitude
 
     });
 
@@ -418,6 +468,103 @@ const applyPRC = async () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                 <div className="space-y-2">
+
+  <Label>Attendance Radius (meters)</Label>
+
+  <Input
+    type="number"
+    min="1"
+    value={allowedRadius}
+    onChange={(e) => setAllowedRadius(e.target.value)}
+  />
+
+</div>
+
+<div className="space-y-2">
+
+  <Label>Classroom Location</Label>
+
+  <Button
+    type="button"
+    variant="outline"
+    className="w-full"
+    onClick={() => {
+
+      if (!navigator.geolocation) {
+
+        toast({
+
+          title: "GPS Not Supported",
+
+          description: "This browser does not support GPS.",
+
+          variant: "destructive"
+
+        });
+
+        return;
+
+      }
+
+      navigator.geolocation.getCurrentPosition(
+
+        (pos) => {
+
+          setLatitude(
+            pos.coords.latitude.toString()
+          );
+
+          setLongitude(
+            pos.coords.longitude.toString()
+          );
+
+          toast({
+
+            title: "Location Captured",
+
+            description: "Classroom GPS saved."
+
+          });
+
+        },
+
+        () => {
+
+          toast({
+
+            title: "Location Required",
+
+            description: "Please enable GPS.",
+
+            variant: "destructive"
+
+          });
+
+        },
+
+        {
+
+          enableHighAccuracy: true,
+
+          timeout: 10000,
+
+          maximumAge: 0
+
+        }
+
+      );
+
+    }}
+  >
+
+    Use Current Location
+
+  </Button>
+
+</div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Semester</Label>
@@ -438,7 +585,14 @@ const applyPRC = async () => {
                     </Select>
                   </div>
                 </div>
-                <Button onClick={createSession} disabled={creating || !!activeSession} className="w-full bg-emerald-700 hover:bg-emerald-800">
+                <Button
+  onClick={createSession}
+  disabled={
+    creating ||
+    !!activeSession ||
+    !latitude ||
+    !longitude
+  } className="w-full bg-emerald-700 hover:bg-emerald-800">
                   {creating ? 'Creating...' : activeSession ? 'Session Active' : 'Create Session'}
                 </Button>
               </CardContent>
