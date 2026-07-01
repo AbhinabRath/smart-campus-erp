@@ -66,7 +66,7 @@ model Student {
   attendanceRecords     AttendanceRecord[]
   fee_payments          fee_payments[]
   marks                 Mark[]
-  department            Department             @relation(fields: [departmentId], references: [id])
+  department            Department             @relation(fields: [departmentId], references: [id], onDelete: NoAction)
   user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([rollNumber])
@@ -93,7 +93,7 @@ model Teacher {
   attendanceSessions AttendanceSession[]
   marksEntries       Mark[]
   studyMaterials     StudyMaterial[]
-  department         Department          @relation(fields: [departmentId], references: [id])
+  department         Department          @relation(fields: [departmentId], references: [id], onDelete: NoAction)
   user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   timetables         Timetable[]
 
@@ -116,7 +116,7 @@ model Subject {
   attendanceSessions AttendanceSession[]
   marks              Mark[]
   studyMaterials     StudyMaterial[]
-  department         Department          @relation(fields: [departmentId], references: [id])
+  department         Department          @relation(fields: [departmentId], references: [id], onDelete: NoAction)
   timetables         Timetable[]
 
   @@index([code])
@@ -126,27 +126,30 @@ model Subject {
 }
 
 model AttendanceSession {
-  id           String             @id @default(cuid())
-  teacherId    String
-  subjectId    String
-  departmentId String
-  semester     Int
-  section      String             @default("A")
-  qrCode       String             @unique
-  currentQrToken        String?   @db.VarChar(255)
-  tokenExpiresAt        DateTime?
-  tokenRotationSec      Int       @default(10)
-  allowedNetworkPrefix  String?   @db.VarChar(50)
-  isActive     Boolean            @default(true)
-  duration     Int                @default(15)
-  startedAt    DateTime           @default(now())
-  endedAt      DateTime?
-  createdAt    DateTime           @default(now())
-  updatedAt    DateTime           @updatedAt
-  records      AttendanceRecord[]
-  department   Department         @relation(fields: [departmentId], references: [id])
-  subject      Subject            @relation(fields: [subjectId], references: [id])
-  teacher      Teacher            @relation(fields: [teacherId], references: [id])
+  id                   String             @id @default(cuid())
+  teacherId            String
+  subjectId            String
+  departmentId         String
+  semester             Int
+  section              String             @default("A")
+  qrCode               String             @unique
+  currentQrToken       String?            @db.VarChar(255)
+  tokenExpiresAt       DateTime?
+  tokenRotationSec     Int                @default(10)
+  allowedNetworkPrefix String?            @db.VarChar(50)
+  latitude             Float?
+  longitude            Float?
+  allowedRadius        Int                @default(25)
+  isActive             Boolean            @default(true)
+  duration             Int                @default(15)
+  startedAt            DateTime           @default(now())
+  endedAt              DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  records              AttendanceRecord[]
+  department           Department         @relation(fields: [departmentId], references: [id], onDelete: NoAction)
+  subject              Subject            @relation(fields: [subjectId], references: [id], onDelete: NoAction)
+  teacher              Teacher            @relation(fields: [teacherId], references: [id], onDelete: NoAction)
 
   @@index([qrCode])
   @@index([isActive])
@@ -162,12 +165,12 @@ model AttendanceRecord {
   attendanceSessionId String
   markedAt            DateTime          @default(now())
   ipAddress           String?
-  tokenUsed     String? @db.VarChar(255)
-  deviceInfo    String? @db.Text
+  tokenUsed           String?           @db.VarChar(255)
+  deviceInfo          String?           @db.Text
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   session             AttendanceSession @relation(fields: [attendanceSessionId], references: [id], onDelete: Cascade)
-  student             Student           @relation(fields: [studentId], references: [id])
+  student             Student           @relation(fields: [studentId], references: [id], onDelete: NoAction)
 
   @@unique([studentId, attendanceSessionId])
   @@index([studentId])
@@ -186,9 +189,9 @@ model Mark {
   remarks       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  student       Student  @relation(fields: [studentId], references: [id])
-  subject       Subject  @relation(fields: [subjectId], references: [id])
-  teacher       Teacher  @relation(fields: [teacherId], references: [id])
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: NoAction)
+  subject       Subject  @relation(fields: [subjectId], references: [id], onDelete: NoAction)
+  teacher       Teacher  @relation(fields: [teacherId], references: [id], onDelete: NoAction)
 
   @@unique([studentId, subjectId, teacherId, examType])
   @@index([studentId])
@@ -211,8 +214,8 @@ model Assignment {
   createdAt   DateTime               @default(now())
   updatedAt   DateTime               @updatedAt
   submissions AssignmentSubmission[]
-  subject     Subject                @relation(fields: [subjectId], references: [id])
-  teacher     Teacher                @relation(fields: [teacherId], references: [id])
+  subject     Subject                @relation(fields: [subjectId], references: [id], onDelete: NoAction)
+  teacher     Teacher                @relation(fields: [teacherId], references: [id], onDelete: NoAction)
 
   @@index([teacherId])
   @@index([subjectId])
@@ -234,7 +237,7 @@ model AssignmentSubmission {
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
   assignment    Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  student       Student    @relation(fields: [studentId], references: [id])
+  student       Student    @relation(fields: [studentId], references: [id], onDelete: NoAction)
 
   @@unique([assignmentId, studentId])
   @@index([assignmentId])
@@ -255,8 +258,8 @@ model StudyMaterial {
   downloads   Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  subject     Subject  @relation(fields: [subjectId], references: [id])
-  teacher     Teacher  @relation(fields: [teacherId], references: [id])
+  subject     Subject  @relation(fields: [subjectId], references: [id], onDelete: NoAction)
+  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: NoAction)
 
   @@index([teacherId])
   @@index([subjectId])
@@ -278,9 +281,9 @@ model Timetable {
   endTime      String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
-  department   Department @relation(fields: [departmentId], references: [id])
-  subject      Subject    @relation(fields: [subjectId], references: [id])
-  teacher      Teacher    @relation(fields: [teacherId], references: [id])
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: NoAction)
+  subject      Subject    @relation(fields: [subjectId], references: [id], onDelete: NoAction)
+  teacher      Teacher    @relation(fields: [teacherId], references: [id], onDelete: NoAction)
 
   @@unique([departmentId, semester, section, dayOfWeek, periodNumber])
   @@index([departmentId])
@@ -300,7 +303,7 @@ model Notice {
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   reads      NoticeRead[]
-  author     User         @relation(fields: [authorId], references: [id])
+  author     User         @relation(fields: [authorId], references: [id], onDelete: NoAction)
 
   @@index([targetRole])
   @@index([priority])
@@ -336,7 +339,7 @@ model LeaveRequest {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   approver   User?    @relation("LeaveApprover", fields: [approvedBy], references: [id])
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: NoAction)
 
   @@index([userId])
   @@index([status])
@@ -355,7 +358,7 @@ model Recommendation {
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [studentId], references: [id])
+  user        User     @relation(fields: [studentId], references: [id], onDelete: NoAction)
 
   @@index([studentId])
   @@index([type])
@@ -428,7 +431,7 @@ model fee_payments {
   remarks     String?   @db.VarChar(255)
   paymentDate DateTime? @default(now())
   createdAt   DateTime? @default(now())
-  students    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "fk_fee_student")
+  students    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade, onUpdate: NoAction, map: "fk_fee_student")
 
   @@index([studentId], map: "idx_student")
 }
