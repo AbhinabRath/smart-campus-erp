@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
+import https from 'https';
 
 export async function generateMyIdCard(
   req: Request,
@@ -154,6 +155,30 @@ function generateCard(
 
   doc.fillColor('black');
 
+ if (
+  user.user.avatar &&
+  user.user.avatar.startsWith('https://')
+) {
+
+  https.get(user.user.avatar, (response) => {
+    const chunks: Buffer[] = [];
+
+    response.on('data', chunk => chunks.push(chunk));
+
+    response.on('end', () => {
+      doc.image(
+        Buffer.concat(chunks),
+        95,
+        150,
+        {
+          fit: [110, 130]
+        }
+      );
+    });
+  });
+
+} else {
+
   const avatarPath =
     user.user.avatar
       ? path.join(
@@ -190,7 +215,10 @@ function generateCard(
       130,
       210
     );
+
   }
+
+}
 
   doc
     .fontSize(11)

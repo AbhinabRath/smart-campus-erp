@@ -169,6 +169,27 @@ export async function getMarksBySubject(req: Request, res: Response, next: NextF
   }
 }
 
+export async function getMarksForAllSubjects(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { examType } = req.query;
+    const where: any = {};
+    if (examType) where.examType = String(examType);
+
+    const marks = await prisma.mark.findMany({
+      where,
+      include: {
+        student: { include: { user: { select: { name: true, email: true } } } },
+        subject: { select: { id: true, name: true, code: true } },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    successResponse(res, 'All subject marks retrieved.', marks);
+  } catch (err) {
+    next(err);
+  }
+}
+
 /**
  * GET /api/marks/my-marks
  * Student views their own marks. Ensures students can only see their data.

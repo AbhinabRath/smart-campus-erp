@@ -130,21 +130,15 @@ export default function TimetableManager() {
 
   const subjectColorMap = useSubjectColorMap(entries);
 
-  const loadData = useCallback(async () => {
-    setLoading(true);
+ const loadReferenceData = useCallback(async () => {
     try {
-      const [ttRes, deptRes, subRes] = await Promise.all([
-        api.get('/timetables'),
+      const [deptRes, subRes] = await Promise.all([
         api.get('/departments'),
         api.get('/subjects'),
       ]);
-      const ttData = ttRes.data.data;
-      setEntries(Array.isArray(ttData) ? ttData : (ttData?.timetables || []));
-     
+
       setDepartments(deptRes.data.data || []);
-      
       setSubjects(subRes.data.data || []);
-      
 
       // Load teachers for admin
       if (role === 'admin') {
@@ -176,10 +170,28 @@ export default function TimetableManager() {
           setFilterDept(deptRes.data.data[0].id);
           }
     } catch { /* ignore */ }
-    setLoading(false);
   }, [role, currentUser]);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  useEffect(() => { loadReferenceData(); }, [loadReferenceData]);
+
+  const loadTimetableEntries = useCallback(async () => {
+    if (!filterDept || !filterSemester || !filterSection) return;
+    setLoading(true);
+    try {
+      const ttRes = await api.get('/timetables', {
+        params: {
+          departmentId: filterDept,
+          semester: filterSemester,
+          section: filterSection,
+        },
+      });
+      const ttData = ttRes.data.data;
+      setEntries(Array.isArray(ttData) ? ttData : (ttData?.timetables || []));
+    } catch { /* ignore */ }
+    setLoading(false);
+  }, [filterDept, filterSemester, filterSection]);
+
+  useEffect(() => { loadTimetableEntries(); }, [loadTimetableEntries]);
 
   // Admin: Create timetable entry
   const handleCreate = async (e: React.FormEvent) => {
@@ -204,7 +216,7 @@ export default function TimetableManager() {
         endTime: PERIOD_END_TIMES[periodIdx] || '09:50',
       });
       toast({ title: 'Success', description: 'Timetable entry created' });
-      loadData();
+      loadTimetableEntries();
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       toast({ title: 'Error', description: axiosErr.response?.data?.message || 'Failed to create entry', variant: 'destructive' });
@@ -214,11 +226,7 @@ export default function TimetableManager() {
   };
 
   // Filter timetable entries
- const filtered = entries.filter((e) => {
-  return e.departmentId === filterDept &&
-         e.semester === parseInt(filterSemester) &&
-         e.section === filterSection;
-});
+ const filtered = entries;
 const filteredSubjects = subjects.filter(
   (s) =>
     s.departmentId === filterDept &&
@@ -297,7 +305,7 @@ const periodInfo = periods.map((period) => {
           <SelectTrigger className="w-[100px]"><SelectValue /></SelectTrigger>
           <SelectContent>{['A','B','C'].map((s) => <SelectItem key={s} value={s}>Sec {s}</SelectItem>)}</SelectContent>
         </Select>
-        <Button variant="ghost" size="icon" onClick={loadData}><RefreshCw className="w-4 h-4" /></Button>
+        <Button variant="ghost" size="icon" onClick={loadTimetableEntries}><RefreshCw className="w-4 h-4" /></Button>
       </div>
 
       {/* Admin: Create entry */}
@@ -429,7 +437,7 @@ const periodInfo = periods.map((period) => {
                                             description: 'Timetable slot removed',
                                           });
 
-                                          loadData();
+                                          loadTimetableEntries();
                                         } catch {
                                           toast({
                                             title: 'Error',

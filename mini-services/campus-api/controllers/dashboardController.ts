@@ -477,25 +477,19 @@ prisma.attendanceRecord.findMany({
     },
   },
 }),
-prisma.student.findMany({
-  select: {
-    departmentId: true,
-    semester: true,
-    section: true,
-  },
+prisma.student.groupBy({
+  by: ['departmentId', 'semester', 'section'],
+  _count: { id: true },
 }),
     ]);
     const sectionStudentCount = new Map<string, number>();
 
-allStudents.forEach((student) => {
+allStudents.forEach((group) => {
 
   const key =
-    `${student.departmentId}-${student.semester}-${student.section}`;
+    `${group.departmentId}-${group.semester}-${group.section}`;
 
-  sectionStudentCount.set(
-    key,
-    (sectionStudentCount.get(key) || 0) + 1
-  );
+  sectionStudentCount.set(key, group._count.id);
 
 });
 
@@ -564,15 +558,17 @@ return {
 };
   });
 })();
-const assignmentsWithEligibility = await Promise.all(
-  recentAssignments.map(async (assignment) => {
+const eligibleCountByDeptSemester = new Map<string, number>();
+for (const g of allStudents) {
+  const key = `${g.departmentId}-${g.semester}`;
+  eligibleCountByDeptSemester.set(key, (eligibleCountByDeptSemester.get(key) || 0) + g._count.id);
+}
 
-    const eligibleStudents = await prisma.student.count({
-      where: {
-        departmentId: assignment.subject.departmentId,
-        semester: assignment.subject.semester,
-      },
-    });
+const assignmentsWithEligibility = recentAssignments.map((assignment) => {
+
+    const eligibleStudents = eligibleCountByDeptSemester.get(
+      `${assignment.subject.departmentId}-${assignment.subject.semester}`
+    ) || 0;
 
     const submissionRate =
       eligibleStudents > 0
@@ -595,12 +591,11 @@ const assignmentsWithEligibility = await Promise.all(
       eligibleStudents,
       submissionRate,
     };
-  })
-);
+  });
 
-const totalStudents = allStudents.filter(
-  (s) => s.departmentId === teacher.departmentId
-).length;
+const totalStudents = allStudents
+  .filter((g) => g.departmentId === teacher.departmentId)
+  .reduce((sum, g) => sum + g._count.id, 0);
     successResponse(res, 'Teacher dashboard data loaded.', {
       teacher: {
         name: req.user!.name,

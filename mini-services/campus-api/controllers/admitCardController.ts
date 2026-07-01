@@ -3,6 +3,7 @@ import prisma from '../config/database';
 import PDFDocument from 'pdfkit';
 import path from 'path';
 import fs from 'fs';
+import https from 'https';
 
 function generateAdmitNumber() {
   return Math.floor(
@@ -186,6 +187,31 @@ function generatePdf(
   // PHOTO BOX
   doc.rect(370, 120, 170, 150).stroke();
 
+  if (
+  student.user.avatar &&
+  student.user.avatar.startsWith('https://')
+) {
+
+  https.get(student.user.avatar, (response) => {
+    const chunks: Buffer[] = [];
+
+    response.on('data', chunk => chunks.push(chunk));
+
+    response.on('end', () => {
+      doc.image(
+        Buffer.concat(chunks),
+        405,
+        135,
+        {
+          fit: [100, 110],
+          align: 'center'
+        }
+      );
+    });
+  });
+
+} else {
+
   const avatarPath =
     student.user.avatar
       ? path.join(
@@ -198,6 +224,7 @@ function generatePdf(
     avatarPath &&
     fs.existsSync(avatarPath)
   ) {
+
     doc.image(
       avatarPath,
       405,
@@ -207,7 +234,9 @@ function generatePdf(
         align: 'center'
       }
     );
+
   } else {
+
     doc.rect(
       410,
       135,
@@ -220,7 +249,10 @@ function generatePdf(
       440,
       180
     );
+
   }
+
+}
 
   doc
     .fontSize(9)

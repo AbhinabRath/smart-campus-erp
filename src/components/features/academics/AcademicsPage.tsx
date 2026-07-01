@@ -616,10 +616,7 @@ return (
   </div>
 
 </div>
-{(
-  currentUser?.role === 'student' ||
-  currentUser?.role === 'teacher'
-) && (
+{( currentUser?.role === 'student') && (
 
 <div className="rounded-3xl border border-border p-8">
 

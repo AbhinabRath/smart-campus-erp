@@ -111,6 +111,7 @@ router.put('/marks/:id', requireAuth, requireRole('teacher', 'admin'), marksCtrl
 router.delete('/marks/:id', requireAuth, requireRole('teacher', 'admin'), marksCtrl.deleteMarks);
 router.get('/marks/student/:studentId', requireAuth, requireRole('teacher', 'admin'), marksCtrl.getMarksByStudent);
 router.get('/marks/subject/:subjectId', requireAuth, requireRole('teacher', 'admin'), marksCtrl.getMarksBySubject);
+router.get('/marks/all-subjects', requireAuth, requireRole('teacher', 'admin'), marksCtrl.getMarksForAllSubjects);
 router.get('/marks/my-marks', requireAuth, requireRole('student'), marksCtrl.getMyMarks);
 
 // =============================================================================

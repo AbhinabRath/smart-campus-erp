@@ -144,19 +144,15 @@ export default function MarksManager() {
       setAdminSubjects(allSubjects);
       setAdminDepts(allDepts);
 
-      // Load marks for all subjects (in parallel)
-      const marksPromises = allSubjects.map((s) =>
-        api.get(`/marks/subject/${s.id}`).then((r) => {
-          const subjectMarks: Mark[] = r.data.data || [];
-          // Enrich each mark with subject info for table display
-          return subjectMarks.map((m) => ({
-            ...m,
-            subject: { ...m.subject, id: s.id, name: s.name, code: s.code },
-          }));
-        }).catch(() => [] as Mark[])
-      );
-      const allMarksArrays = await Promise.all(marksPromises);
-      const allMarks = allMarksArrays.flat();
+      const subjectById = new Map(allSubjects.map((s) => [s.id, s]));
+      const allMarksRes = await api.get('/marks/all-subjects');
+      const allMarks: Mark[] = (allMarksRes.data.data || []).map((m: Mark) => {
+        const s = subjectById.get(m.subject?.id || '');
+        return {
+          ...m,
+          subject: { ...m.subject, id: s?.id || m.subject?.id, name: s?.name || m.subject?.name, code: s?.code || m.subject?.code },
+        };
+      });
       setAdminMarks(allMarks);
     } catch { /* ignore */ }
     setAdminLoading(false);
