@@ -85,7 +85,7 @@ export default function AttendanceManager() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [activeSession, setActiveSession] = useState<Session | null>(null);
-  const [refreshCountdown, setRefreshCountdown] = useState(10);
+  const [refreshCountdown, setRefreshCountdown] = useState(15);
   const [selectedSubject, setSelectedSubject] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedSemester, setSelectedSemester] = useState('3');
@@ -185,7 +185,7 @@ const [marking, setMarking] = useState(false);
 
         refreshQR();
 
-        return 10;
+        return 15;
 
       }
 

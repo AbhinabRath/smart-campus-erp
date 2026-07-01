@@ -65,7 +65,7 @@ export async function createAttendanceSession(req: Request, res: Response, next:
 
 currentQrToken,
 
-tokenExpiresAt: new Date(Date.now() + 10000),
+tokenExpiresAt: new Date(Date.now() + 15000),
 
 tokenRotationSec: 10,
 
@@ -676,7 +676,7 @@ export async function refreshAttendanceQR(
 
           currentQrToken: token,
 
-          tokenExpiresAt: new Date(Date.now() + 10000)
+          tokenExpiresAt: new Date(Date.now() + 15000)
 
         }
 
