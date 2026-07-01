@@ -78,7 +78,9 @@ export type ViewId =
   | 'profile'
   | 'settings'
   | 'directory'
-  | 'public-profile';
+  | 'public-profile'
+  | 'password-reset-requests';
+  | 'reset-password';
 interface AppState {
   // Auth state
   currentUser: User | null;

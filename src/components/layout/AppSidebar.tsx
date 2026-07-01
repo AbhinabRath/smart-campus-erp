@@ -15,6 +15,7 @@ import {
   Users,
   Building2,
   BookOpen,
+  KeyRound,
   ClipboardCheck,
   FileText,
   FileUp,
@@ -103,6 +104,13 @@ const navItems: NavItem[] = [
 },
   { id: 'profile', label: 'Profile', icon: UserCircle, roles: ['admin', 'teacher', 'student'], section: 'account' },
   { id: 'settings', label: 'Settings', icon: Settings, roles: ['admin', 'teacher', 'student'], section: 'account' },
+  {
+  id: 'password-reset-requests',
+  label: 'Forgot Password Logs',
+  icon: KeyRound,
+  roles: ['admin'],
+  section: 'account'
+},
 ];
 
 export default function AppSidebar() {

@@ -93,6 +93,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [requestingReset, setRequestingReset] = useState(false);
   const [loading, setLoading] = useState(false);
   const [touched, setTouched] = useState({ email: false, password: false });
   const [focused, setFocused] = useState({ email: false, password: false });
@@ -111,6 +112,46 @@ export default function LoginPage() {
       .catch(() => setPublicNotices([]));
   }, []);
 
+   const handleForgotPassword = async () => {
+
+  if (!email.trim()) {
+
+    setError('Please enter your email first.');
+
+    return;
+
+  }
+
+  setError('');
+
+  setRequestingReset(true);
+
+  try {
+
+    const res = await api.post(
+      '/auth/forgot-password',
+      {
+        email
+      }
+    );
+
+    alert(res.data.message);
+
+  } catch (err: any) {
+
+    alert(
+      err.response?.data?.message ||
+      'Unable to submit request.'
+    );
+
+  } finally {
+
+    setRequestingReset(false);
+
+  }
+
+};
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setTouched({ email: true, password: true });
@@ -119,10 +160,37 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const loginRes = await api.post('/auth/login', { email, password });
+      const body: any = {
+  email
+};
+
+if (password.trim()) {
+  body.password = password;
+}
+
+const loginRes =
+  await api.post(
+    '/auth/login',
+    body
+  );
       const sessionToken = loginRes.data?.data?.sessionToken;
-      const meRes = await api.get('/auth/me');
-      login(meRes.data.data, sessionToken);
+      const meRes =
+  await api.get('/auth/me');
+
+login(
+  meRes.data.data,
+  sessionToken
+);
+
+if (
+  loginRes.data.data.forcePasswordReset
+) {
+
+  useAppStore
+    .getState()
+    .setView('reset-password');
+
+}
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string } } };
       setError(axiosErr.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -376,6 +444,16 @@ sm:text-[52px]
                   </>
                 )}
               </Button>
+              <button
+  type="button"
+  onClick={handleForgotPassword}
+  disabled={requestingReset}
+  className="mt-3 w-full text-center text-sm text-blue-600 hover:underline"
+>
+  {requestingReset
+    ? 'Sending Request...'
+    : 'Forgot Password?'}
+</button>
             </form>
 
 <p className="mt-4 text-center text-xs text-slate-400">

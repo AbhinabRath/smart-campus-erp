@@ -30,7 +30,7 @@ import { successResponse, errorResponse } from '../utils/response';
  */
 export async function login(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const { email, password } = req.body;
+    const { email, password = '' } = req.body;
 
 // Find user by email. We need the password hash for comparison.
 const user = await prisma.user.findUnique({ where: { email } });
@@ -67,11 +67,25 @@ if (resetRequest) {
 
 } else {
 
+  if (!password) {
+
+    errorResponse(
+      res,
+      'Password is required.',
+      400
+    );
+
+    return;
+
+  }
+
   isPasswordValid =
-    await bcrypt.compare(password, user.password);
+    await bcrypt.compare(
+      password,
+      user.password
+    );
 
 }
-
 if (!isPasswordValid) {
 
   const rejected =

@@ -55,7 +55,9 @@ import PublicProfilePage from
 
 // Settings
 import SettingsPage from '@/components/features/settings/SettingsPage';
-
+import PasswordResetRequests from '@/components/features/auth/PasswordResetRequests';
+import ResetPasswordPage
+from '@/components/features/auth/ResetPasswordPage';
 // Shared components
 import CommandPalette from '@/components/shared/CommandPalette';
 
@@ -96,9 +98,15 @@ function renderView(view: ViewId, role: string) {
 case 'public-profile':
   return <PublicProfilePage />;
     case 'profile': return <ProfilePage />;
-    case 'settings': return <SettingsPage />;
+    case 'settings':
+  return <SettingsPage />;
+
+case 'password-reset-requests':
+  return <PasswordResetRequests />;
     default: return <AdminDashboard />;
   }
+  case 'reset-password':
+  return <ResetPasswordPage />;
 }
 
 // View title mapping for the header
@@ -122,6 +130,7 @@ const viewTitles: Record<ViewId, string> = {
   settings: 'Settings',
   directory: 'Directory',
   'public-profile': 'Profile',
+'password-reset-requests': 'Forgot Password Logs',
 };
 
 export default function Home() {
