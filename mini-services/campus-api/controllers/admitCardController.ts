@@ -5,6 +5,27 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
+function downloadImage(url: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      const chunks: Buffer[] = [];
+
+      res.on('data', (chunk) => chunks.push(chunk));
+
+      res.on('end', () => {
+        if (res.statusCode !== 200) {
+  reject(new Error(`HTTP ${res.statusCode}`));
+  return;
+}
+
+resolve(Buffer.concat(chunks));
+      });
+
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
 function generateAdmitNumber() {
   return Math.floor(
     100000000000 + Math.random() * 900000000000
@@ -50,7 +71,7 @@ export async function generateMyAdmitCard(
         },
       });
 
-    generatePdf(
+    await generatePdf(
       student,
       subjects,
       examType,
@@ -100,7 +121,7 @@ export async function generateStudentAdmitCard(
         },
       });
 
-    generatePdf(
+    await generatePdf(
       student,
       subjects,
       examType,
@@ -111,7 +132,7 @@ export async function generateStudentAdmitCard(
   }
 }
 
-function generatePdf(
+async function generatePdf(
   student: any,
   subjects: any[],
   examType: string,
@@ -187,19 +208,17 @@ function generatePdf(
   // PHOTO BOX
   doc.rect(370, 120, 170, 150).stroke();
 
-  if (
-  student.user.avatar &&
-  student.user.avatar.startsWith('https://')
-) {
+ if (student.user.avatar) {
 
-  https.get(student.user.avatar, (response) => {
-    const chunks: Buffer[] = [];
+  if (student.user.avatar.startsWith('https://')) {
 
-    response.on('data', chunk => chunks.push(chunk));
+    try {
 
-    response.on('end', () => {
+      const imageBuffer =
+        await downloadImage(student.user.avatar);
+
       doc.image(
-        Buffer.concat(chunks),
+        imageBuffer,
         405,
         135,
         {
@@ -207,50 +226,77 @@ function generatePdf(
           align: 'center'
         }
       );
-    });
-  });
 
-} else {
+    } catch {
 
-  const avatarPath =
-    student.user.avatar
-      ? path.join(
-          process.cwd(),
-          student.user.avatar.replace(/^\/+/, '')
-        )
-      : null;
+      doc.rect(
+        405,
+        135,
+        100,
+        110
+      ).stroke();
 
-  if (
-    avatarPath &&
-    fs.existsSync(avatarPath)
-  ) {
+      doc.text(
+        'PHOTO',
+        430,
+        185
+      );
 
-    doc.image(
-      avatarPath,
-      405,
-      135,
-      {
-        fit: [100, 110],
-        align: 'center'
-      }
-    );
+    }
 
   } else {
 
-    doc.rect(
-      410,
-      135,
-      90,
-      100
-    ).stroke();
+    const avatarPath =
+      path.join(
+        process.cwd(),
+        student.user.avatar.replace(/^\/+/, '')
+      );
 
-    doc.text(
-      'PHOTO',
-      440,
-      180
-    );
+    if (fs.existsSync(avatarPath)) {
+
+      doc.image(
+        avatarPath,
+        405,
+135,
+{
+  fit: [100,110],
+  align: 'center'
+}
+      );
+
+    } else {
+
+      doc.rect(
+        405,
+        135,
+        100,
+        110
+      ).stroke();
+
+      doc.text(
+        'PHOTO',
+        430,
+        185
+      );
+
+    }
 
   }
+
+} else {
+
+  doc.rect(
+    405,
+    135,
+    100,
+    110
+  ).stroke();
+
+  doc.text(
+    'PHOTO',
+    430,
+    185
+  );
 
 }
 

@@ -5,6 +5,22 @@ import path from 'path';
 import fs from 'fs';
 import https from 'https';
 
+function downloadImage(url: string): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    https.get(url, (res) => {
+      const chunks: Buffer[] = [];
+
+      res.on('data', (chunk) => chunks.push(chunk));
+
+      res.on('end', () => {
+        resolve(Buffer.concat(chunks));
+      });
+
+      res.on('error', reject);
+    }).on('error', reject);
+  });
+}
+
 export async function generateMyIdCard(
   req: Request,
   res: Response,
@@ -32,7 +48,7 @@ export async function generateMyIdCard(
         });
       }
 
-      generateCard(
+      await generateCard(
         {
           ...student,
           cardType: 'student'
@@ -63,7 +79,7 @@ export async function generateMyIdCard(
         });
       }
 
-      generateCard(
+      await generateCard(
         {
           ...teacher,
           cardType: 'teacher'
@@ -84,7 +100,7 @@ export async function generateMyIdCard(
   }
 }
 
-function generateCard(
+async function generateCard(
   user: any,
   res: Response
 ) {
@@ -155,68 +171,93 @@ function generateCard(
 
   doc.fillColor('black');
 
- if (
-  user.user.avatar &&
-  user.user.avatar.startsWith('https://')
-) {
+ if (user.user.avatar) {
 
-  https.get(user.user.avatar, (response) => {
-    const chunks: Buffer[] = [];
+  if (user.user.avatar.startsWith('https://')) {
 
-    response.on('data', chunk => chunks.push(chunk));
+    try {
 
-    response.on('end', () => {
+      const imageBuffer =
+        await downloadImage(user.user.avatar);
+
       doc.image(
-        Buffer.concat(chunks),
+        imageBuffer,
         95,
         150,
         {
           fit: [110, 130]
         }
       );
-    });
-  });
 
-} else {
+    } catch {
 
-  const avatarPath =
-    user.user.avatar
-      ? path.join(
-          process.cwd(),
-          user.user.avatar.replace(/^\/+/, '')
-        )
-      : null;
+      doc.rect(
+        95,
+        150,
+        110,
+        130
+      ).stroke();
 
-  if (
-    avatarPath &&
-    fs.existsSync(avatarPath)
-  ) {
+      doc.text(
+        'PHOTO',
+        130,
+        210
+      );
 
-    doc.image(
-      avatarPath,
-      95,
-      150,
-      {
-        fit: [110, 130]
-      }
-    );
+    }
 
   } else {
 
-    doc.rect(
-      95,
-      150,
-      110,
-      130
-    ).stroke();
+    const avatarPath =
+      path.join(
+        process.cwd(),
+        user.user.avatar.replace(/^\/+/, '')
+      );
 
-    doc.text(
-      'PHOTO',
-      130,
-      210
-    );
+    if (fs.existsSync(avatarPath)) {
+
+      doc.image(
+        avatarPath,
+        95,
+        150,
+        {
+          fit: [110, 130]
+        }
+      );
+
+    } else {
+
+      doc.rect(
+        95,
+        150,
+        110,
+        130
+      ).stroke();
+
+      doc.text(
+        'PHOTO',
+        130,
+        210
+      );
+
+    }
 
   }
+
+} else {
+
+  doc.rect(
+    95,
+    150,
+    110,
+    130
+  ).stroke();
+
+  doc.text(
+    'PHOTO',
+    130,
+    210
+  );
 
 }
 
