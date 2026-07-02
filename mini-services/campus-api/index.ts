@@ -20,6 +20,7 @@
 // =============================================================================
 
 import express from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
@@ -30,6 +31,8 @@ import fileUrlMiddleware from "./middleware/fileUrlMiddleware";
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
+
+app.use(compression());
 
 // =============================================================================
 // MIDDLEWARE SETUP

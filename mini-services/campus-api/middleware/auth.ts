@@ -79,7 +79,11 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     // so we can attach user info to the request without an extra query.
     const session = await prisma.session.findUnique({
       where: { token: sessionToken },
-      include: { user: true },
+      include: {
+        user: {
+          select: { id: true, email: true, name: true, role: true, isActive: true },
+        },
+      },
     });
 
     // Session not found means the token is invalid or was revoked
