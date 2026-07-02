@@ -11,7 +11,7 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { FileText, Plus, RefreshCw, BarChart3, Trash2, Edit3, Download, Users, TrendingUp, Award, ArrowUpDown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -610,57 +610,201 @@ export default function MarksManager() {
   // =========================================================================
 
   // Filter subjects by department
-  const filteredAdminSubjects = adminFilterDept === 'all'
+const filteredAdminSubjects = useMemo(() => (
+  adminFilterDept === 'all'
     ? adminSubjects
-    : adminSubjects.filter((s) => s.departmentId === adminFilterDept);
+    : adminSubjects.filter((s) => s.departmentId === adminFilterDept)
+), [adminSubjects, adminFilterDept]);
 
-  // Filter marks by department and subject
-  const filteredAdminMarks = adminMarks.filter((m) => {
-    const deptMatch = adminFilterDept === 'all' || (m.subject?.id && adminSubjects.find((s) => s.id === m.subject.id)?.departmentId === adminFilterDept);
-    const subMatch = adminFilterSubject === 'all' || m.subject?.id === adminFilterSubject;
+// Subject -> Department lookup
+const subjectDepartmentMap = useMemo(() => {
+
+  const map = new Map<string, string>();
+
+adminSubjects.forEach((subject) => {
+  if (subject.departmentId) {
+    map.set(subject.id, subject.departmentId);
+  }
+});
+
+return map;
+
+}, [adminSubjects]);
+
+// Filter marks
+const filteredAdminMarks = useMemo(() => (
+  adminMarks.filter((m) => {
+
+    const deptMatch =
+      adminFilterDept === 'all' ||
+      subjectDepartmentMap.get(m.subject?.id ?? '') === adminFilterDept;
+
+    const subMatch =
+      adminFilterSubject === 'all' ||
+      m.subject?.id === adminFilterSubject;
+
     return deptMatch && subMatch;
-  });
 
-  // Sort marks
-  const sortedAdminMarks = [...filteredAdminMarks].sort((a, b) => {
+  })
+), [
+  adminMarks,
+  adminFilterDept,
+  adminFilterSubject,
+  subjectDepartmentMap
+]);
+
+// Sort
+const sortedAdminMarks = useMemo(() => (
+  [...filteredAdminMarks].sort((a, b) => {
+
     const dir = adminSortDir === 'asc' ? 1 : -1;
-    if (adminSortField === 'name') return dir * (a.student?.user?.name || '').localeCompare(b.student?.user?.name || '');
-    if (adminSortField === 'marks') return dir * (a.marksObtained - b.marksObtained);
-    const pctA = a.totalMarks > 0 ? (a.marksObtained / a.totalMarks) * 100 : 0;
-    const pctB = b.totalMarks > 0 ? (b.marksObtained / b.totalMarks) * 100 : 0;
+
+    if (adminSortField === 'name')
+      return dir * (a.student?.user?.name || '').localeCompare(b.student?.user?.name || '');
+
+    if (adminSortField === 'marks')
+      return dir * (a.marksObtained - b.marksObtained);
+
+    const pctA =
+      a.totalMarks > 0
+        ? (a.marksObtained / a.totalMarks) * 100
+        : 0;
+
+    const pctB =
+      b.totalMarks > 0
+        ? (b.marksObtained / b.totalMarks) * 100
+        : 0;
+
     return dir * (pctA - pctB);
-  });
 
-  // Compute stats
-  const totalEntries = filteredAdminMarks.length;
-  const avgScore = totalEntries > 0
-    ? Math.round(filteredAdminMarks.reduce((sum, m) => sum + (m.totalMarks > 0 ? (m.marksObtained / m.totalMarks) * 100 : 0), 0) / totalEntries)
+  })
+), [
+  filteredAdminMarks,
+  adminSortDir,
+  adminSortField
+]);
+
+const totalEntries = filteredAdminMarks.length;
+
+const avgScore = useMemo(() => (
+
+  totalEntries > 0
+
+    ? Math.round(
+
+        filteredAdminMarks.reduce(
+
+          (sum, m) =>
+
+            sum +
+
+            (m.totalMarks > 0
+
+              ? (m.marksObtained / m.totalMarks) * 100
+
+              : 0),
+
+          0
+
+        ) / totalEntries
+
+      )
+
+    : 0
+
+), [
+  filteredAdminMarks,
+  totalEntries
+]);
+
+const passCount = useMemo(() => (
+
+  filteredAdminMarks.filter(
+
+    (m) =>
+
+      m.totalMarks > 0 &&
+
+      (m.marksObtained / m.totalMarks) * 100 >= 40
+
+  ).length
+
+), [filteredAdminMarks]);
+
+const passRate =
+  totalEntries > 0
+    ? Math.round((passCount / totalEntries) * 100)
     : 0;
-  const passCount = filteredAdminMarks.filter((m) => m.totalMarks > 0 && (m.marksObtained / m.totalMarks) * 100 >= 40).length;
-  const passRate = totalEntries > 0 ? Math.round((passCount / totalEntries) * 100) : 0;
-  const topScorer = filteredAdminMarks.length > 0
-    ? filteredAdminMarks.reduce((best, m) => {
-        const pct = m.totalMarks > 0 ? (m.marksObtained / m.totalMarks) * 100 : 0;
-        const bestPct = best.totalMarks > 0 ? (best.marksObtained / best.totalMarks) * 100 : 0;
-        return pct > bestPct ? m : best;
-      })
-    : null;
 
-  // Subject-wise average chart data
-  const subjectAvgData = filteredAdminMarks.length > 0
+const topScorer = useMemo(() => (
+
+  filteredAdminMarks.length > 0
+
+    ? filteredAdminMarks.reduce((best, m) => {
+
+        const pct =
+          m.totalMarks > 0
+            ? (m.marksObtained / m.totalMarks) * 100
+            : 0;
+
+        const bestPct =
+          best.totalMarks > 0
+            ? (best.marksObtained / best.totalMarks) * 100
+            : 0;
+
+        return pct > bestPct ? m : best;
+
+      })
+
+    : null
+
+), [filteredAdminMarks]);
+
+const subjectAvgData = useMemo(() => (
+
+  filteredAdminMarks.length > 0
+
     ? Object.entries(
+
         filteredAdminMarks.reduce((acc, m) => {
+
           const key = m.subject?.name || 'Unknown';
-          if (!acc[key]) acc[key] = { total: 0, count: 0 };
-          acc[key].total += m.totalMarks > 0 ? (m.marksObtained / m.totalMarks) * 100 : 0;
+
+          if (!acc[key]) {
+            acc[key] = {
+              total: 0,
+              count: 0
+            };
+          }
+
+          acc[key].total +=
+            m.totalMarks > 0
+              ? (m.marksObtained / m.totalMarks) * 100
+              : 0;
+
           acc[key].count++;
+
           return acc;
-        }, {} as Record<string, { total: number; count: number }>)
+
+        }, {} as Record<string, {
+          total: number;
+          count: number;
+        }>)
+
       ).map(([name, { total, count }]) => ({
-        name: name.length > 15 ? name.slice(0, 15) + '…' : name,
+
+        name:
+          name.length > 15
+            ? name.slice(0, 15) + '…'
+            : name,
+
         average: Math.round(total / count),
+
       }))
-    : [];
+
+    : []
+
+), [filteredAdminMarks]);
 
   const toggleSort = (field: 'name' | 'marks' | 'pct') => {
     if (adminSortField === field) {
