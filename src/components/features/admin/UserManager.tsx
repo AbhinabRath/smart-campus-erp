@@ -7,7 +7,12 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { motion } from 'framer-motion';
 import { Users, Plus, RefreshCw, Trash2, Edit, Shield } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -181,7 +186,23 @@ window.dispatchEvent(new Event('users-updated'));
     });
   }
 };
-  const filtered = filterRole === 'all' ? users : users.filter((u) => u.role === filterRole);
+  const filtered = useMemo(
+  () =>
+    filterRole === 'all'
+      ? users
+      : users.filter((u) => u.role === filterRole),
+  [users, filterRole]
+);
+
+const roleCounts = useMemo(() => {
+  return users.reduce(
+    (acc, user) => {
+      acc[user.role] = (acc[user.role] || 0) + 1;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+}, [users]);
 
   return (
     <div className="space-y-6">
@@ -329,9 +350,9 @@ window.dispatchEvent(new Event('users-updated'));
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.filter((u) => u.role === 'student').length}</p><p className="text-xs text-muted-foreground">Students</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.filter((u) => u.role === 'teacher').length}</p><p className="text-xs text-muted-foreground">Teachers</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{users.filter((u) => u.role === 'admin').length}</p><p className="text-xs text-muted-foreground">Admins</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roleCounts.student || 0}</p><p className="text-xs text-muted-foreground">Students</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roleCounts.teacher || 0}</p><p className="text-xs text-muted-foreground">Teachers</p></CardContent></Card>
+        <Card><CardContent className="p-4 text-center"><p className="text-2xl font-bold">{roleCounts.admin || 0}</p><p className="text-xs text-muted-foreground">Admins</p></CardContent></Card>
       </div>
 
       {/* Filter */}

@@ -136,11 +136,21 @@ export default function MaterialManager() {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
-  const filtered = materials.filter((m) => {
-    const matchesSearch = m.title.toLowerCase().includes(search.toLowerCase()) || (m.subject?.name || '').toLowerCase().includes(search.toLowerCase());
-    const matchesSubject = filterSubject === 'all' || m.subject?.id === filterSubject;
+  const filtered = useMemo(() => {
+  const query = search.toLowerCase();
+
+  return materials.filter((m) => {
+    const matchesSearch =
+      m.title.toLowerCase().includes(query) ||
+      (m.subject?.name || '').toLowerCase().includes(query);
+
+    const matchesSubject =
+      filterSubject === 'all' ||
+      m.subject?.id === filterSubject;
+
     return matchesSearch && matchesSubject;
   });
+}, [materials, search, filterSubject]);
 
   // Recently added (last 7 days)
   const recentlyAdded = useMemo(() => {

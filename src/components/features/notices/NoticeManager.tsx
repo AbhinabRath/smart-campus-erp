@@ -11,7 +11,7 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bell, Plus, RefreshCw, Pin, Trash2, AlertTriangle, AlertCircle, Info, MinusCircle, Search, Eye, EyeOff, Clock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -214,20 +214,36 @@ const openDetail = async (notice: Notice) => {
   const canDelete = role === 'admin';
 
   // Sort notices: pinned first, then by date; also filter by search and priority
-  const sortedNotices = [...notices]
+  const sortedNotices = useMemo(() => {
+  const query = searchQuery.toLowerCase();
+
+  return [...notices]
     .filter((n) => {
-      const matchesSearch = !searchQuery || n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesPriority = filterPriority === 'all' || n.priority === filterPriority;
+      const matchesSearch =
+        !query ||
+        n.title.toLowerCase().includes(query) ||
+        n.content.toLowerCase().includes(query);
+
+      const matchesPriority =
+        filterPriority === 'all' || n.priority === filterPriority;
+
       return matchesSearch && matchesPriority;
     })
     .sort((a, b) => {
       if (a.isPinned && !b.isPinned) return -1;
       if (!a.isPinned && b.isPinned) return 1;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
 
-  const unreadCount =
-  notices.filter((n) => !n.isRead).length;
+      return (
+        new Date(b.createdAt).getTime() -
+        new Date(a.createdAt).getTime()
+      );
+    });
+}, [notices, searchQuery, filterPriority]);
+
+const unreadCount = useMemo(
+  () => notices.filter((n) => !n.isRead).length,
+  [notices]
+);
 
   return (
     <div className="space-y-6">
