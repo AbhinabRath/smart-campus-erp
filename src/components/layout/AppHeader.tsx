@@ -8,7 +8,12 @@
 
 'use client';
 import { BACKEND_URL } from "@/lib/config";
-import React, { useEffect, useState, useSyncExternalStore } from 'react';
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from 'react';
 import { useTheme } from 'next-themes';
 import {
   Menu, LogOut, Bell, Search, Sun, Moon,
@@ -52,6 +57,8 @@ const viewTitles: Record<ViewId, string> = {
 academics: "Academics",
 directory: "Directory",
 "public-profile": "Public Profile",
+'password-reset-requests': 'Password Reset Requests',
+'reset-password': 'Reset Password',
 };
 
 interface NoticeItem {
@@ -119,9 +126,10 @@ export default function AppHeader() {
     student: 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-900/30 dark:text-sky-400 dark:border-sky-800',
   };
 
-  const unreadCount = notices.filter(
-  (n) => !n.isRead
-).length;
+  const unreadCount = useMemo(
+  () => notices.filter((n) => !n.isRead).length,
+  [notices]
+);
 
 const hasUnread = unreadCount > 0;
 

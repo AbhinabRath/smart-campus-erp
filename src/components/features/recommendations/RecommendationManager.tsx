@@ -8,7 +8,12 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lightbulb, RefreshCw, Eye, Sparkles, AlertTriangle, BookOpen, Briefcase, ClipboardCheck, X, CheckCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -113,16 +118,29 @@ const handleClear = async () => {
   };
 
   // Mark all as read
-  const markAllAsRead = async () => {
-    const unreadRecs = recommendations.filter((r) => !r.isRead);
-    for (const rec of unreadRecs) {
-      try {
-        await api.put(`/recommendations/${rec.id}/read`);
-      } catch { /* ignore */ }
-    }
-    setRecommendations((prev) => prev.map((r) => ({ ...r, isRead: true })));
-    toast({ title: 'Done', description: 'All recommendations marked as read' });
-  };
+const markAllAsRead = async () => {
+  const unreadRecs = recommendations.filter((r) => !r.isRead);
+
+  await Promise.all(
+    unreadRecs.map((rec) =>
+      api
+        .put(`/recommendations/${rec.id}/read`)
+        .catch(() => {})
+    )
+  );
+
+  setRecommendations((prev) =>
+    prev.map((r) => ({
+      ...r,
+      isRead: true,
+    }))
+  );
+
+  toast({
+    title: 'Done',
+    description: 'All recommendations marked as read',
+  });
+};
 
   // Dismiss recommendation (slide out animation)
   const dismissRec = (id: string) => {
@@ -137,12 +155,43 @@ const handleClear = async () => {
     }, 300);
   };
 
-  const unread = recommendations.filter((r) => !r.isRead);
-  const read = recommendations.filter((r) => r.isRead);
+  const { unread, read, typeCounts } = useMemo(() => {
+  return recommendations.reduce(
+    (acc, recommendation) => {
+      acc.typeCounts[recommendation.type] =
+        (acc.typeCounts[recommendation.type] || 0) + 1;
 
-  // Filter by type
-  const filteredUnread = filter === 'all' ? unread : unread.filter((r) => r.type === filter);
-  const filteredRead = filter === 'all' ? read : read.filter((r) => r.type === filter);
+      if (recommendation.isRead) {
+        acc.read.push(recommendation);
+      } else {
+        acc.unread.push(recommendation);
+      }
+
+      return acc;
+    },
+    {
+      unread: [] as Recommendation[],
+      read: [] as Recommendation[],
+      typeCounts: {} as Record<string, number>,
+    }
+  );
+}, [recommendations]);
+
+const filteredUnread = useMemo(
+  () =>
+    filter === 'all'
+      ? unread
+      : unread.filter((r) => r.type === filter),
+  [filter, unread]
+);
+
+const filteredRead = useMemo(
+  () =>
+    filter === 'all'
+      ? read
+      : read.filter((r) => r.type === filter),
+  [filter, read]
+);
 
   return (
     <div className="space-y-6">
@@ -190,7 +239,7 @@ const handleClear = async () => {
           All ({recommendations.length})
         </Button>
         {Object.entries(TYPE_CONFIG).map(([type, config]) => {
-          const count = recommendations.filter((r) => r.type === type).length;
+          const count = typeCounts[type] || 0;
           if (count === 0) return null;
           const Icon = config.icon;
           return (

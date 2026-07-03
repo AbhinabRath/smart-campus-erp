@@ -10,7 +10,12 @@
 
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, {
+  useEffect,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Plane, Plus, CheckCircle, XCircle, Clock, RefreshCw,
@@ -186,31 +191,66 @@ export default function LeaveManager() {
   };
 
   // Summary stats
-  const pendingCount = leaves.filter((l) => l.status === 'pending').length;
-  const approvedCount = leaves.filter((l) => l.status === 'approved').length;
-  const rejectedCount = leaves.filter((l) => l.status === 'rejected').length;
+const {
+  pendingCount,
+  approvedCount,
+  rejectedCount,
+} = useMemo(() => {
+  return leaves.reduce(
+    (acc, leave) => {
+      if (leave.status === 'pending') acc.pendingCount++;
+      if (leave.status === 'approved') acc.approvedCount++;
+      if (leave.status === 'rejected') acc.rejectedCount++;
 
-  // Approved leaves for calendar view
-  const approvedLeaves = leaves.filter((l) => l.status === 'approved');
+      return acc;
+    },
+    {
+      pendingCount: 0,
+      approvedCount: 0,
+      rejectedCount: 0,
+    }
+  );
+}, [leaves]);
 
-  // Get current month dates for mini calendar
-  const today = new Date();
-  const currentMonth = today.getMonth();
-  const currentYear = today.getFullYear();
-  const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-  const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay();
+// Get current month dates for mini calendar
+const today = useMemo(() => new Date(), []);
+const currentMonth = today.getMonth();
+const currentYear = today.getFullYear();
 
-  // Check if a date has an approved leave
-  const getLeavesForDate = (day: number) => {
+const daysInMonth = useMemo(
+  () => new Date(currentYear, currentMonth + 1, 0).getDate(),
+  [currentYear, currentMonth]
+);
+
+const firstDayOfMonth = useMemo(
+  () => new Date(currentYear, currentMonth, 1).getDay(),
+  [currentYear, currentMonth]
+);
+
+// Approved leaves for calendar view
+const approvedLeaves = useMemo(
+  () => leaves.filter((l) => l.status === 'approved'),
+  [leaves]
+);
+
+// Check if a date has an approved leave
+const getLeavesForDate = useCallback(
+  (day: number) => {
     const date = new Date(currentYear, currentMonth, day);
+
     return approvedLeaves.filter((l) => {
       try {
-        return isWithinInterval(date, { start: parseISO(l.startDate), end: parseISO(l.endDate) });
+        return isWithinInterval(date, {
+          start: parseISO(l.startDate),
+          end: parseISO(l.endDate),
+        });
       } catch {
         return false;
       }
     });
-  };
+  },
+  [approvedLeaves, currentMonth, currentYear]
+);
 
   return (
     <div className="space-y-6">
