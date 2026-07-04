@@ -21,17 +21,26 @@ export async function getRecommendations(req: Request, res: Response, next: Next
   try {
     const userId = req.user!.id;
 
-    const recommendations = await prisma.recommendation.findMany({
-      where: { studentId: userId },
+    const [recommendations, unreadCount] =
+  await Promise.all([
+    prisma.recommendation.findMany({
+      where: {
+        studentId: userId,
+      },
       orderBy: [
-        { isRead: 'asc' },     // Unread first
-        { priority: 'desc' },   // High priority first
+        { isRead: 'asc' },
+        { priority: 'desc' },
         { createdAt: 'desc' },
       ],
-    });
+    }),
 
-    // Count unread for badge display
-    const unreadCount = recommendations.filter(r => !r.isRead).length;
+    prisma.recommendation.count({
+      where: {
+        studentId: userId,
+        isRead: false,
+      },
+    }),
+  ]);
 
     successResponse(res, 'Recommendations retrieved.', { recommendations, unreadCount });
   } catch (err) {

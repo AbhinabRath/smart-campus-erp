@@ -32,40 +32,40 @@ export async function getMyFees(
       return errorResponse(res, 'Fee structure not found', 404);
     }
 
-    const allPayments =
-  await prisma.fee_payments.findMany({
+    const paymentTotals =
+  await prisma.fee_payments.groupBy({
+    by: ['semester'],
     where: {
-      studentId: student.id
-    }
+      studentId: student.id,
+    },
+    _sum: {
+      amountPaid: true,
+    },
   });
 
 const feeStructures =
   await prisma.fee_structure.findMany({
     where: {
       semester: {
-        lte: student.semester
-      }
+        lte: student.semester,
+      },
     },
     orderBy: {
-      semester: 'asc'
-    }
+      semester: 'asc',
+    },
   });
 
-    
-    const ledger = feeStructures.map((fee) => {
+const paidBySemester = new Map(
+  paymentTotals.map((p) => [
+    p.semester,
+    Number(p._sum.amountPaid || 0),
+  ])
+);
 
-  const semesterPayments =
-    allPayments.filter(
-      (p) =>
-        p.semester === fee.semester
-    );
+const ledger = feeStructures.map((fee) => {
 
   const paidAmount =
-    semesterPayments.reduce(
-      (sum, p) =>
-        sum + Number(p.amountPaid),
-      0
-    );
+    paidBySemester.get(fee.semester) || 0;
 
   return {
     semester: fee.semester,
@@ -171,31 +171,28 @@ export async function getStudentFees(
     }
   });
 
-    const payments =
-      await prisma.fee_payments.findMany({
-        where: {
-          studentId
-        },
-        orderBy: {
-          paymentDate: 'asc'
-        }
-      });
+    const paymentTotals =
+  await prisma.fee_payments.groupBy({
+    by: ['semester'],
+    where: {
+      studentId,
+    },
+    _sum: {
+      amountPaid: true,
+    },
+  });
 
-    const ledger = feeStructures.map(
-      (fee) => {
-        const semesterPayments =
-          payments.filter(
-            (p) =>
-              p.semester === fee.semester
-          );
+const paidBySemester = new Map(
+  paymentTotals.map((p) => [
+    p.semester,
+    Number(p._sum.amountPaid || 0),
+  ])
+);
 
-        const paidAmount =
-          semesterPayments.reduce(
-            (sum, p) =>
-              sum +
-              Number(p.amountPaid),
-            0
-          );
+const ledger = feeStructures.map((fee) => {
+
+  const paidAmount =
+    paidBySemester.get(fee.semester) || 0;
 
         const totalFee =
           Number(fee.totalFee);
@@ -263,10 +260,14 @@ export async function getFeeAdminList(req: Request, res: Response, next: NextFun
       orderBy: { semester: 'asc' },
     });
 
-    // Single query: ALL payments, but only the fields we need
-    const allPayments = await prisma.fee_payments.findMany({
-      select: { studentId: true, semester: true, amountPaid: true },
-    });
+    // Single grouped query: ALL payment totals by student and semester
+const allPayments =
+  await prisma.fee_payments.groupBy({
+    by: ['studentId', 'semester'],
+    _sum: {
+      amountPaid: true,
+    },
+  });
 
     // Build O(1) lookup structures once, outside any per-student loop
     // Map: semester -> totalFee (number)
@@ -283,7 +284,10 @@ export async function getFeeAdminList(req: Request, res: Response, next: NextFun
         semMap = new Map();
         paymentsByStudent.set(p.studentId, semMap);
       }
-      semMap.set(p.semester, (semMap.get(p.semester) || 0) + Number(p.amountPaid));
+      semMap.set(
+  p.semester,
+  Number(p._sum.amountPaid || 0)
+);
     }
 
     // Precompute cumulative totalFee for each semester level (1..N)
@@ -389,19 +393,18 @@ if (!structure) {
 }
 
 const existingPayments =
-  await prisma.fee_payments.findMany({
+  await prisma.fee_payments.aggregate({
     where: {
       studentId,
-      semester
-    }
+      semester,
+    },
+    _sum: {
+      amountPaid: true,
+    },
   });
 
 const alreadyPaid =
-  existingPayments.reduce(
-    (sum, p) =>
-      sum + Number(p.amountPaid),
-    0
-  );
+  Number(existingPayments._sum.amountPaid || 0);
 
 const totalFee =
   Number(structure.totalFee);

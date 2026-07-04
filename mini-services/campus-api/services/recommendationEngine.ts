@@ -163,40 +163,35 @@ export async function generateRecommendations(studentUserId: string) {
   // ── RULE 4: Pending assignments ──
   // Unsubmitted assignments directly affect grades.
   const studentDepartment = student.department;
-  const subjects = await prisma.subject.findMany({
+
+const pendingAssignmentsCount =
+  await prisma.assignment.count({
     where: {
-      departmentId: student.departmentId,
-      semester: student.semester,
+      subject: {
+        departmentId: student.departmentId,
+        semester: student.semester,
+      },
+
+      deadline: {
+        gte: new Date(),
+      },
+
+      submissions: {
+        none: {
+          studentId: student.id,
+        },
+      },
     },
   });
 
-  const subjectIds = subjects.map(s => s.id);
-
-  // Find active assignments for the student's subjects
-  const activeAssignments = await prisma.assignment.findMany({
-    where: {
-      subjectId: { in: subjectIds },
-      deadline: { gte: new Date() }, // Only assignments with future deadline
-    },
-  });
-
-  // Check which ones the student hasn't submitted yet
-  const submissions = await prisma.assignmentSubmission.findMany({
-    where: { studentId: student.id },
-    select: { assignmentId: true },
-  });
-  const submittedIds = new Set(submissions.map(s => s.assignmentId));
-
-  const pendingAssignments = activeAssignments.filter(a => !submittedIds.has(a.id));
-
-  if (pendingAssignments.length > 0) {
+if (pendingAssignmentsCount > 0) {
     const title = 'Complete Pending Assignments';
     if (!existingTitles.has(title)) {
       newRecommendations.push({
         studentId: studentUserId,
         type: 'assignment',
         title,
-        description: `You have ${pendingAssignments.length} pending assignment(s). Completing them on time is crucial for your internal marks. Check the assignments page for details.`,
+        description: `You have ${pendingAssignmentsCount} pending assignment(s). Completing them on time is crucial for your internal marks. Check the assignments page for details.`,
         priority: 'high',
         actionUrl: '/assignments',
       });

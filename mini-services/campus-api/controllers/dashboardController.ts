@@ -81,64 +81,49 @@ export async function getStudentDashboard(req: Request, res: Response, next: Nex
       }),
 
       // Upcoming assignments (deadline in the future)
-     (async () => {
-  const submittedAssignments =
-    await prisma.assignmentSubmission.findMany({
-      where: {
+prisma.assignment.findMany({
+  where: {
+    subject: {
+      departmentId: student.departmentId,
+      semester: student.semester,
+    },
+
+    deadline: {
+      gte: new Date(),
+    },
+
+    submissions: {
+      none: {
         studentId: student.id,
       },
+    },
+  },
+
+  include: {
+    subject: {
       select: {
-        assignmentId: true,
-      },
-    });
-
-  const submittedIds =
-    submittedAssignments.map(
-      (s) => s.assignmentId
-    );
-
-  return prisma.assignment.findMany({
-    where: {
-      subject: {
-        departmentId: student.departmentId,
-        semester: student.semester,
-      },
-
-      deadline: {
-        gte: new Date(),
-      },
-
-      id: {
-        notIn: submittedIds,
+        name: true,
+        code: true,
       },
     },
 
-    include: {
-      subject: {
-        select: {
-          name: true,
-          code: true,
-        },
-      },
-
-      teacher: {
-        include: {
-          user: {
-            select: {
-              name: true,
-            },
+    teacher: {
+      include: {
+        user: {
+          select: {
+            name: true,
           },
         },
       },
     },
+  },
 
-    orderBy: {
-      deadline: 'asc',
-    },
+  orderBy: {
+    deadline: 'asc',
+  },
 
-    take: 5,
-  });
-})(),
+  take: 5,
+}),
 
       // Latest notices for students
       prisma.notice.findMany({
